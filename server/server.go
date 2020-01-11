@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/99designs/gqlgen/handler"
-	gqlgen_todos "github.com/JeremyMarshall/gqlgen-todos"
+	gqlgen_todos "github.com/bythepowerof/gqlgen-kmakeapi"
 )
 
 const defaultPort = "8080"

@@ -15,4 +15,4 @@ resolver:
 autobind: []
 models:
   Todo:
-    model: github.com/JeremyMarshall/gqlgen-todos.Todo
+    model: github.com/bythepowerof/gqlgen-kmakeapi.Todo

@@ -1,4 +1,4 @@
-module github.com/JeremyMarshall/gqlgen-todos
+module github.com/bythepowerof/gqlgen-kmakeapi
 
 go 1.13
 
