@@ -226,6 +226,7 @@ type User {
 
 type Query {
   todos: [Todo!]!
+  # namespaces: [Namespace]!
 }
 
 input NewTodo {
@@ -235,7 +236,33 @@ input NewTodo {
 
 type Mutation {
   createTodo(input: NewTodo!): Todo!
-}`},
+}
+
+# type Namespace {
+#   name: String!
+#   kmakes: [Kmake]!
+# }
+
+# type Kmake {
+#   name: String!
+#   variables: [Variable]!
+#   rules: [Rule]!
+#   status: String
+# }
+
+# type Variable {
+#   name: String!
+#   value: String!
+# }
+
+# type Rule {
+#   targets:       [String]!
+#   doublecolon:   Boolean!
+#   commands:      [String]!
+#   prereqs:       [String]!
+#   targetpattern: String!
+# }
+`},
 )
 
 // endregion ************************** generated!.gotpl **************************
