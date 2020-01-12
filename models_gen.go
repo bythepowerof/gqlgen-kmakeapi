@@ -2,12 +2,37 @@
 
 package gqlgen_todos
 
+type Kmake struct {
+	Name      string      `json:"name"`
+	Variables []*Variable `json:"variables"`
+	Rules     []*Rule     `json:"rules"`
+	Status    *string     `json:"status"`
+}
+
+type Namespace struct {
+	Name   string   `json:"name"`
+	Kmakes []*Kmake `json:"kmakes"`
+}
+
 type NewTodo struct {
 	Text   string `json:"text"`
 	UserID string `json:"userId"`
 }
 
+type Rule struct {
+	Targets       []*string `json:"targets"`
+	Doublecolon   bool      `json:"doublecolon"`
+	Commands      []*string `json:"commands"`
+	Prereqs       []*string `json:"prereqs"`
+	Targetpattern string    `json:"targetpattern"`
+}
+
 type User struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+}
+
+type Variable struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
