@@ -11,7 +11,7 @@ type User {
 }
 
 type Query {
-  todos: [Todo!]!
+  todos(id: ID): [Todo!]!
   namespaces: [Namespace]!
 }
 

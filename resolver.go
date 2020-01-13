@@ -1,7 +1,7 @@
 package gqlgen_todos
 
 import (
-	"context"
+	// "context"
 ) // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
 // type Resolver struct{}
@@ -24,12 +24,12 @@ type mutationResolver struct{ *Resolver }
 
 type queryResolver struct{ *Resolver }
 
-// func (r *queryResolver) Todos(ctx context.Context) ([]*Todo, error) {
+// func (r *queryResolver) Todos(ctx context.Context, id *string) ([]*Todo, error) {
 // 	panic("not implemented")
 // }
-func (r *queryResolver) Namespaces(ctx context.Context) ([]*Namespace, error) {
-	panic("not implemented")
-}
+// func (r *queryResolver) Namespaces(ctx context.Context) ([]*Namespace, error) {
+// 	panic("not implemented")
+// }
 
 type todoResolver struct{ *Resolver }
 
