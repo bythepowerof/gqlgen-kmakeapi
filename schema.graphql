@@ -12,7 +12,7 @@ type User {
 
 type Query {
   todos(id: ID): [Todo!]!
-  namespaces: [Namespace]!
+  namespaces(name: String): [Namespace]!
 }
 
 input NewTodo {
@@ -26,7 +26,7 @@ type Mutation {
 
 type Namespace {
   name: String!
-  kmakes: [Kmake]!
+  kmakes(name: String): [Kmake]!
 }
 
 type Kmake {

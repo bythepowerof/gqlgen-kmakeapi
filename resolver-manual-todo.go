@@ -1,22 +1,10 @@
 package gqlgen_todos
 
-// //go:generate go run github.com/99designs/gqlgen
-
 import (
 	context "context"
 	"fmt"
 	"math/rand"
-
-	// "k8s.io/apimachinery/pkg/api/errors"
-	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	// "k8s.io/client-go/rest"
 )
-
-type Resolver struct {
-	todos []*Todo
-	Clientset *kubernetes.Clientset
-}
 
 func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (*Todo, error) {
 	todo := &Todo{
