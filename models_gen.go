@@ -2,13 +2,6 @@
 
 package gqlgen_todos
 
-type Kmake struct {
-	Name      string      `json:"name"`
-	Variables []*Variable `json:"variables"`
-	Rules     []*Rule     `json:"rules"`
-	Status    *string     `json:"status"`
-}
-
 type NewTodo struct {
 	Text   string `json:"text"`
 	UserID string `json:"userId"`

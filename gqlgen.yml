@@ -18,3 +18,8 @@ models:
     model: github.com/bythepowerof/gqlgen-kmakeapi.Todo
   Namespace:
     model: k8s.io/api/core/v1.Namespace
+  Kmake:
+    model: github.com/bythepowerof/kmake-controller/api/v1.Kmake
+  Rules:
+    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeRule
+
