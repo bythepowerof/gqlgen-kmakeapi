@@ -14,6 +14,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
+	"k8s.io/api/core/v1"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -35,6 +36,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	Mutation() MutationResolver
+	Namespace() NamespaceResolver
 	Query() QueryResolver
 	Todo() TodoResolver
 }
@@ -93,9 +95,12 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	CreateTodo(ctx context.Context, input NewTodo) (*Todo, error)
 }
+type NamespaceResolver interface {
+	Kmakes(ctx context.Context, obj *v1.Namespace, name *string) ([]*Kmake, error)
+}
 type QueryResolver interface {
 	Todos(ctx context.Context, id *string) ([]*Todo, error)
-	Namespaces(ctx context.Context, name *string) ([]*Namespace, error)
+	Namespaces(ctx context.Context, name *string) ([]*v1.Namespace, error)
 }
 type TodoResolver interface {
 	User(ctx context.Context, obj *Todo) (*User, error)
@@ -704,7 +709,7 @@ func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field grap
 	return ec.marshalNTodo2ᚖgithubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚐTodo(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Namespace_name(ctx context.Context, field graphql.CollectedField, obj *Namespace) (ret graphql.Marshaler) {
+func (ec *executionContext) _Namespace_name(ctx context.Context, field graphql.CollectedField, obj *v1.Namespace) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -741,7 +746,7 @@ func (ec *executionContext) _Namespace_name(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Namespace_kmakes(ctx context.Context, field graphql.CollectedField, obj *Namespace) (ret graphql.Marshaler) {
+func (ec *executionContext) _Namespace_kmakes(ctx context.Context, field graphql.CollectedField, obj *v1.Namespace) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -754,7 +759,7 @@ func (ec *executionContext) _Namespace_kmakes(ctx context.Context, field graphql
 		Object:   "Namespace",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
@@ -767,7 +772,7 @@ func (ec *executionContext) _Namespace_kmakes(ctx context.Context, field graphql
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Kmakes, nil
+		return ec.resolvers.Namespace().Kmakes(rctx, obj, args["name"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -867,10 +872,10 @@ func (ec *executionContext) _Query_namespaces(ctx context.Context, field graphql
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*Namespace)
+	res := resTmp.([]*v1.Namespace)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNNamespace2ᚕᚖgithubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚐNamespace(ctx, field.Selections, res)
+	return ec.marshalNNamespace2ᚕᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐNamespace(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2684,7 +2689,7 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 var namespaceImplementors = []string{"Namespace"}
 
-func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet, obj *Namespace) graphql.Marshaler {
+func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet, obj *v1.Namespace) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, namespaceImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -2696,13 +2701,22 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 		case "name":
 			out.Values[i] = ec._Namespace_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "kmakes":
-			out.Values[i] = ec._Namespace_kmakes(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Namespace_kmakes(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3244,7 +3258,7 @@ func (ec *executionContext) marshalNKmake2ᚕᚖgithubᚗcomᚋbythepowerofᚋgq
 	return ret
 }
 
-func (ec *executionContext) marshalNNamespace2ᚕᚖgithubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚐNamespace(ctx context.Context, sel ast.SelectionSet, v []*Namespace) graphql.Marshaler {
+func (ec *executionContext) marshalNNamespace2ᚕᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐNamespace(ctx context.Context, sel ast.SelectionSet, v []*v1.Namespace) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3268,7 +3282,7 @@ func (ec *executionContext) marshalNNamespace2ᚕᚖgithubᚗcomᚋbythepowerof�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalONamespace2ᚖgithubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚐNamespace(ctx, sel, v[i])
+			ret[i] = ec.marshalONamespace2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐNamespace(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3750,11 +3764,11 @@ func (ec *executionContext) marshalOKmake2ᚖgithubᚗcomᚋbythepowerofᚋgqlge
 	return ec._Kmake(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalONamespace2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚐNamespace(ctx context.Context, sel ast.SelectionSet, v Namespace) graphql.Marshaler {
+func (ec *executionContext) marshalONamespace2k8sᚗioᚋapiᚋcoreᚋv1ᚐNamespace(ctx context.Context, sel ast.SelectionSet, v v1.Namespace) graphql.Marshaler {
 	return ec._Namespace(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalONamespace2ᚖgithubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚐNamespace(ctx context.Context, sel ast.SelectionSet, v *Namespace) graphql.Marshaler {
+func (ec *executionContext) marshalONamespace2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐNamespace(ctx context.Context, sel ast.SelectionSet, v *v1.Namespace) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

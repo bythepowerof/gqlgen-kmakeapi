@@ -1,13 +1,20 @@
 package gqlgen_todos
 
 import (
-	// "context"
-) // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
+	"context"
+
+	"k8s.io/api/core/v1"
+)
+
+// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
 // type Resolver struct{}
 
 func (r *Resolver) Mutation() MutationResolver {
 	return &mutationResolver{r}
+}
+func (r *Resolver) Namespace() NamespaceResolver {
+	return &namespaceResolver{r}
 }
 func (r *Resolver) Query() QueryResolver {
 	return &queryResolver{r}
@@ -22,12 +29,18 @@ type mutationResolver struct{ *Resolver }
 // 	panic("not implemented")
 // }
 
+type namespaceResolver struct{ *Resolver }
+
+func (r *namespaceResolver) Kmakes(ctx context.Context, obj *v1.Namespace, name *string) ([]*Kmake, error) {
+	panic("not implemented")
+}
+
 type queryResolver struct{ *Resolver }
 
 // func (r *queryResolver) Todos(ctx context.Context, id *string) ([]*Todo, error) {
 // 	panic("not implemented")
 // }
-// func (r *queryResolver) Namespaces(ctx context.Context, name *string) ([]*Namespace, error) {
+// func (r *queryResolver) Namespaces(ctx context.Context, name *string) ([]*v1.Namespace, error) {
 // 	panic("not implemented")
 // }
 

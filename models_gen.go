@@ -9,11 +9,6 @@ type Kmake struct {
 	Status    *string     `json:"status"`
 }
 
-type Namespace struct {
-	Name   string   `json:"name"`
-	Kmakes []*Kmake `json:"kmakes"`
-}
-
 type NewTodo struct {
 	Text   string `json:"text"`
 	UserID string `json:"userId"`

@@ -8,9 +8,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func (r *queryResolver) Namespaces(ctx context.Context, name *string) ([]*Namespace, error) {
+func (r *queryResolver) Namespaces(ctx context.Context, name *string) ([]*corev1.Namespace, error) {
 
-	ret := make([]*Namespace,0)
+	ret := make([]*corev1.Namespace,0)
 
 	if name != nil {
 		ns := &corev1.Namespace{}
@@ -22,7 +22,7 @@ func (r *queryResolver) Namespaces(ctx context.Context, name *string) ([]*Namesp
 		if err != nil {
 			return nil, err
 		}
-		ret = append(ret, &Namespace{Name: ns.GetName()})
+		ret = append(ret, ns)
 		return ret, nil
 	}
 	nsList := &corev1.NamespaceList{}
@@ -32,9 +32,8 @@ func (r *queryResolver) Namespaces(ctx context.Context, name *string) ([]*Namesp
 		return nil, err
 	}
 
-	for _, ns := range(nsList.Items) {
-		ret = append(ret, &Namespace{Name: ns.GetName()})
+	for i := 0; i < len(nsList.Items); i++ {
+		ret = append(ret, &nsList.Items[i])
 	}
-
 	return ret, nil
 }
