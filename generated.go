@@ -55,12 +55,12 @@ type ComplexityRoot struct {
 	}
 
 	Namespace struct {
-		Kmakes func(childComplexity int) int
+		Kmakes func(childComplexity int, name *string) int
 		Name   func(childComplexity int) int
 	}
 
 	Query struct {
-		Namespaces func(childComplexity int) int
+		Namespaces func(childComplexity int, name *string) int
 		Todos      func(childComplexity int, id *string) int
 	}
 
@@ -95,7 +95,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Todos(ctx context.Context, id *string) ([]*Todo, error)
-	Namespaces(ctx context.Context) ([]*Namespace, error)
+	Namespaces(ctx context.Context, name *string) ([]*Namespace, error)
 }
 type TodoResolver interface {
 	User(ctx context.Context, obj *Todo) (*User, error)
@@ -161,7 +161,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Namespace.Kmakes(childComplexity), true
+		args, err := ec.field_Namespace_kmakes_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Namespace.Kmakes(childComplexity, args["name"].(*string)), true
 
 	case "Namespace.name":
 		if e.complexity.Namespace.Name == nil {
@@ -175,7 +180,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Query.Namespaces(childComplexity), true
+		args, err := ec.field_Query_namespaces_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Namespaces(childComplexity, args["name"].(*string)), true
 
 	case "Query.todos":
 		if e.complexity.Query.Todos == nil {
@@ -356,7 +366,7 @@ type User {
 
 type Query {
   todos(id: ID): [Todo!]!
-  namespaces: [Namespace]!
+  namespaces(name: String): [Namespace]!
 }
 
 input NewTodo {
@@ -370,7 +380,7 @@ type Mutation {
 
 type Namespace {
   name: String!
-  kmakes: [Kmake]!
+  kmakes(name: String): [Kmake]!
 }
 
 type Kmake {
@@ -413,12 +423,40 @@ func (ec *executionContext) field_Mutation_createTodo_args(ctx context.Context, 
 	return args, nil
 }
 
+func (ec *executionContext) field_Namespace_kmakes_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_namespaces_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -719,6 +757,13 @@ func (ec *executionContext) _Namespace_kmakes(ctx context.Context, field graphql
 		IsMethod: false,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Namespace_kmakes_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
@@ -800,10 +845,17 @@ func (ec *executionContext) _Query_namespaces(ctx context.Context, field graphql
 		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_namespaces_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Namespaces(rctx)
+		return ec.resolvers.Query().Namespaces(rctx, args["name"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
