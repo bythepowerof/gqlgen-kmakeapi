@@ -47,3 +47,17 @@ func (r *kmakeResolver) Variables(ctx context.Context, obj *v1.Kmake) ([]*Variab
 	}
 	return ret, nil
 }
+
+func (r *kmakeResolver) Rules(ctx context.Context, obj *v1.Kmake) ([]*v1.KmakeRule, error) {
+	ret := make([]*v1.KmakeRule, 0)
+
+	for _, v := range obj.Spec.Rules { 
+		ret = append(ret, &v)
+	}
+
+	return ret, nil
+}
+
+func (r *kmakeResolver) Status(ctx context.Context, obj *v1.Kmake) (*string, error) {
+	return &obj.Status.Status, nil
+}

@@ -1,9 +1,9 @@
 package gqlgen_todos
 
 import (
-	"context"
+	// "context"
 
-	"github.com/bythepowerof/kmake-controller/api/v1"
+	// "github.com/bythepowerof/kmake-controller/api/v1"
 	// v11 "k8s.io/api/core/v1"
 )
 
@@ -32,12 +32,12 @@ type kmakeResolver struct{ *Resolver }
 // func (r *kmakeResolver) Variables(ctx context.Context, obj *v1.Kmake) ([]*Variable, error) {
 // 	panic("not implemented")
 // }
-func (r *kmakeResolver) Rules(ctx context.Context, obj *v1.Kmake) ([]*Rule, error) {
-	panic("not implemented")
-}
-func (r *kmakeResolver) Status(ctx context.Context, obj *v1.Kmake) (*string, error) {
-	panic("not implemented")
-}
+// func (r *kmakeResolver) Rules(ctx context.Context, obj *v1.Kmake) ([]*v1.KmakeRule, error) {
+// 	panic("not implemented")
+// }
+// func (r *kmakeResolver) Status(ctx context.Context, obj *v1.Kmake) (*string, error) {
+// 	panic("not implemented")
+// }
 
 type mutationResolver struct{ *Resolver }
 

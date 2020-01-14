@@ -70,9 +70,9 @@ type ComplexityRoot struct {
 
 	Rule struct {
 		Commands      func(childComplexity int) int
-		Doublecolon   func(childComplexity int) int
+		DoubleColon   func(childComplexity int) int
 		Prereqs       func(childComplexity int) int
-		Targetpattern func(childComplexity int) int
+		TargetPattern func(childComplexity int) int
 		Targets       func(childComplexity int) int
 	}
 
@@ -96,7 +96,7 @@ type ComplexityRoot struct {
 
 type KmakeResolver interface {
 	Variables(ctx context.Context, obj *v1.Kmake) ([]*Variable, error)
-	Rules(ctx context.Context, obj *v1.Kmake) ([]*Rule, error)
+	Rules(ctx context.Context, obj *v1.Kmake) ([]*v1.KmakeRule, error)
 	Status(ctx context.Context, obj *v1.Kmake) (*string, error)
 }
 type MutationResolver interface {
@@ -219,11 +219,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.Rule.Commands(childComplexity), true
 
 	case "Rule.doublecolon":
-		if e.complexity.Rule.Doublecolon == nil {
+		if e.complexity.Rule.DoubleColon == nil {
 			break
 		}
 
-		return e.complexity.Rule.Doublecolon(childComplexity), true
+		return e.complexity.Rule.DoubleColon(childComplexity), true
 
 	case "Rule.prereqs":
 		if e.complexity.Rule.Prereqs == nil {
@@ -233,11 +233,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.Rule.Prereqs(childComplexity), true
 
 	case "Rule.targetpattern":
-		if e.complexity.Rule.Targetpattern == nil {
+		if e.complexity.Rule.TargetPattern == nil {
 			break
 		}
 
-		return e.complexity.Rule.Targetpattern(childComplexity), true
+		return e.complexity.Rule.TargetPattern(childComplexity), true
 
 	case "Rule.targets":
 		if e.complexity.Rule.Targets == nil {
@@ -632,10 +632,10 @@ func (ec *executionContext) _Kmake_rules(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*Rule)
+	res := resTmp.([]*v1.KmakeRule)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNRule2ᚕᚖgithubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚐRule(ctx, field.Selections, res)
+	return ec.marshalNRule2ᚕᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRule(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Kmake_status(ctx context.Context, field graphql.CollectedField, obj *v1.Kmake) (ret graphql.Marshaler) {
@@ -960,7 +960,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Rule_targets(ctx context.Context, field graphql.CollectedField, obj *Rule) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rule_targets(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRule) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -991,13 +991,13 @@ func (ec *executionContext) _Rule_targets(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*string)
+	res := resTmp.([]string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNString2ᚕᚖstring(ctx, field.Selections, res)
+	return ec.marshalNString2ᚕstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Rule_doublecolon(ctx context.Context, field graphql.CollectedField, obj *Rule) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rule_doublecolon(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRule) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1016,7 +1016,7 @@ func (ec *executionContext) _Rule_doublecolon(ctx context.Context, field graphql
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Doublecolon, nil
+		return obj.DoubleColon, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1034,7 +1034,7 @@ func (ec *executionContext) _Rule_doublecolon(ctx context.Context, field graphql
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Rule_commands(ctx context.Context, field graphql.CollectedField, obj *Rule) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rule_commands(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRule) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1065,13 +1065,13 @@ func (ec *executionContext) _Rule_commands(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*string)
+	res := resTmp.([]string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNString2ᚕᚖstring(ctx, field.Selections, res)
+	return ec.marshalNString2ᚕstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Rule_prereqs(ctx context.Context, field graphql.CollectedField, obj *Rule) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rule_prereqs(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRule) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1102,13 +1102,13 @@ func (ec *executionContext) _Rule_prereqs(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*string)
+	res := resTmp.([]string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNString2ᚕᚖstring(ctx, field.Selections, res)
+	return ec.marshalNString2ᚕstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Rule_targetpattern(ctx context.Context, field graphql.CollectedField, obj *Rule) (ret graphql.Marshaler) {
+func (ec *executionContext) _Rule_targetpattern(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRule) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1127,7 +1127,7 @@ func (ec *executionContext) _Rule_targetpattern(ctx context.Context, field graph
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Targetpattern, nil
+		return obj.TargetPattern, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2822,7 +2822,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 
 var ruleImplementors = []string{"Rule"}
 
-func (ec *executionContext) _Rule(ctx context.Context, sel ast.SelectionSet, obj *Rule) graphql.Marshaler {
+func (ec *executionContext) _Rule(ctx context.Context, sel ast.SelectionSet, obj *v1.KmakeRule) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, ruleImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -3333,7 +3333,7 @@ func (ec *executionContext) unmarshalNNewTodo2githubᚗcomᚋbythepowerofᚋgqlg
 	return ec.unmarshalInputNewTodo(ctx, v)
 }
 
-func (ec *executionContext) marshalNRule2ᚕᚖgithubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚐRule(ctx context.Context, sel ast.SelectionSet, v []*Rule) graphql.Marshaler {
+func (ec *executionContext) marshalNRule2ᚕᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRule(ctx context.Context, sel ast.SelectionSet, v []*v1.KmakeRule) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3357,7 +3357,7 @@ func (ec *executionContext) marshalNRule2ᚕᚖgithubᚗcomᚋbythepowerofᚋgql
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalORule2ᚖgithubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚐRule(ctx, sel, v[i])
+			ret[i] = ec.marshalORule2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRule(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -3384,7 +3384,7 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) unmarshalNString2ᚕᚖstring(ctx context.Context, v interface{}) ([]*string, error) {
+func (ec *executionContext) unmarshalNString2ᚕstring(ctx context.Context, v interface{}) ([]string, error) {
 	var vSlice []interface{}
 	if v != nil {
 		if tmp1, ok := v.([]interface{}); ok {
@@ -3394,9 +3394,9 @@ func (ec *executionContext) unmarshalNString2ᚕᚖstring(ctx context.Context, v
 		}
 	}
 	var err error
-	res := make([]*string, len(vSlice))
+	res := make([]string, len(vSlice))
 	for i := range vSlice {
-		res[i], err = ec.unmarshalOString2ᚖstring(ctx, vSlice[i])
+		res[i], err = ec.unmarshalOString2string(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -3404,10 +3404,10 @@ func (ec *executionContext) unmarshalNString2ᚕᚖstring(ctx context.Context, v
 	return res, nil
 }
 
-func (ec *executionContext) marshalNString2ᚕᚖstring(ctx context.Context, sel ast.SelectionSet, v []*string) graphql.Marshaler {
+func (ec *executionContext) marshalNString2ᚕstring(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	for i := range v {
-		ret[i] = ec.marshalOString2ᚖstring(ctx, sel, v[i])
+		ret[i] = ec.marshalOString2string(ctx, sel, v[i])
 	}
 
 	return ret
@@ -3809,11 +3809,11 @@ func (ec *executionContext) marshalONamespace2ᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐNa
 	return ec._Namespace(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalORule2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚐRule(ctx context.Context, sel ast.SelectionSet, v Rule) graphql.Marshaler {
+func (ec *executionContext) marshalORule2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRule(ctx context.Context, sel ast.SelectionSet, v v1.KmakeRule) graphql.Marshaler {
 	return ec._Rule(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalORule2ᚖgithubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚐRule(ctx context.Context, sel ast.SelectionSet, v *Rule) graphql.Marshaler {
+func (ec *executionContext) marshalORule2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRule(ctx context.Context, sel ast.SelectionSet, v *v1.KmakeRule) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

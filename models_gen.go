@@ -7,14 +7,6 @@ type NewTodo struct {
 	UserID string `json:"userId"`
 }
 
-type Rule struct {
-	Targets       []*string `json:"targets"`
-	Doublecolon   bool      `json:"doublecolon"`
-	Commands      []*string `json:"commands"`
-	Prereqs       []*string `json:"prereqs"`
-	Targetpattern string    `json:"targetpattern"`
-}
-
 type User struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
