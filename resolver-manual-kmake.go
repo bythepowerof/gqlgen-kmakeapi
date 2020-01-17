@@ -59,6 +59,6 @@ func (r *kmakeResolver) Rules(ctx context.Context, obj *v1.Kmake) ([]*v1.KmakeRu
 	return ret, nil
 }
 
-func (r *kmakeResolver) Status(ctx context.Context, obj *v1.Kmake) (*string, error) {
-	return &obj.Status.Status, nil
+func (r *kmakeResolver) Status(ctx context.Context, obj *v1.Kmake) (string, error) {
+	return obj.Status.Status, nil
 }

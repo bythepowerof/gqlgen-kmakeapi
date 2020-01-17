@@ -49,26 +49,30 @@ type Rule {
   targetpattern: String!
 }
 
-type KmakeRun {
-  name: String!
-  status: String!
-  operation: KmakeRunOperation!
-}
+# type KmakeRun {
+#   name: String!
+#   status: String!
+#   operation: KmakeRunOperation!
+# }
 
-union KmakeRunOperation = 	Job | Dummy| FileWait
+# type KmakeRunOperation {
+#   job: Job 
+#   dummy: Dummy
+#   filewait: FileWait
+# }
 
-type Job {
-  targets: [String]!
-  image: String!
-  command: String!
-  args: [String!]
-}
+# type Job {
+#   targets: [String]!
+#   image: String!
+#   command: String!
+#   args: [String!]
+# }
 
-type Dummy {
-  _: String!
-}
+# type Dummy {
+#   dummy: String!
+# }
 
-type FileWait {
-  files: [String!]
-}
+# type FileWait {
+#   files: [String!]
+# }
 
