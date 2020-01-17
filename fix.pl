@@ -26,13 +26,18 @@ my @fixed;
 
 my $c = 0;
 
-while ($c < $#resolver) {
+while ($c <= $#resolver) {
     chomp $c;
     if (exists $f{$resolver[$c]}) {
         print "skipping $resolver[$c]$resolver[$c+1]$resolver[$c+2]";
         $c += 2;
     } elsif (exists $t{$resolver[$c]}) {
         print "skipping $resolver[$c]";
+    } elsif ( $resolver[$c] =~ /import/) {
+        $c++ while( $resolver[$c] !~ /\)/);
+        print "skipping imports\n";
+        push @fixed, "import ()\n";
+
     } else {
         push @fixed, $resolver[$c];
     }

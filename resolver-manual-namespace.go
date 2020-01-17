@@ -4,16 +4,16 @@ package gqlgen_todos
 
 import (
 	context "context"
-	corev1 "k8s.io/api/core/v1"
+	v11 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func (r *queryResolver) Namespaces(ctx context.Context, name *string) ([]*corev1.Namespace, error) {
+func (r *queryResolver) Namespaces(ctx context.Context, name *string) ([]*v11.Namespace, error) {
 
-	ret := make([]*corev1.Namespace, 0)
+	ret := make([]*v11.Namespace, 0)
 
 	if name != nil {
-		ns := &corev1.Namespace{}
+		ns := &v11.Namespace{}
 		err := r.Client.Get(context.Background(), client.ObjectKey{
 			Namespace: "",
 			Name:      *name,
@@ -25,7 +25,7 @@ func (r *queryResolver) Namespaces(ctx context.Context, name *string) ([]*corev1
 		ret = append(ret, ns)
 		return ret, nil
 	}
-	nsList := &corev1.NamespaceList{}
+	nsList := &v11.NamespaceList{}
 
 	err := r.Client.List(context.Background(), nsList)
 	if err != nil {
