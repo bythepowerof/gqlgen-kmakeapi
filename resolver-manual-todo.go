@@ -19,7 +19,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (*Todo
 func (r *queryResolver) Todos(ctx context.Context, id *string) ([]*Todo, error) {
 	if id == nil {
 		return r.todos, nil
-	} 
+	}
 	b := r.todos[:0]
 	for _, x := range r.todos {
 		if x.UserID == *id {
@@ -32,4 +32,3 @@ func (r *queryResolver) Todos(ctx context.Context, id *string) ([]*Todo, error) 
 func (r *todoResolver) User(ctx context.Context, obj *Todo) (*User, error) {
 	return &User{ID: obj.UserID, Name: "user " + obj.UserID}, nil
 }
-

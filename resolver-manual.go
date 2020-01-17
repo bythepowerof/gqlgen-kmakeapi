@@ -7,6 +7,6 @@ import (
 )
 
 type Resolver struct {
-	todos []*Todo
+	todos  []*Todo
 	Client client.Client
 }

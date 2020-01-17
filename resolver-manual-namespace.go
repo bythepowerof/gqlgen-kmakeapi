@@ -10,7 +10,7 @@ import (
 
 func (r *queryResolver) Namespaces(ctx context.Context, name *string) ([]*corev1.Namespace, error) {
 
-	ret := make([]*corev1.Namespace,0)
+	ret := make([]*corev1.Namespace, 0)
 
 	if name != nil {
 		ns := &corev1.Namespace{}

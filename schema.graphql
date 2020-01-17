@@ -33,7 +33,7 @@ type Kmake {
   name: String!
   variables: [Variable]!
   rules: [Rule]!
-  status: String
+  status: String!
 }
 
 type Variable {
@@ -48,3 +48,27 @@ type Rule {
   prereqs:       [String]!
   targetpattern: String!
 }
+
+type KmakeRun {
+  name: String!
+  status: String!
+  operation: KmakeRunOperation!
+}
+
+union KmakeRunOperation = 	Job | Dummy| FileWait
+
+type Job {
+  targets: [String]!
+  image: String!
+  command: String!
+  args: [String!]
+}
+
+type Dummy {
+  _: String!
+}
+
+type FileWait {
+  files: [String!]
+}
+

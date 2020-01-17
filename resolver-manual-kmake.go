@@ -11,7 +11,7 @@ import (
 )
 
 func (r *namespaceResolver) Kmakes(ctx context.Context, obj *v11.Namespace, name *string) ([]*v1.Kmake, error) {
-	ret := make([]*v1.Kmake,0)
+	ret := make([]*v1.Kmake, 0)
 
 	if name != nil {
 		kmake := &v1.Kmake{}
@@ -36,13 +36,14 @@ func (r *namespaceResolver) Kmakes(ctx context.Context, obj *v11.Namespace, name
 	for i := 0; i < len(kmakeList.Items); i++ {
 		ret = append(ret, &kmakeList.Items[i])
 	}
-	return ret, nil}
+	return ret, nil
+}
 
 func (r *kmakeResolver) Variables(ctx context.Context, obj *v1.Kmake) ([]*Variable, error) {
 
 	ret := make([]*Variable, 0)
 
-	for k, v := range obj.Spec.Variables { 
+	for k, v := range obj.Spec.Variables {
 		ret = append(ret, &Variable{Name: k, Value: v})
 	}
 	return ret, nil
@@ -51,7 +52,7 @@ func (r *kmakeResolver) Variables(ctx context.Context, obj *v1.Kmake) ([]*Variab
 func (r *kmakeResolver) Rules(ctx context.Context, obj *v1.Kmake) ([]*v1.KmakeRule, error) {
 	ret := make([]*v1.KmakeRule, 0)
 
-	for _, v := range obj.Spec.Rules { 
+	for _, v := range obj.Spec.Rules {
 		ret = append(ret, &v)
 	}
 

@@ -2,6 +2,37 @@
 
 package gqlgen_todos
 
+type KmakeRunOperation interface {
+	IsKmakeRunOperation()
+}
+
+type Dummy struct {
+	_ string `json:"_"`
+}
+
+func (Dummy) IsKmakeRunOperation() {}
+
+type FileWait struct {
+	Files []string `json:"files"`
+}
+
+func (FileWait) IsKmakeRunOperation() {}
+
+type Job struct {
+	Targets []*string `json:"targets"`
+	Image   string    `json:"image"`
+	Command string    `json:"command"`
+	Args    []string  `json:"args"`
+}
+
+func (Job) IsKmakeRunOperation() {}
+
+type KmakeRun struct {
+	Name      string            `json:"name"`
+	Status    string            `json:"status"`
+	Operation KmakeRunOperation `json:"operation"`
+}
+
 type NewTodo struct {
 	Text   string `json:"text"`
 	UserID string `json:"userId"`
