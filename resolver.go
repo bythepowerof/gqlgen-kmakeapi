@@ -16,17 +16,11 @@ func (r *Resolver) KmakeRunDummy() KmakeRunDummyResolver {
 func (r *Resolver) KmakeRunJob() KmakeRunJobResolver {
 	return &kmakeRunJobResolver{r}
 }
-func (r *Resolver) Mutation() MutationResolver {
-	return &mutationResolver{r}
-}
 func (r *Resolver) Namespace() NamespaceResolver {
 	return &namespaceResolver{r}
 }
 func (r *Resolver) Query() QueryResolver {
 	return &queryResolver{r}
-}
-func (r *Resolver) Todo() TodoResolver {
-	return &todoResolver{r}
 }
 
 type kmakeResolver struct{ *Resolver }
@@ -37,10 +31,6 @@ type kmakeRunDummyResolver struct{ *Resolver }
 
 type kmakeRunJobResolver struct{ *Resolver }
 
-type mutationResolver struct{ *Resolver }
-
 type namespaceResolver struct{ *Resolver }
 
 type queryResolver struct{ *Resolver }
-
-type todoResolver struct{ *Resolver }

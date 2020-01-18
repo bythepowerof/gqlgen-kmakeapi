@@ -1,17 +1,5 @@
-type Todo {
-  id: ID!
-  text: String!
-  done: Boolean!
-  user: User!
-}
-
-type User {
-  id: ID!
-  name: String!
-}
 
 type Query {
-  todos(id: ID): [Todo!]!
   namespaces(name: String): [Namespace]!
 }
 
@@ -20,9 +8,8 @@ input NewTodo {
   userId: String!
 }
 
-type Mutation {
-  createTodo(input: NewTodo!): Todo!
-}
+# type Mutation {
+# }
 
 type Namespace {
   name: String!
