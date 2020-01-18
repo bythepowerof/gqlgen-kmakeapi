@@ -1,7 +1,5 @@
 package gqlgen_todos
 
-// //go:generate go run github.com/99designs/gqlgen
-
 import (
 	context "context"
 	v11 "k8s.io/api/core/v1"
@@ -12,22 +10,15 @@ func (r *queryResolver) Namespaces(ctx context.Context, name *string) ([]*v11.Na
 
 	ret := make([]*v11.Namespace, 0)
 
-	if name != nil {
-		ns := &v11.Namespace{}
-		err := r.Client.Get(context.Background(), client.ObjectKey{
-			Namespace: "",
-			Name:      *name,
-		}, ns)
-
-		if err != nil {
-			return nil, err
-		}
-		ret = append(ret, ns)
-		return ret, nil
-	}
 	nsList := &v11.NamespaceList{}
+	o := &client.ListOptions{}
 
-	err := r.Client.List(context.Background(), nsList)
+	if name != nil {
+		fields := map[string]string{"metadata.name": *name}
+		client.MatchingFields(fields).ApplyToList(o)
+	}
+
+	err := r.Client.List(context.Background(), nsList, o)
 	if err != nil {
 		return nil, err
 	}

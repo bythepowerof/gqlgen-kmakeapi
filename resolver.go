@@ -7,6 +7,9 @@ import ()
 func (r *Resolver) Kmake() KmakeResolver {
 	return &kmakeResolver{r}
 }
+func (r *Resolver) KmakeRun() KmakeRunResolver {
+	return &kmakeRunResolver{r}
+}
 func (r *Resolver) Mutation() MutationResolver {
 	return &mutationResolver{r}
 }
@@ -21,6 +24,8 @@ func (r *Resolver) Todo() TodoResolver {
 }
 
 type kmakeResolver struct{ *Resolver }
+
+type kmakeRunResolver struct{ *Resolver }
 
 type mutationResolver struct{ *Resolver }
 

@@ -22,4 +22,9 @@ models:
     model: github.com/bythepowerof/kmake-controller/api/v1.Kmake
   Rule:
     model: github.com/bythepowerof/kmake-controller/api/v1.KmakeRule
-
+  KmakeStatus:
+    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeStatus
+  KmakeRun:
+    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeRun   
+  KmakeRunStatus:
+    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeRunStatus

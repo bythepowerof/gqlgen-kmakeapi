@@ -1,7 +1,5 @@
 package gqlgen_todos
 
-//go:generate go run github.com/99designs/gqlgen
-
 import (
 	"context"
 
@@ -13,22 +11,16 @@ import (
 func (r *namespaceResolver) Kmakes(ctx context.Context, obj *v11.Namespace, name *string) ([]*v1.Kmake, error) {
 	ret := make([]*v1.Kmake, 0)
 
-	if name != nil {
-		kmake := &v1.Kmake{}
-		err := r.Client.Get(context.Background(), client.ObjectKey{
-			Namespace: obj.GetName(),
-			Name:      *name,
-		}, kmake)
-
-		if err != nil {
-			return nil, err
-		}
-		ret = append(ret, kmake)
-		return ret, nil
-	}
 	kmakeList := &v1.KmakeList{}
+	o := &client.ListOptions{}
+	client.InNamespace(obj.GetName()).ApplyToList(o)
 
-	err := r.Client.List(context.Background(), kmakeList, client.InNamespace(obj.GetNamespace()))
+	if name != nil {
+		fields := map[string]string{"metadata.name": *name}
+		client.MatchingFields(fields).ApplyToList(o)
+	}
+
+	err := r.Client.List(context.Background(), kmakeList, o)
 	if err != nil {
 		return nil, err
 	}
@@ -61,4 +53,31 @@ func (r *kmakeResolver) Rules(ctx context.Context, obj *v1.Kmake) ([]*v1.KmakeRu
 
 func (r *kmakeResolver) Status(ctx context.Context, obj *v1.Kmake) (string, error) {
 	return obj.Status.Status, nil
+}
+
+func (r *kmakeResolver) Runs(ctx context.Context, obj *v1.Kmake, name *string) ([]*v1.KmakeRun, error) {
+	ret := make([]*v1.KmakeRun, 0)
+
+	kmakerunList := &v1.KmakeRunList{}
+
+	labels := map[string]string{"bythepowerof.github.io/kmake": obj.GetName()}
+
+	o := &client.ListOptions{}
+	client.InNamespace(obj.GetNamespace()).ApplyToList(o)
+	client.MatchingLabels(labels).ApplyToList(o)
+
+	if name != nil {
+		fields := map[string]string{"metadata.name": *name}
+		client.MatchingFields(fields).ApplyToList(o)
+	}
+
+	err := r.Client.List(context.Background(), kmakerunList, o)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := 0; i < len(kmakerunList.Items); i++ {
+		ret = append(ret, &kmakerunList.Items[i])
+	}
+	return ret, nil
 }

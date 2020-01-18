@@ -33,7 +33,8 @@ type Kmake {
   name: String!
   variables: [Variable]!
   rules: [Rule]!
-  status: String!
+  status: KmakeStatus!
+  runs(name: String): [KmakeRun]!
 }
 
 type Variable {
@@ -49,11 +50,19 @@ type Rule {
   targetpattern: String!
 }
 
-# type KmakeRun {
-#   name: String!
-#   status: String!
+type KmakeStatus {
+  status: String!
+}
+
+type KmakeRun {
+  name: String!
+  runstatus: KmakeRunStatus!
 #   operation: KmakeRunOperation!
-# }
+}
+
+type KmakeRunStatus {
+  status: String!
+}
 
 # type KmakeRunOperation {
 #   job: Job 
