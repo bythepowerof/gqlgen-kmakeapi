@@ -10,6 +10,12 @@ func (r *Resolver) Kmake() KmakeResolver {
 func (r *Resolver) KmakeRun() KmakeRunResolver {
 	return &kmakeRunResolver{r}
 }
+func (r *Resolver) KmakeRunDummy() KmakeRunDummyResolver {
+	return &kmakeRunDummyResolver{r}
+}
+func (r *Resolver) KmakeRunJob() KmakeRunJobResolver {
+	return &kmakeRunJobResolver{r}
+}
 func (r *Resolver) Mutation() MutationResolver {
 	return &mutationResolver{r}
 }
@@ -26,6 +32,10 @@ func (r *Resolver) Todo() TodoResolver {
 type kmakeResolver struct{ *Resolver }
 
 type kmakeRunResolver struct{ *Resolver }
+
+type kmakeRunDummyResolver struct{ *Resolver }
+
+type kmakeRunJobResolver struct{ *Resolver }
 
 type mutationResolver struct{ *Resolver }
 

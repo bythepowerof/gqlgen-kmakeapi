@@ -55,7 +55,7 @@ func (r *kmakeResolver) Status(ctx context.Context, obj *v1.Kmake) (string, erro
 	return obj.Status.Status, nil
 }
 
-func (r *kmakeResolver) Runs(ctx context.Context, obj *v1.Kmake, name *string) ([]*v1.KmakeRun, error) {
+func (r *kmakeResolver) Runs(ctx context.Context, obj *v1.Kmake, jobtype *JobType, name *string) ([]*v1.KmakeRun, error) {
 	ret := make([]*v1.KmakeRun, 0)
 
 	kmakerunList := &v1.KmakeRunList{}
@@ -77,6 +77,17 @@ func (r *kmakeResolver) Runs(ctx context.Context, obj *v1.Kmake, name *string) (
 	}
 
 	for i := 0; i < len(kmakerunList.Items); i++ {
+		if jobtype != nil {
+			if *jobtype == "DUMMY" && kmakerunList.Items[i].Spec.KmakeRunOperation.Dummy == nil {
+				continue
+			}
+			if *jobtype == "JOB" && kmakerunList.Items[i].Spec.KmakeRunOperation.Job == nil {
+				continue
+			}
+			if *jobtype == "FILEWAIT" && kmakerunList.Items[i].Spec.KmakeRunOperation.FileWait == nil {
+				continue
+			}
+		}
 		ret = append(ret, &kmakerunList.Items[i])
 	}
 	return ret, nil

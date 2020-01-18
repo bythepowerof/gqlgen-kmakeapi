@@ -29,12 +29,18 @@ type Namespace {
   kmakes(name: String): [Kmake]!
 }
 
+enum JobType {
+  JOB
+  DUMMY
+  FILEWAIT
+}
+
 type Kmake {
   name: String!
   variables: [Variable]!
   rules: [Rule]!
   status: KmakeStatus!
-  runs(name: String): [KmakeRun]!
+  runs(jobtype: JobType, name: String): [KmakeRun]!
 }
 
 type Variable {
@@ -57,31 +63,31 @@ type KmakeStatus {
 type KmakeRun {
   name: String!
   runstatus: KmakeRunStatus!
-#   operation: KmakeRunOperation!
+  operation: KmakeRunOperation
 }
 
 type KmakeRunStatus {
   status: String!
 }
 
-# type KmakeRunOperation {
-#   job: Job 
-#   dummy: Dummy
-#   filewait: FileWait
-# }
+type KmakeRunOperation {
+  job: KmakeRunJob 
+  dummy: KmakeRunDummy
+  filewait: KmakeRunFileWait
+}
 
-# type Job {
-#   targets: [String]!
-#   image: String!
-#   command: String!
-#   args: [String!]
-# }
+type KmakeRunJob {
+  targets: [String]!
+  image: String!
+  command: [String]
+  args: [String]
+}
 
-# type Dummy {
-#   dummy: String!
-# }
+type KmakeRunDummy {
+  dummy: String!
+}
 
-# type FileWait {
-#   files: [String!]
-# }
+type KmakeRunFileWait {
+  files: [String!]
+}
 

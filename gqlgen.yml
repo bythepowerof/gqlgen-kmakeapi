@@ -28,3 +28,12 @@ models:
     model: github.com/bythepowerof/kmake-controller/api/v1.KmakeRun   
   KmakeRunStatus:
     model: github.com/bythepowerof/kmake-controller/api/v1.KmakeRunStatus
+  KmakeRunOperation:
+    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeRunOperation
+  KmakeRunJob:
+    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeRunJob
+  KmakeRunFileWait:
+    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeRunFileWait
+  KmakeRunDummy:
+    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeRunDummy 
+
