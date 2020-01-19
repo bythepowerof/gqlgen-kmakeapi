@@ -1,12 +1,14 @@
 
 type Query {
   namespaces(name: String): [Namespace]!
+  kmakes(namespace: String): [Kmake]!
+  kmakeruns(namespace: String, kmake: String): [KmakeRun]!
 }
 
-input NewTodo {
-  text: String!
-  userId: String!
-}
+# input NewTodo {
+#   text: String!
+#   userId: String!
+# }
 
 # type Mutation {
 # }

@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/99designs/gqlgen/handler"
-	gqlgen_todos "github.com/bythepowerof/gqlgen-kmakeapi"
+	gqlgen_kmakeapi "github.com/bythepowerof/gqlgen-kmakeapi/view"
 
 	bythepowerofv1 "github.com/bythepowerof/kmake-controller/api/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -35,7 +35,7 @@ func main() {
 	}
 
 	http.Handle("/", handler.Playground("GraphQL playground", "/query"))
-	http.Handle("/query", handler.GraphQL(gqlgen_todos.NewExecutableSchema(gqlgen_todos.Config{Resolvers: &gqlgen_todos.Resolver{Client: c}})))
+	http.Handle("/query", handler.GraphQL(gqlgen_kmakeapi.NewExecutableSchema(gqlgen_kmakeapi.Config{Resolvers: &gqlgen_kmakeapi.Resolver{Client: c}})))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))

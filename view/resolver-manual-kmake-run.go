@@ -1,4 +1,4 @@
-package gqlgen_todos
+package gqlgen_kmakeapi
 
 import (
 	"context"

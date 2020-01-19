@@ -1,4 +1,4 @@
-package gqlgen_todos
+package gqlgen_kmakeapi
 
 //go:generate go run github.com/99designs/gqlgen
 
@@ -7,6 +7,5 @@ import (
 )
 
 type Resolver struct {
-	todos  []*Todo
 	Client client.Client
 }
