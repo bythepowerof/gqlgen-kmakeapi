@@ -4,13 +4,13 @@ use warnings;
 
 use Data::Dumper;
 
-my @funcs  = `grep -h "^func" *.go  | sort |uniq -d`;
+my @funcs  = `grep -h "^func" resolver*.go  | sort |uniq -d`;
 my %f;
 foreach my $x (@funcs) {
     # chomp $x;
     $f{$x} = 1;
 }
-my @types = `grep -h "^type" *.go |sed -e 's/struct.*/struct\{\}/'  | sort |uniq -d`;
+my @types = `grep -h "^type" resolver*.go |sed -e 's/struct.*/struct\{\}/'  | sort |uniq -d`;
 my %t;
 foreach my $x (@types) {
     # chomp $x;
@@ -30,9 +30,11 @@ while ($c <= $#resolver) {
     chomp $c;
     if (exists $f{$resolver[$c]}) {
         print "skipping $resolver[$c]$resolver[$c+1]$resolver[$c+2]";
+        delete $f{$resolver[$c]};
         $c += 2;
     } elsif (exists $t{$resolver[$c]}) {
         print "skipping $resolver[$c]";
+        delete $t{$resolver[$c]};
     } elsif ( $resolver[$c] =~ /import/) {
         $c++ while( $resolver[$c] !~ /\)/);
         print "skipping imports\n";
@@ -49,4 +51,14 @@ open(my $fh2, ">", "resolver.go")
 
 foreach my $l (@fixed){
     print $fh2 $l;
+}
+
+print "Orphan functions\n";
+foreach my $k (keys %f){
+    print "$k\n";
+}
+
+print "Orphan types\n";
+foreach my $k (keys %t){
+    print "$k\n";
 }

@@ -9,8 +9,8 @@ import (
 	// 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func (r *kmakeRunResolver) Runstatus(ctx context.Context, obj *v1.KmakeRun) (*v1.KmakeRunStatus, error) {
-	return &obj.Status, nil
+func (r *kmakeRunResolver) Status(ctx context.Context, obj *v1.KmakeRun) (string, error) {
+	return obj.Status.Status, nil
 }
 
 func (r *kmakeRunResolver) Operation(ctx context.Context, obj *v1.KmakeRun) (*v1.KmakeRunOperation, error) {
