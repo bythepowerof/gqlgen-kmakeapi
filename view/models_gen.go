@@ -2,56 +2,7 @@
 
 package gqlgen_kmakeapi
 
-import (
-	"fmt"
-	"io"
-	"strconv"
-)
-
 type Variable struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
-}
-
-type JobType string
-
-const (
-	JobTypeJob      JobType = "JOB"
-	JobTypeDummy    JobType = "DUMMY"
-	JobTypeFilewait JobType = "FILEWAIT"
-)
-
-var AllJobType = []JobType{
-	JobTypeJob,
-	JobTypeDummy,
-	JobTypeFilewait,
-}
-
-func (e JobType) IsValid() bool {
-	switch e {
-	case JobTypeJob, JobTypeDummy, JobTypeFilewait:
-		return true
-	}
-	return false
-}
-
-func (e JobType) String() string {
-	return string(e)
-}
-
-func (e *JobType) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = JobType(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid JobType", str)
-	}
-	return nil
-}
-
-func (e JobType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
 }

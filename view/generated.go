@@ -12,6 +12,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/bythepowerof/gqlgen-kmakeapi/controller"
 	"github.com/bythepowerof/kmake-controller/api/v1"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
@@ -51,7 +52,7 @@ type ComplexityRoot struct {
 	Kmake struct {
 		Name      func(childComplexity int) int
 		Rules     func(childComplexity int) int
-		Runs      func(childComplexity int, jobtype *JobType, name *string) int
+		Runs      func(childComplexity int, jobtype *controller.JobType, name *string) int
 		Status    func(childComplexity int) int
 		Variables func(childComplexity int) int
 	}
@@ -120,7 +121,7 @@ type KmakeResolver interface {
 	Variables(ctx context.Context, obj *v1.Kmake) ([]*Variable, error)
 	Rules(ctx context.Context, obj *v1.Kmake) ([]*v1.KmakeRule, error)
 
-	Runs(ctx context.Context, obj *v1.Kmake, jobtype *JobType, name *string) ([]*v1.KmakeRun, error)
+	Runs(ctx context.Context, obj *v1.Kmake, jobtype *controller.JobType, name *string) ([]*v1.KmakeRun, error)
 }
 type KmakeRunResolver interface {
 	Runstatus(ctx context.Context, obj *v1.KmakeRun) (*v1.KmakeRunStatus, error)
@@ -182,7 +183,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Kmake.Runs(childComplexity, args["jobtype"].(*JobType), args["name"].(*string)), true
+		return e.complexity.Kmake.Runs(childComplexity, args["jobtype"].(*controller.JobType), args["name"].(*string)), true
 
 	case "Kmake.status":
 		if e.complexity.Kmake.Status == nil {
@@ -541,9 +542,9 @@ type KmakeRunFileWait {
 func (ec *executionContext) field_Kmake_runs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *JobType
+	var arg0 *controller.JobType
 	if tmp, ok := rawArgs["jobtype"]; ok {
-		arg0, err = ec.unmarshalOJobType2ᚖgithubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋviewᚐJobType(ctx, tmp)
+		arg0, err = ec.unmarshalOJobType2ᚖgithubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋcontrollerᚐJobType(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -848,7 +849,7 @@ func (ec *executionContext) _Kmake_runs(ctx context.Context, field graphql.Colle
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Kmake().Runs(rctx, obj, args["jobtype"].(*JobType), args["name"].(*string))
+		return ec.resolvers.Kmake().Runs(rctx, obj, args["jobtype"].(*controller.JobType), args["name"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4346,28 +4347,28 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
 }
 
-func (ec *executionContext) unmarshalOJobType2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋviewᚐJobType(ctx context.Context, v interface{}) (JobType, error) {
-	var res JobType
-	return res, res.UnmarshalGQL(v)
+func (ec *executionContext) unmarshalOJobType2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋcontrollerᚐJobType(ctx context.Context, v interface{}) (controller.JobType, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	return controller.JobType(tmp), err
 }
 
-func (ec *executionContext) marshalOJobType2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋviewᚐJobType(ctx context.Context, sel ast.SelectionSet, v JobType) graphql.Marshaler {
-	return v
+func (ec *executionContext) marshalOJobType2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋcontrollerᚐJobType(ctx context.Context, sel ast.SelectionSet, v controller.JobType) graphql.Marshaler {
+	return graphql.MarshalString(string(v))
 }
 
-func (ec *executionContext) unmarshalOJobType2ᚖgithubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋviewᚐJobType(ctx context.Context, v interface{}) (*JobType, error) {
+func (ec *executionContext) unmarshalOJobType2ᚖgithubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋcontrollerᚐJobType(ctx context.Context, v interface{}) (*controller.JobType, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOJobType2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋviewᚐJobType(ctx, v)
+	res, err := ec.unmarshalOJobType2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋcontrollerᚐJobType(ctx, v)
 	return &res, err
 }
 
-func (ec *executionContext) marshalOJobType2ᚖgithubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋviewᚐJobType(ctx context.Context, sel ast.SelectionSet, v *JobType) graphql.Marshaler {
+func (ec *executionContext) marshalOJobType2ᚖgithubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋcontrollerᚐJobType(ctx context.Context, sel ast.SelectionSet, v *controller.JobType) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return v
+	return ec.marshalOJobType2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋcontrollerᚐJobType(ctx, sel, *v)
 }
 
 func (ec *executionContext) marshalOKmake2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmake(ctx context.Context, sel ast.SelectionSet, v v1.Kmake) graphql.Marshaler {
