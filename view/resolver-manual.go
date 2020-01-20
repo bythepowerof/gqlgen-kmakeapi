@@ -4,10 +4,8 @@ package gqlgen_kmakeapi
 
 import (
 	"github.com/bythepowerof/gqlgen-kmakeapi/controller"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type Resolver struct {
-	Client          client.Client
 	KmakeController controller.KmakeController
 }

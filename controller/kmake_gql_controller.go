@@ -21,6 +21,11 @@ type KmakeController interface {
 	KmakeRuns(ctx context.Context, namespace *string, kmakename *string, jobtype *JobType, name *string) ([]*v1.KmakeRun, error)
 }
 
+type KV struct {
+	Key   string
+	Value string
+}
+
 type KubernetesController struct {
 	Client client.Client
 }
@@ -76,15 +81,17 @@ func (r *KubernetesController) KmakeRuns(ctx context.Context, namespace *string,
 
 	kmakerunList := &v1.KmakeRunList{}
 
-	labels := map[string]string{"bythepowerof.github.io/kmake": *kmakename}
-
 	o := &client.ListOptions{}
 	client.InNamespace(*namespace).ApplyToList(o)
-	client.MatchingLabels(labels).ApplyToList(o)
 
 	if name != nil {
 		fields := map[string]string{"metadata.name": *name}
 		client.MatchingFields(fields).ApplyToList(o)
+	}
+
+	if kmakename != nil {
+		labels := map[string]string{"bythepowerof.github.io/kmake": *kmakename}
+		client.MatchingLabels(labels).ApplyToList(o)
 	}
 
 	err := r.Client.List(context.Background(), kmakerunList, o)

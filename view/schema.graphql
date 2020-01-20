@@ -1,14 +1,9 @@
 
 type Query {
   namespaces(name: String): [Namespace]!
-  kmakes(namespace: String): [Kmake]!
-  kmakeruns(namespace: String, kmake: String): [KmakeRun]!
+  kmakes(namespace: String!, kmake: String): [Kmake]!
+  kmakeruns(namespace: String!, kmake: String, jobtype: JobType, kmakerun: String): [KmakeRun]!
 }
-
-# input NewTodo {
-#   text: String!
-#   userId: String!
-# }
 
 # type Mutation {
 # }
@@ -26,14 +21,14 @@ enum JobType {
 
 type Kmake {
   name: String!
-  variables: [Variable]!
+  variables: [KV]!
   rules: [Rule]!
   status: KmakeStatus!
   runs(jobtype: JobType, name: String): [KmakeRun]!
 }
 
-type Variable {
-  name: String!
+type KV {
+  key: String!
   value: String!
 }
 
@@ -51,6 +46,7 @@ type KmakeStatus {
 
 type KmakeRun {
   name: String!
+  kmakename: String
   runstatus: KmakeRunStatus!
   operation: KmakeRunOperation
 }

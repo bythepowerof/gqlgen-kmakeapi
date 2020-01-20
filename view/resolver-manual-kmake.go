@@ -13,12 +13,12 @@ func (r *namespaceResolver) Kmakes(ctx context.Context, obj *v11.Namespace, name
 	return r.KmakeController.Kmakes(ctx, &namespace, name)
 }
 
-func (r *kmakeResolver) Variables(ctx context.Context, obj *v1.Kmake) ([]*Variable, error) {
+func (r *kmakeResolver) Variables(ctx context.Context, obj *v1.Kmake) ([]*controller.KV, error) {
 
-	ret := make([]*Variable, 0)
+	ret := make([]*controller.KV, 0)
 
 	for k, v := range obj.Spec.Variables {
-		ret = append(ret, &Variable{Name: k, Value: v})
+		ret = append(ret, &controller.KV{Key: k, Value: v})
 	}
 	return ret, nil
 }
@@ -42,4 +42,8 @@ func (r *kmakeResolver) Runs(ctx context.Context, obj *v1.Kmake, jobtype *contro
 	kmakename := obj.GetName()
 
 	return r.KmakeController.KmakeRuns(ctx, &namespace, &kmakename, jobtype, name)
+}
+
+func (r *queryResolver) Kmakes(ctx context.Context, namespace string, kmake *string) ([]*v1.Kmake, error) {
+	return r.KmakeController.Kmakes(ctx, &namespace, kmake)
 }

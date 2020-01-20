@@ -33,10 +33,10 @@ while ($c <= $#resolver) {
         $c += 2;
     } elsif (exists $t{$resolver[$c]}) {
         print "skipping $resolver[$c]";
-    # } elsif ( $resolver[$c] =~ /import/) {
-    #     $c++ while( $resolver[$c] !~ /\)/);
-    #     print "skipping imports\n";
-    #     push @fixed, "import ()\n";
+    } elsif ( $resolver[$c] =~ /import/) {
+        $c++ while( $resolver[$c] !~ /\)/);
+        print "skipping imports\n";
+        push @fixed, "import ()\n";
 
     } else {
         push @fixed, $resolver[$c];

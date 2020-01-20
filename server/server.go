@@ -40,7 +40,6 @@ func main() {
 		gqlgen_kmakeapi.NewExecutableSchema(
 			gqlgen_kmakeapi.Config{
 				Resolvers: &gqlgen_kmakeapi.Resolver{
-					Client:          c,
 					KmakeController: &controller.KubernetesController{Client: c},
 				},
 			},

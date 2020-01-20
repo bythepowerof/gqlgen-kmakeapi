@@ -3,6 +3,7 @@ package gqlgen_kmakeapi
 import (
 	"context"
 
+	"github.com/bythepowerof/gqlgen-kmakeapi/controller"
 	"github.com/bythepowerof/kmake-controller/api/v1"
 	// v11 "k8s.io/api/core/v1"
 	// 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -28,6 +29,10 @@ func (r *kmakeRunJobResolver) Command(ctx context.Context, obj *v1.KmakeRunJob) 
 
 	return ret, nil
 }
+func (r *kmakeRunResolver) Kmakename(ctx context.Context, obj *v1.KmakeRun) (*string, error) {
+	kmakename := obj.GetKmakeName()
+	return &kmakename, nil
+}
 func (r *kmakeRunJobResolver) Args(ctx context.Context, obj *v1.KmakeRunJob) ([]*string, error) {
 	ret := make([]*string, 0)
 
@@ -39,4 +44,8 @@ func (r *kmakeRunJobResolver) Args(ctx context.Context, obj *v1.KmakeRunJob) ([]
 
 func (r *kmakeRunDummyResolver) Dummy(ctx context.Context, obj *v1.KmakeRunDummy) (string, error) {
 	return "1", nil
+}
+
+func (r *queryResolver) Kmakeruns(ctx context.Context, namespace string, kmake *string, jobtype *controller.JobType, kmakerun *string) ([]*v1.KmakeRun, error) {
+	return r.KmakeController.KmakeRuns(ctx, &namespace, kmake, jobtype, kmakerun)
 }

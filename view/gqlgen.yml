@@ -36,5 +36,6 @@ models:
     model: github.com/bythepowerof/kmake-controller/api/v1.KmakeRunDummy
   JobType:
     model: github.com/bythepowerof/gqlgen-kmakeapi/controller.JobType
-
+  KV:
+    model: github.com/bythepowerof/gqlgen-kmakeapi/controller.KV
 
