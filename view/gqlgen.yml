@@ -32,6 +32,27 @@ models:
     model: github.com/bythepowerof/kmake-controller/api/v1.KmakeRunDummy
   JobType:
     model: github.com/bythepowerof/gqlgen-kmakeapi/controller.JobType
+  RunType:
+    model: github.com/bythepowerof/gqlgen-kmakeapi/controller.RunType
   KV:
     model: github.com/bythepowerof/gqlgen-kmakeapi/controller.KV
+  KmakeScheduleRun:
+    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleRun
+  KmakeScheduleRunOperation:
+    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleRunOperation
+  KmakeScheduleRunStart:
+    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleRunStart
+  KmakeScheduleRunRestart:
+    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleRunRestart
+  KmakeScheduleRunStop:
+    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleRunStop
+  KmakeScheduleDelete:
+    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleDelete
+  KmakeScheduleCreate:
+    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleCreate
+  KmakeScheduleReset:
+    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleReset
+  KmakeScheduleForce:
+    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleForce
+
 

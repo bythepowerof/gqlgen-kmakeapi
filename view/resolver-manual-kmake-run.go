@@ -47,5 +47,5 @@ func (r *kmakeRunDummyResolver) Dummy(ctx context.Context, obj *v1.KmakeRunDummy
 }
 
 func (r *queryResolver) Kmakeruns(ctx context.Context, namespace string, kmake *string, jobtype *controller.JobType, kmakerun *string) ([]*v1.KmakeRun, error) {
-	return r.KmakeController.KmakeRuns(ctx, &namespace, kmake, jobtype, kmakerun)
+	return r.KmakeController.Kmakeruns(ctx, &namespace, kmake, jobtype, kmakerun)
 }

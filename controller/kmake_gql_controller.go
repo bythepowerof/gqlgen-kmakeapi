@@ -15,10 +15,23 @@ const (
 	JobTypeFilewait JobType = "FILEWAIT"
 )
 
+type RunType string
+
+const (
+	RunTypeStart   RunType = "START"
+	RunTypeRestart RunType = "RESTART"
+	RunTypeStop    RunType = "STOP"
+	RunTypeDelete  RunType = "DELETE"
+	RunTypeCreate  RunType = "CREATE"
+	RunTypeReset   RunType = "RESET"
+	RunTypeForce   RunType = "FORCE"
+)
+
 type KmakeController interface {
 	Namespaces(ctx context.Context, name *string) ([]*v11.Namespace, error)
 	Kmakes(ctx context.Context, namespace *string, name *string) ([]*v1.Kmake, error)
-	KmakeRuns(ctx context.Context, namespace *string, kmakename *string, jobtype *JobType, name *string) ([]*v1.KmakeRun, error)
+	Kmakeruns(ctx context.Context, namespace *string, kmakename *string, jobtype *JobType, name *string) ([]*v1.KmakeRun, error)
+	Kmakescheduleruns(ctx context.Context, namespace string, kmake *string, kmakerun *string, kmakescheduler *string, name *string, runtype *RunType) ([]*v1.KmakeScheduleRun, error)
 }
 
 type KV struct {
@@ -76,7 +89,7 @@ func (r *KubernetesController) Kmakes(ctx context.Context, namespace *string, na
 	return ret, nil
 }
 
-func (r *KubernetesController) KmakeRuns(ctx context.Context, namespace *string, kmakename *string, jobtype *JobType, name *string) ([]*v1.KmakeRun, error) {
+func (r *KubernetesController) Kmakeruns(ctx context.Context, namespace *string, kmakename *string, jobtype *JobType, name *string) ([]*v1.KmakeRun, error) {
 	ret := make([]*v1.KmakeRun, 0)
 
 	kmakerunList := &v1.KmakeRunList{}
@@ -112,6 +125,67 @@ func (r *KubernetesController) KmakeRuns(ctx context.Context, namespace *string,
 			}
 		}
 		ret = append(ret, &kmakerunList.Items[i])
+	}
+	return ret, nil
+}
+
+func (r *KubernetesController) Kmakescheduleruns(ctx context.Context, namespace string, kmake *string, kmakerun *string, kmakescheduler *string, name *string, runtype *RunType) ([]*v1.KmakeScheduleRun, error) {
+	ret := make([]*v1.KmakeScheduleRun, 0)
+
+	kmakeschedulerunList := &v1.KmakeScheduleRunList{}
+
+	o := &client.ListOptions{}
+	client.InNamespace(namespace).ApplyToList(o)
+
+	if name != nil {
+		fields := map[string]string{"metadata.name": *name}
+		client.MatchingFields(fields).ApplyToList(o)
+	}
+
+	if kmake != nil {
+		labels := map[string]string{"bythepowerof.github.io/kmake": *kmake}
+		client.MatchingLabels(labels).ApplyToList(o)
+	}
+
+	if kmakerun != nil {
+		labels := map[string]string{"bythepowerof.github.io/kmakerun": *kmakerun}
+		client.MatchingLabels(labels).ApplyToList(o)
+	}
+
+	if kmakescheduler != nil {
+		labels := map[string]string{"bythepowerof.github.io/kmakescheduler": *kmakescheduler}
+		client.MatchingLabels(labels).ApplyToList(o)
+	}
+	err := r.Client.List(context.Background(), kmakeschedulerunList, o)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := 0; i < len(kmakeschedulerunList.Items); i++ {
+		if runtype != nil {
+			if *runtype == "START" && kmakeschedulerunList.Items[i].Spec.KmakeScheduleRunOperation.Start == nil {
+				continue
+			}
+			if *runtype == "RESTART" && kmakeschedulerunList.Items[i].Spec.KmakeScheduleRunOperation.Restart == nil {
+				continue
+			}
+			if *runtype == "STOP" && kmakeschedulerunList.Items[i].Spec.KmakeScheduleRunOperation.Stop == nil {
+				continue
+			}
+			if *runtype == "DELETE" && kmakeschedulerunList.Items[i].Spec.KmakeScheduleRunOperation.Delete == nil {
+				continue
+			}
+			if *runtype == "CREATE" && kmakeschedulerunList.Items[i].Spec.KmakeScheduleRunOperation.Create == nil {
+				continue
+			}
+			if *runtype == "RESET" && kmakeschedulerunList.Items[i].Spec.KmakeScheduleRunOperation.Reset == nil {
+				continue
+			}
+			if *runtype == "FORCE" && kmakeschedulerunList.Items[i].Spec.KmakeScheduleRunOperation.Force == nil {
+				continue
+			}
+		}
+		ret = append(ret, &kmakeschedulerunList.Items[i])
 	}
 	return ret, nil
 }

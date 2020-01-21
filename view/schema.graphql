@@ -3,6 +3,7 @@ type Query {
   namespaces(name: String): [Namespace]!
   kmakes(namespace: String!, kmake: String): [Kmake]!
   kmakeruns(namespace: String!, kmake: String, jobtype: JobType, kmakerun: String): [KmakeRun]!
+  kmakescheduleruns(namespace: String!, kmake: String, kmakerun: String, kmakescheduler: String, name: String, runtype: RunType): [KmakeScheduleRun]!
 }
 
 # type Mutation {
@@ -17,6 +18,16 @@ enum JobType {
   JOB
   DUMMY
   FILEWAIT
+}
+
+enum RunType {
+	START
+	RESTART
+	STOP
+	DELETE
+	CREATE
+	RESET
+	FORCE
 }
 
 type Kmake {
@@ -69,3 +80,51 @@ type KmakeRunFileWait {
   files: [String!]
 }
 
+type KmakeScheduleRun {
+  name: String!
+  kmakename: String
+  kmakerunname: String
+  kmakeschedulename: String
+  status: String!
+  operation: KmakeScheduleRunOperation!
+}
+
+type KmakeScheduleRunOperation {
+  start:  KmakeScheduleRunStart
+	Restart: KmakeScheduleRunRestart
+	Stop:    KmakeScheduleRunStop
+	Delete:  KmakeScheduleDelete
+	Create:  KmakeScheduleCreate
+	Reset:   KmakeScheduleReset
+	Force:   KmakeScheduleForce
+}
+
+type KmakeScheduleRunStart {
+    dummy: String!
+}
+
+type KmakeScheduleRunRestart {
+	Run: String!
+}
+
+type KmakeScheduleRunStop {
+	Run: String!
+}
+
+type KmakeScheduleDelete {
+    dummy: String!
+}
+
+type KmakeScheduleCreate {
+    dummy: String!
+}
+
+type KmakeScheduleReset {
+	Recurse: String!
+	Full:    String!
+}
+
+type KmakeScheduleForce {
+	Operation: String!
+	Recurse:   String!
+}
