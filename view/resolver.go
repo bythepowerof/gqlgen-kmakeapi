@@ -7,6 +7,9 @@ import ()
 func (r *Resolver) Kmake() KmakeResolver {
 	return &kmakeResolver{r}
 }
+func (r *Resolver) KmakeNowScheduler() KmakeNowSchedulerResolver {
+	return &kmakeNowSchedulerResolver{r}
+}
 func (r *Resolver) KmakeRun() KmakeRunResolver {
 	return &kmakeRunResolver{r}
 }
@@ -36,6 +39,8 @@ func (r *Resolver) Query() QueryResolver {
 }
 
 type kmakeResolver struct{ *Resolver }
+
+type kmakeNowSchedulerResolver struct{ *Resolver }
 
 type kmakeRunResolver struct{ *Resolver }
 

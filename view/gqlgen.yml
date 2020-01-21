@@ -54,5 +54,7 @@ models:
     model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleReset
   KmakeScheduleForce:
     model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleForce
+  KmakeNowScheduler:
+    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeNowScheduler
 
 

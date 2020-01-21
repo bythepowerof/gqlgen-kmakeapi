@@ -32,6 +32,7 @@ type KmakeController interface {
 	Kmakes(ctx context.Context, namespace *string, name *string) ([]*v1.Kmake, error)
 	Kmakeruns(ctx context.Context, namespace *string, kmakename *string, jobtype *JobType, name *string) ([]*v1.KmakeRun, error)
 	Kmakescheduleruns(ctx context.Context, namespace string, kmake *string, kmakerun *string, kmakescheduler *string, name *string, runtype *RunType) ([]*v1.KmakeScheduleRun, error)
+	Kmakenowschedulers(ctx context.Context, namespace string, name *string, monitor *string) ([]*v1.KmakeNowScheduler, error)
 }
 
 type KV struct {
@@ -186,6 +187,29 @@ func (r *KubernetesController) Kmakescheduleruns(ctx context.Context, namespace 
 			}
 		}
 		ret = append(ret, &kmakeschedulerunList.Items[i])
+	}
+	return ret, nil
+}
+
+func (r *KubernetesController) Kmakenowschedulers(ctx context.Context, namespace string, name *string, monitor *string) ([]*v1.KmakeNowScheduler, error) {
+	ret := make([]*v1.KmakeNowScheduler, 0)
+
+	kmakeNowSchedulerList := &v1.KmakeNowSchedulerList{}
+	o := &client.ListOptions{}
+	client.InNamespace(namespace).ApplyToList(o)
+
+	if name != nil {
+		fields := map[string]string{"metadata.name": *name}
+		client.MatchingFields(fields).ApplyToList(o)
+	}
+
+	err := r.Client.List(context.Background(), kmakeNowSchedulerList, o)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := 0; i < len(kmakeNowSchedulerList.Items); i++ {
+		ret = append(ret, &kmakeNowSchedulerList.Items[i])
 	}
 	return ret, nil
 }

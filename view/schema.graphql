@@ -4,6 +4,7 @@ type Query {
   kmakes(namespace: String!, kmake: String): [Kmake]!
   kmakeruns(namespace: String!, kmake: String, jobtype: JobType, kmakerun: String): [KmakeRun]!
   kmakescheduleruns(namespace: String!, kmake: String, kmakerun: String, kmakescheduler: String, name: String, runtype: RunType): [KmakeScheduleRun]!
+  kmakenowschedulers(namespace: String!, name: String, monitor: String): [KmakeNowScheduler]!
 }
 
 # type Mutation {
@@ -32,6 +33,7 @@ enum RunType {
 
 type Kmake {
   name: String!
+  namespace: String!
   variables: [KV]!
   rules: [Rule]!
   status: String!
@@ -53,6 +55,7 @@ type Rule {
 
 type KmakeRun {
   name: String!
+  namespace: String!
   kmakename: String
   status: String!
   operation: KmakeRunOperation
@@ -83,6 +86,7 @@ type KmakeRunFileWait {
 
 type KmakeScheduleRun {
   name: String!
+  namespace: String!
   kmakename: String
   kmakerunname: String
   kmakeschedulename: String
@@ -128,4 +132,20 @@ type KmakeScheduleReset {
 type KmakeScheduleForce {
 	Operation: String!
 	Recurse:   String!
+}
+
+# interface KmakeScheduler {
+#   name: String!
+#   namespace: String!
+#   variables: [KV!]
+#   monitor: [String!]
+# }
+
+type KmakeNowScheduler {
+# type KmakeNowScheduler implements KmakeScheduler{
+  name: String!
+  namespace: String!
+  variables: [KV!]
+  monitor: [String!]
+  scheduleruns( kmake: String, kmakerun: String, name: String, runtype: RunType): [KmakeScheduleRun]!
 }
