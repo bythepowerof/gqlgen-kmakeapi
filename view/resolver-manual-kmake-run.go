@@ -49,3 +49,9 @@ func (r *kmakeRunDummyResolver) Dummy(ctx context.Context, obj *v1.KmakeRunDummy
 func (r *queryResolver) Kmakeruns(ctx context.Context, namespace string, kmake *string, jobtype *controller.JobType, kmakerun *string) ([]*v1.KmakeRun, error) {
 	return r.KmakeController.Kmakeruns(ctx, &namespace, kmake, jobtype, kmakerun)
 }
+
+func (r *kmakeRunResolver) Schedulerun(ctx context.Context, obj *v1.KmakeRun, kmakescheduler *string, name *string, runtype *controller.RunType) ([]*v1.KmakeScheduleRun, error) {
+	kmake := obj.GetKmakeName()
+	kmakerun := obj.GetName()
+	return r.KmakeController.Kmakescheduleruns(ctx, obj.GetNamespace(), &kmake, &kmakerun, kmakescheduler, name, runtype)
+}

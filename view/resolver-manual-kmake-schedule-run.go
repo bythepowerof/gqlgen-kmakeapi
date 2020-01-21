@@ -22,7 +22,12 @@ func (r *kmakeScheduleRunResolver) Kmakerunname(ctx context.Context, obj *v1.Kma
 	return &ret, nil
 }
 func (r *kmakeScheduleRunResolver) Kmakeschedulename(ctx context.Context, obj *v1.KmakeScheduleRun) (*string, error) {
-	ret := obj.GetKmakeScheduleName()
+	var ret string
+	if scheduler, ok := obj.GetLabels()["bythepowerof.github.io/schedule-instance"]; ok {
+		ret = scheduler
+	} else {
+		ret = ""
+	}
 	return &ret, nil
 }
 func (r *kmakeScheduleRunResolver) Status(ctx context.Context, obj *v1.KmakeScheduleRun) (string, error) {

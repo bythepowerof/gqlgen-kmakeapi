@@ -148,12 +148,12 @@ func (r *KubernetesController) Kmakescheduleruns(ctx context.Context, namespace 
 	}
 
 	if kmakerun != nil {
-		labels := map[string]string{"bythepowerof.github.io/kmakerun": *kmakerun}
+		labels := map[string]string{"bythepowerof.github.io/run": *kmakerun}
 		client.MatchingLabels(labels).ApplyToList(o)
 	}
 
 	if kmakescheduler != nil {
-		labels := map[string]string{"bythepowerof.github.io/kmakescheduler": *kmakescheduler}
+		labels := map[string]string{"bythepowerof.github.io/schedule-instance": *kmakescheduler}
 		client.MatchingLabels(labels).ApplyToList(o)
 	}
 	err := r.Client.List(context.Background(), kmakeschedulerunList, o)
