@@ -35,11 +35,6 @@ type KmakeController interface {
 	Kmakenowschedulers(ctx context.Context, namespace string, name *string, monitor *string) ([]*v1.KmakeNowScheduler, error)
 }
 
-type KV struct {
-	Key   string
-	Value string
-}
-
 type KubernetesController struct {
 	Client client.Client
 }

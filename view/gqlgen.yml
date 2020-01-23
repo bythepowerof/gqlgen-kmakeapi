@@ -35,7 +35,7 @@ models:
   RunType:
     model: github.com/bythepowerof/gqlgen-kmakeapi/controller.RunType
   KV:
-    model: github.com/bythepowerof/gqlgen-kmakeapi/controller.KV
+    model: github.com/bythepowerof/kmake-controller/api/v1.KV
   KmakeScheduleRun:
     model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleRun
   KmakeScheduleRunOperation:
@@ -56,5 +56,6 @@ models:
     model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleForce
   KmakeNowScheduler:
     model: github.com/bythepowerof/kmake-controller/api/v1.KmakeNowScheduler
-
+  KmakeScheduler:
+    model: github.com/bythepowerof/kmake-controller/gql.KmakeScheduler
 

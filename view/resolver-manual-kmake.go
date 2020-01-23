@@ -13,12 +13,12 @@ func (r *namespaceResolver) Kmakes(ctx context.Context, obj *v11.Namespace, name
 	return r.KmakeController.Kmakes(ctx, &namespace, name)
 }
 
-func (r *kmakeResolver) Variables(ctx context.Context, obj *v1.Kmake) ([]*controller.KV, error) {
+func (r *kmakeResolver) Variables(ctx context.Context, obj *v1.Kmake) ([]*v1.KV, error) {
 
-	ret := make([]*controller.KV, 0)
+	ret := make([]*v1.KV, 0)
 
 	for k, v := range obj.Spec.Variables {
-		ret = append(ret, &controller.KV{Key: k, Value: v})
+		ret = append(ret, &v1.KV{Key: k, Value: v})
 	}
 	return ret, nil
 }
