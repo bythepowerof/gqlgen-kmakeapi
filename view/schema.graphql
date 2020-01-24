@@ -1,10 +1,14 @@
 
 type Query {
   namespaces(name: String): [Namespace]!
+
+  kmakeObjects(namespace: String!, name: String): [KmakeObject]!
+  kmakeschedulers(namespace: String!, name: String, monitor: String): [KmakeScheduler]!
+
   kmakes(namespace: String!, kmake: String): [Kmake]!
   kmakeruns(namespace: String!, kmake: String, jobtype: JobType, kmakerun: String): [KmakeRun]!
   kmakescheduleruns(namespace: String!, kmake: String, kmakerun: String, kmakescheduler: String, name: String, runtype: RunType): [KmakeScheduleRun]!
-  kmakeschedulers(namespace: String!, name: String, monitor: String): [KmakeScheduler]!
+
 }
 
 # type Mutation {
@@ -31,9 +35,9 @@ enum RunType {
 	FORCE
 }
 
-type Kmake {
-  name: String!
-  namespace: String!
+type Kmake implements KmakeObject{
+  GetName: String!
+  GetNamespace: String!
   variables: [KV]!
   rules: [Rule]!
   status: String!
@@ -53,9 +57,9 @@ type Rule {
   targetpattern: String!
 }
 
-type KmakeRun {
-  name: String!
-  namespace: String!
+type KmakeRun implements KmakeObject {
+  GetName: String!
+  GetNamespace: String!
   kmakename: String
   status: String!
   operation: KmakeRunOperation
@@ -84,9 +88,9 @@ type KmakeRunFileWait {
   files: [String!]
 }
 
-type KmakeScheduleRun {
-  name: String!
-  namespace: String!
+type KmakeScheduleRun implements KmakeObject{
+  GetName: String!
+  GetNamespace: String!
   kmakename: String
   kmakerunname: String
   kmakeschedulename: String
@@ -134,7 +138,7 @@ type KmakeScheduleForce {
 	Recurse:   String!
 }
 
-type KmakeNowScheduler implements KmakeScheduler{
+type KmakeNowScheduler implements KmakeScheduler & KmakeObject{
 	GetName: String
 	GetNamespace: String
 	Variables: [KV]
@@ -147,4 +151,9 @@ interface KmakeScheduler {
 	GetNamespace: String
 	Variables: [KV]
 	Monitor: [String]
+}
+
+interface KmakeObject {
+	GetName: String
+	GetNamespace: String
 }

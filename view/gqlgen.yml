@@ -58,4 +58,5 @@ models:
     model: github.com/bythepowerof/kmake-controller/api/v1.KmakeNowScheduler
   KmakeScheduler:
     model: github.com/bythepowerof/kmake-controller/gql.KmakeScheduler
-
+  KmakeObject:
+    model: github.com/bythepowerof/kmake-controller/gql.KmakeObject

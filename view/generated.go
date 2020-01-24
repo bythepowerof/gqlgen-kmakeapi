@@ -62,12 +62,12 @@ type ComplexityRoot struct {
 	}
 
 	Kmake struct {
-		Name      func(childComplexity int) int
-		Namespace func(childComplexity int) int
-		Rules     func(childComplexity int) int
-		Runs      func(childComplexity int, jobtype *controller.JobType, name *string) int
-		Status    func(childComplexity int) int
-		Variables func(childComplexity int) int
+		GetName      func(childComplexity int) int
+		GetNamespace func(childComplexity int) int
+		Rules        func(childComplexity int) int
+		Runs         func(childComplexity int, jobtype *controller.JobType, name *string) int
+		Status       func(childComplexity int) int
+		Variables    func(childComplexity int) int
 	}
 
 	KmakeNowScheduler struct {
@@ -79,12 +79,12 @@ type ComplexityRoot struct {
 	}
 
 	KmakeRun struct {
-		Kmakename   func(childComplexity int) int
-		Name        func(childComplexity int) int
-		Namespace   func(childComplexity int) int
-		Operation   func(childComplexity int) int
-		Schedulerun func(childComplexity int, kmakescheduler *string, name *string, runtype *controller.RunType) int
-		Status      func(childComplexity int) int
+		GetName      func(childComplexity int) int
+		GetNamespace func(childComplexity int) int
+		Kmakename    func(childComplexity int) int
+		Operation    func(childComplexity int) int
+		Schedulerun  func(childComplexity int, kmakescheduler *string, name *string, runtype *controller.RunType) int
+		Status       func(childComplexity int) int
 	}
 
 	KmakeRunDummy struct {
@@ -127,11 +127,11 @@ type ComplexityRoot struct {
 	}
 
 	KmakeScheduleRun struct {
+		GetName           func(childComplexity int) int
+		GetNamespace      func(childComplexity int) int
 		Kmakename         func(childComplexity int) int
 		Kmakerunname      func(childComplexity int) int
 		Kmakeschedulename func(childComplexity int) int
-		Name              func(childComplexity int) int
-		Namespace         func(childComplexity int) int
 		Operation         func(childComplexity int) int
 		Status            func(childComplexity int) int
 	}
@@ -164,6 +164,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		KmakeObjects      func(childComplexity int, namespace string, name *string) int
 		Kmakeruns         func(childComplexity int, namespace string, kmake *string, jobtype *controller.JobType, kmakerun *string) int
 		Kmakes            func(childComplexity int, namespace string, kmake *string) int
 		Kmakeschedulers   func(childComplexity int, namespace string, name *string, monitor *string) int
@@ -224,10 +225,11 @@ type NamespaceResolver interface {
 }
 type QueryResolver interface {
 	Namespaces(ctx context.Context, name *string) ([]*v11.Namespace, error)
+	KmakeObjects(ctx context.Context, namespace string, name *string) ([]gql.KmakeObject, error)
+	Kmakeschedulers(ctx context.Context, namespace string, name *string, monitor *string) ([]gql.KmakeScheduler, error)
 	Kmakes(ctx context.Context, namespace string, kmake *string) ([]*v1.Kmake, error)
 	Kmakeruns(ctx context.Context, namespace string, kmake *string, jobtype *controller.JobType, kmakerun *string) ([]*v1.KmakeRun, error)
 	Kmakescheduleruns(ctx context.Context, namespace string, kmake *string, kmakerun *string, kmakescheduler *string, name *string, runtype *controller.RunType) ([]*v1.KmakeScheduleRun, error)
-	Kmakeschedulers(ctx context.Context, namespace string, name *string, monitor *string) ([]gql.KmakeScheduler, error)
 }
 
 type executableSchema struct {
@@ -259,19 +261,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Kv.Value(childComplexity), true
 
-	case "Kmake.name":
-		if e.complexity.Kmake.Name == nil {
+	case "Kmake.GetName":
+		if e.complexity.Kmake.GetName == nil {
 			break
 		}
 
-		return e.complexity.Kmake.Name(childComplexity), true
+		return e.complexity.Kmake.GetName(childComplexity), true
 
-	case "Kmake.namespace":
-		if e.complexity.Kmake.Namespace == nil {
+	case "Kmake.GetNamespace":
+		if e.complexity.Kmake.GetNamespace == nil {
 			break
 		}
 
-		return e.complexity.Kmake.Namespace(childComplexity), true
+		return e.complexity.Kmake.GetNamespace(childComplexity), true
 
 	case "Kmake.rules":
 		if e.complexity.Kmake.Rules == nil {
@@ -346,26 +348,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.KmakeNowScheduler.Variables(childComplexity), true
 
+	case "KmakeRun.GetName":
+		if e.complexity.KmakeRun.GetName == nil {
+			break
+		}
+
+		return e.complexity.KmakeRun.GetName(childComplexity), true
+
+	case "KmakeRun.GetNamespace":
+		if e.complexity.KmakeRun.GetNamespace == nil {
+			break
+		}
+
+		return e.complexity.KmakeRun.GetNamespace(childComplexity), true
+
 	case "KmakeRun.kmakename":
 		if e.complexity.KmakeRun.Kmakename == nil {
 			break
 		}
 
 		return e.complexity.KmakeRun.Kmakename(childComplexity), true
-
-	case "KmakeRun.name":
-		if e.complexity.KmakeRun.Name == nil {
-			break
-		}
-
-		return e.complexity.KmakeRun.Name(childComplexity), true
-
-	case "KmakeRun.namespace":
-		if e.complexity.KmakeRun.Namespace == nil {
-			break
-		}
-
-		return e.complexity.KmakeRun.Namespace(childComplexity), true
 
 	case "KmakeRun.operation":
 		if e.complexity.KmakeRun.Operation == nil {
@@ -498,6 +500,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.KmakeScheduleReset.Recurse(childComplexity), true
 
+	case "KmakeScheduleRun.GetName":
+		if e.complexity.KmakeScheduleRun.GetName == nil {
+			break
+		}
+
+		return e.complexity.KmakeScheduleRun.GetName(childComplexity), true
+
+	case "KmakeScheduleRun.GetNamespace":
+		if e.complexity.KmakeScheduleRun.GetNamespace == nil {
+			break
+		}
+
+		return e.complexity.KmakeScheduleRun.GetNamespace(childComplexity), true
+
 	case "KmakeScheduleRun.kmakename":
 		if e.complexity.KmakeScheduleRun.Kmakename == nil {
 			break
@@ -518,20 +534,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.KmakeScheduleRun.Kmakeschedulename(childComplexity), true
-
-	case "KmakeScheduleRun.name":
-		if e.complexity.KmakeScheduleRun.Name == nil {
-			break
-		}
-
-		return e.complexity.KmakeScheduleRun.Name(childComplexity), true
-
-	case "KmakeScheduleRun.namespace":
-		if e.complexity.KmakeScheduleRun.Namespace == nil {
-			break
-		}
-
-		return e.complexity.KmakeScheduleRun.Namespace(childComplexity), true
 
 	case "KmakeScheduleRun.operation":
 		if e.complexity.KmakeScheduleRun.Operation == nil {
@@ -635,6 +637,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Namespace.Name(childComplexity), true
+
+	case "Query.kmakeObjects":
+		if e.complexity.Query.KmakeObjects == nil {
+			break
+		}
+
+		args, err := ec.field_Query_kmakeObjects_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.KmakeObjects(childComplexity, args["namespace"].(string), args["name"].(*string)), true
 
 	case "Query.kmakeruns":
 		if e.complexity.Query.Kmakeruns == nil {
@@ -783,10 +797,14 @@ var parsedSchema = gqlparser.MustLoadSchema(
 	&ast.Source{Name: "schema.graphql", Input: `
 type Query {
   namespaces(name: String): [Namespace]!
+
+  kmakeObjects(namespace: String!, name: String): [KmakeObject]!
+  kmakeschedulers(namespace: String!, name: String, monitor: String): [KmakeScheduler]!
+
   kmakes(namespace: String!, kmake: String): [Kmake]!
   kmakeruns(namespace: String!, kmake: String, jobtype: JobType, kmakerun: String): [KmakeRun]!
   kmakescheduleruns(namespace: String!, kmake: String, kmakerun: String, kmakescheduler: String, name: String, runtype: RunType): [KmakeScheduleRun]!
-  kmakeschedulers(namespace: String!, name: String, monitor: String): [KmakeScheduler]!
+
 }
 
 # type Mutation {
@@ -813,9 +831,9 @@ enum RunType {
 	FORCE
 }
 
-type Kmake {
-  name: String!
-  namespace: String!
+type Kmake implements KmakeObject{
+  GetName: String!
+  GetNamespace: String!
   variables: [KV]!
   rules: [Rule]!
   status: String!
@@ -835,9 +853,9 @@ type Rule {
   targetpattern: String!
 }
 
-type KmakeRun {
-  name: String!
-  namespace: String!
+type KmakeRun implements KmakeObject {
+  GetName: String!
+  GetNamespace: String!
   kmakename: String
   status: String!
   operation: KmakeRunOperation
@@ -866,9 +884,9 @@ type KmakeRunFileWait {
   files: [String!]
 }
 
-type KmakeScheduleRun {
-  name: String!
-  namespace: String!
+type KmakeScheduleRun implements KmakeObject{
+  GetName: String!
+  GetNamespace: String!
   kmakename: String
   kmakerunname: String
   kmakeschedulename: String
@@ -916,7 +934,7 @@ type KmakeScheduleForce {
 	Recurse:   String!
 }
 
-type KmakeNowScheduler implements KmakeScheduler{
+type KmakeNowScheduler implements KmakeScheduler & KmakeObject{
 	GetName: String
 	GetNamespace: String
 	Variables: [KV]
@@ -929,6 +947,11 @@ interface KmakeScheduler {
 	GetNamespace: String
 	Variables: [KV]
 	Monitor: [String]
+}
+
+interface KmakeObject {
+	GetName: String
+	GetNamespace: String
 }`},
 )
 
@@ -1051,6 +1074,28 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_kmakeObjects_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg1
 	return args, nil
 }
 
@@ -1322,7 +1367,7 @@ func (ec *executionContext) _KV_value(ctx context.Context, field graphql.Collect
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Kmake_name(ctx context.Context, field graphql.CollectedField, obj *v1.Kmake) (ret graphql.Marshaler) {
+func (ec *executionContext) _Kmake_GetName(ctx context.Context, field graphql.CollectedField, obj *v1.Kmake) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1335,13 +1380,13 @@ func (ec *executionContext) _Kmake_name(ctx context.Context, field graphql.Colle
 		Object:   "Kmake",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
+		return obj.GetName(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1359,7 +1404,7 @@ func (ec *executionContext) _Kmake_name(ctx context.Context, field graphql.Colle
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Kmake_namespace(ctx context.Context, field graphql.CollectedField, obj *v1.Kmake) (ret graphql.Marshaler) {
+func (ec *executionContext) _Kmake_GetNamespace(ctx context.Context, field graphql.CollectedField, obj *v1.Kmake) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1372,13 +1417,13 @@ func (ec *executionContext) _Kmake_namespace(ctx context.Context, field graphql.
 		Object:   "Kmake",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Namespace, nil
+		return obj.GetNamespace(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1731,7 +1776,7 @@ func (ec *executionContext) _KmakeNowScheduler_scheduleruns(ctx context.Context,
 	return ec.marshalNKmakeScheduleRun2ᚕᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleRun(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _KmakeRun_name(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRun) (ret graphql.Marshaler) {
+func (ec *executionContext) _KmakeRun_GetName(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRun) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1744,13 +1789,13 @@ func (ec *executionContext) _KmakeRun_name(ctx context.Context, field graphql.Co
 		Object:   "KmakeRun",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
+		return obj.GetName(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1768,7 +1813,7 @@ func (ec *executionContext) _KmakeRun_name(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _KmakeRun_namespace(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRun) (ret graphql.Marshaler) {
+func (ec *executionContext) _KmakeRun_GetNamespace(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRun) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1781,13 +1826,13 @@ func (ec *executionContext) _KmakeRun_namespace(ctx context.Context, field graph
 		Object:   "KmakeRun",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Namespace, nil
+		return obj.GetNamespace(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2488,7 +2533,7 @@ func (ec *executionContext) _KmakeScheduleReset_Full(ctx context.Context, field 
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _KmakeScheduleRun_name(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleRun) (ret graphql.Marshaler) {
+func (ec *executionContext) _KmakeScheduleRun_GetName(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleRun) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -2501,13 +2546,13 @@ func (ec *executionContext) _KmakeScheduleRun_name(ctx context.Context, field gr
 		Object:   "KmakeScheduleRun",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
+		return obj.GetName(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2525,7 +2570,7 @@ func (ec *executionContext) _KmakeScheduleRun_name(ctx context.Context, field gr
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _KmakeScheduleRun_namespace(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleRun) (ret graphql.Marshaler) {
+func (ec *executionContext) _KmakeScheduleRun_GetNamespace(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleRun) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -2538,13 +2583,13 @@ func (ec *executionContext) _KmakeScheduleRun_namespace(ctx context.Context, fie
 		Object:   "KmakeScheduleRun",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Namespace, nil
+		return obj.GetNamespace(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3212,6 +3257,94 @@ func (ec *executionContext) _Query_namespaces(ctx context.Context, field graphql
 	return ec.marshalNNamespace2ᚕᚖk8sᚗioᚋapiᚋcoreᚋv1ᚐNamespace(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_kmakeObjects(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_kmakeObjects_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().KmakeObjects(rctx, args["namespace"].(string), args["name"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]gql.KmakeObject)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNKmakeObject2ᚕgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋgqlᚐKmakeObject(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_kmakeschedulers(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_kmakeschedulers_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Kmakeschedulers(rctx, args["namespace"].(string), args["name"].(*string), args["monitor"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]gql.KmakeScheduler)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNKmakeScheduler2ᚕgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋgqlᚐKmakeScheduler(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_kmakes(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -3342,50 +3475,6 @@ func (ec *executionContext) _Query_kmakescheduleruns(ctx context.Context, field 
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNKmakeScheduleRun2ᚕᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleRun(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Query_kmakeschedulers(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "Query",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Query_kmakeschedulers_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx.Args = args
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Kmakeschedulers(rctx, args["namespace"].(string), args["name"].(*string), args["monitor"].(*string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]gql.KmakeScheduler)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNKmakeScheduler2ᚕgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋgqlᚐKmakeScheduler(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4803,6 +4892,35 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _KmakeObject(ctx context.Context, sel ast.SelectionSet, obj gql.KmakeObject) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case *v1.Kmake:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Kmake(ctx, sel, obj)
+	case *v1.KmakeRun:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._KmakeRun(ctx, sel, obj)
+	case *v1.KmakeScheduleRun:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._KmakeScheduleRun(ctx, sel, obj)
+	case *v1.KmakeNowScheduler:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._KmakeNowScheduler(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 func (ec *executionContext) _KmakeScheduler(ctx context.Context, sel ast.SelectionSet, obj gql.KmakeScheduler) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
@@ -4853,7 +4971,7 @@ func (ec *executionContext) _KV(ctx context.Context, sel ast.SelectionSet, obj *
 	return out
 }
 
-var kmakeImplementors = []string{"Kmake"}
+var kmakeImplementors = []string{"Kmake", "KmakeObject"}
 
 func (ec *executionContext) _Kmake(ctx context.Context, sel ast.SelectionSet, obj *v1.Kmake) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, kmakeImplementors)
@@ -4864,13 +4982,13 @@ func (ec *executionContext) _Kmake(ctx context.Context, sel ast.SelectionSet, ob
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Kmake")
-		case "name":
-			out.Values[i] = ec._Kmake_name(ctx, field, obj)
+		case "GetName":
+			out.Values[i] = ec._Kmake_GetName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "namespace":
-			out.Values[i] = ec._Kmake_namespace(ctx, field, obj)
+		case "GetNamespace":
+			out.Values[i] = ec._Kmake_GetNamespace(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
@@ -4941,7 +5059,7 @@ func (ec *executionContext) _Kmake(ctx context.Context, sel ast.SelectionSet, ob
 	return out
 }
 
-var kmakeNowSchedulerImplementors = []string{"KmakeNowScheduler", "KmakeScheduler"}
+var kmakeNowSchedulerImplementors = []string{"KmakeNowScheduler", "KmakeScheduler", "KmakeObject"}
 
 func (ec *executionContext) _KmakeNowScheduler(ctx context.Context, sel ast.SelectionSet, obj *v1.KmakeNowScheduler) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, kmakeNowSchedulerImplementors)
@@ -4985,7 +5103,7 @@ func (ec *executionContext) _KmakeNowScheduler(ctx context.Context, sel ast.Sele
 	return out
 }
 
-var kmakeRunImplementors = []string{"KmakeRun"}
+var kmakeRunImplementors = []string{"KmakeRun", "KmakeObject"}
 
 func (ec *executionContext) _KmakeRun(ctx context.Context, sel ast.SelectionSet, obj *v1.KmakeRun) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, kmakeRunImplementors)
@@ -4996,13 +5114,13 @@ func (ec *executionContext) _KmakeRun(ctx context.Context, sel ast.SelectionSet,
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("KmakeRun")
-		case "name":
-			out.Values[i] = ec._KmakeRun_name(ctx, field, obj)
+		case "GetName":
+			out.Values[i] = ec._KmakeRun_GetName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "namespace":
-			out.Values[i] = ec._KmakeRun_namespace(ctx, field, obj)
+		case "GetNamespace":
+			out.Values[i] = ec._KmakeRun_GetNamespace(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
@@ -5351,7 +5469,7 @@ func (ec *executionContext) _KmakeScheduleReset(ctx context.Context, sel ast.Sel
 	return out
 }
 
-var kmakeScheduleRunImplementors = []string{"KmakeScheduleRun"}
+var kmakeScheduleRunImplementors = []string{"KmakeScheduleRun", "KmakeObject"}
 
 func (ec *executionContext) _KmakeScheduleRun(ctx context.Context, sel ast.SelectionSet, obj *v1.KmakeScheduleRun) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, kmakeScheduleRunImplementors)
@@ -5362,13 +5480,13 @@ func (ec *executionContext) _KmakeScheduleRun(ctx context.Context, sel ast.Selec
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("KmakeScheduleRun")
-		case "name":
-			out.Values[i] = ec._KmakeScheduleRun_name(ctx, field, obj)
+		case "GetName":
+			out.Values[i] = ec._KmakeScheduleRun_GetName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "namespace":
-			out.Values[i] = ec._KmakeScheduleRun_namespace(ctx, field, obj)
+		case "GetNamespace":
+			out.Values[i] = ec._KmakeScheduleRun_GetNamespace(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
@@ -5640,6 +5758,34 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				return res
 			})
+		case "kmakeObjects":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_kmakeObjects(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "kmakeschedulers":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_kmakeschedulers(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "kmakes":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -5677,20 +5823,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_kmakescheduleruns(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "kmakeschedulers":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_kmakeschedulers(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -6079,6 +6211,43 @@ func (ec *executionContext) marshalNKmake2ᚕᚖgithubᚗcomᚋbythepowerofᚋkm
 				defer wg.Done()
 			}
 			ret[i] = ec.marshalOKmake2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmake(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalNKmakeObject2ᚕgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋgqlᚐKmakeObject(ctx context.Context, sel ast.SelectionSet, v []gql.KmakeObject) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOKmakeObject2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋgqlᚐKmakeObject(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -6666,6 +6835,13 @@ func (ec *executionContext) marshalOKmake2ᚖgithubᚗcomᚋbythepowerofᚋkmake
 		return graphql.Null
 	}
 	return ec._Kmake(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOKmakeObject2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋgqlᚐKmakeObject(ctx context.Context, sel ast.SelectionSet, v gql.KmakeObject) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._KmakeObject(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOKmakeRun2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRun(ctx context.Context, sel ast.SelectionSet, v v1.KmakeRun) graphql.Marshaler {
