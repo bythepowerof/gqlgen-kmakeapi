@@ -13,9 +13,6 @@ func (r *Resolver) KmakeNowScheduler() KmakeNowSchedulerResolver {
 func (r *Resolver) KmakeRun() KmakeRunResolver {
 	return &kmakeRunResolver{r}
 }
-func (r *Resolver) KmakeRunDummy() KmakeRunDummyResolver {
-	return &kmakeRunDummyResolver{r}
-}
 func (r *Resolver) KmakeRunJob() KmakeRunJobResolver {
 	return &kmakeRunJobResolver{r}
 }
@@ -43,8 +40,6 @@ type kmakeResolver struct{ *Resolver }
 type kmakeNowSchedulerResolver struct{ *Resolver }
 
 type kmakeRunResolver struct{ *Resolver }
-
-type kmakeRunDummyResolver struct{ *Resolver }
 
 type kmakeRunJobResolver struct{ *Resolver }
 

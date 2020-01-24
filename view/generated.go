@@ -42,7 +42,6 @@ type ResolverRoot interface {
 	Kmake() KmakeResolver
 	KmakeNowScheduler() KmakeNowSchedulerResolver
 	KmakeRun() KmakeRunResolver
-	KmakeRunDummy() KmakeRunDummyResolver
 	KmakeRunJob() KmakeRunJobResolver
 	KmakeScheduleCreate() KmakeScheduleCreateResolver
 	KmakeScheduleDelete() KmakeScheduleDeleteResolver
@@ -92,20 +91,16 @@ type ComplexityRoot struct {
 	}
 
 	KmakeRunFileWait struct {
+		Dummy func(childComplexity int) int
 		Files func(childComplexity int) int
 	}
 
 	KmakeRunJob struct {
 		Args    func(childComplexity int) int
 		Command func(childComplexity int) int
+		Dummy   func(childComplexity int) int
 		Image   func(childComplexity int) int
 		Targets func(childComplexity int) int
-	}
-
-	KmakeRunOperation struct {
-		Dummy    func(childComplexity int) int
-		FileWait func(childComplexity int) int
-		Job      func(childComplexity int) int
 	}
 
 	KmakeScheduleCreate struct {
@@ -193,11 +188,8 @@ type KmakeNowSchedulerResolver interface {
 type KmakeRunResolver interface {
 	Kmakename(ctx context.Context, obj *v1.KmakeRun) (*string, error)
 	Status(ctx context.Context, obj *v1.KmakeRun) (string, error)
-	Operation(ctx context.Context, obj *v1.KmakeRun) (*v1.KmakeRunOperation, error)
+	Operation(ctx context.Context, obj *v1.KmakeRun) (gql.KmakeRunOperation, error)
 	Schedulerun(ctx context.Context, obj *v1.KmakeRun, kmakescheduler *string, name *string, runtype *controller.RunType) ([]*v1.KmakeScheduleRun, error)
-}
-type KmakeRunDummyResolver interface {
-	Dummy(ctx context.Context, obj *v1.KmakeRunDummy) (string, error)
 }
 type KmakeRunJobResolver interface {
 	Image(ctx context.Context, obj *v1.KmakeRunJob) (string, error)
@@ -395,12 +387,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.KmakeRun.Status(childComplexity), true
 
-	case "KmakeRunDummy.dummy":
+	case "KmakeRunDummy.Dummy":
 		if e.complexity.KmakeRunDummy.Dummy == nil {
 			break
 		}
 
 		return e.complexity.KmakeRunDummy.Dummy(childComplexity), true
+
+	case "KmakeRunFileWait.Dummy":
+		if e.complexity.KmakeRunFileWait.Dummy == nil {
+			break
+		}
+
+		return e.complexity.KmakeRunFileWait.Dummy(childComplexity), true
 
 	case "KmakeRunFileWait.files":
 		if e.complexity.KmakeRunFileWait.Files == nil {
@@ -423,6 +422,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.KmakeRunJob.Command(childComplexity), true
 
+	case "KmakeRunJob.Dummy":
+		if e.complexity.KmakeRunJob.Dummy == nil {
+			break
+		}
+
+		return e.complexity.KmakeRunJob.Dummy(childComplexity), true
+
 	case "KmakeRunJob.image":
 		if e.complexity.KmakeRunJob.Image == nil {
 			break
@@ -436,27 +442,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.KmakeRunJob.Targets(childComplexity), true
-
-	case "KmakeRunOperation.dummy":
-		if e.complexity.KmakeRunOperation.Dummy == nil {
-			break
-		}
-
-		return e.complexity.KmakeRunOperation.Dummy(childComplexity), true
-
-	case "KmakeRunOperation.filewait":
-		if e.complexity.KmakeRunOperation.FileWait == nil {
-			break
-		}
-
-		return e.complexity.KmakeRunOperation.FileWait(childComplexity), true
-
-	case "KmakeRunOperation.job":
-		if e.complexity.KmakeRunOperation.Job == nil {
-			break
-		}
-
-		return e.complexity.KmakeRunOperation.Job(childComplexity), true
 
 	case "KmakeScheduleCreate.dummy":
 		if e.complexity.KmakeScheduleCreate.Dummy == nil {
@@ -858,29 +843,29 @@ type KmakeRun implements KmakeObject {
   GetNamespace: String!
   kmakename: String
   status: String!
-  operation: KmakeRunOperation
+  operation: KmakeRunOp
   schedulerun(kmakescheduler: String, name: String, runtype: RunType): [KmakeScheduleRun]
 }
 
 
-type KmakeRunOperation {
-  job: KmakeRunJob 
-  dummy: KmakeRunDummy
-  filewait: KmakeRunFileWait
-}
+# type KmakeRunOperation {
+#   job: KmakeRunOp 
+# }
 
-type KmakeRunJob {
+type KmakeRunJob implements KmakeRunOp{
+  Dummy: String!
   targets: [String]!
   image: String!
   command: [String]
   args: [String]
 }
 
-type KmakeRunDummy {
-  dummy: String!
+type KmakeRunDummy implements KmakeRunOp{
+  Dummy: String!
 }
 
-type KmakeRunFileWait {
+type KmakeRunFileWait implements KmakeRunOp{
+  Dummy: String!
   files: [String!]
 }
 
@@ -952,6 +937,10 @@ interface KmakeScheduler {
 interface KmakeObject {
 	GetName: String
 	GetNamespace: String
+}
+
+interface KmakeRunOp {
+  Dummy: String
 }`},
 )
 
@@ -1949,10 +1938,10 @@ func (ec *executionContext) _KmakeRun_operation(ctx context.Context, field graph
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*v1.KmakeRunOperation)
+	res := resTmp.(gql.KmakeRunOperation)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOKmakeRunOperation2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRunOperation(ctx, field.Selections, res)
+	return ec.marshalOKmakeRunOp2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋgqlᚐKmakeRunOperation(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _KmakeRun_schedulerun(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRun) (ret graphql.Marshaler) {
@@ -1996,7 +1985,7 @@ func (ec *executionContext) _KmakeRun_schedulerun(ctx context.Context, field gra
 	return ec.marshalOKmakeScheduleRun2ᚕᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleRun(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _KmakeRunDummy_dummy(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRunDummy) (ret graphql.Marshaler) {
+func (ec *executionContext) _KmakeRunDummy_Dummy(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRunDummy) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -2015,7 +2004,44 @@ func (ec *executionContext) _KmakeRunDummy_dummy(ctx context.Context, field grap
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.KmakeRunDummy().Dummy(rctx, obj)
+		return obj.Dummy(), nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _KmakeRunFileWait_Dummy(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRunFileWait) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "KmakeRunFileWait",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Dummy(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2065,6 +2091,43 @@ func (ec *executionContext) _KmakeRunFileWait_files(ctx context.Context, field g
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _KmakeRunJob_Dummy(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRunJob) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "KmakeRunJob",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Dummy(), nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _KmakeRunJob_targets(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRunJob) (ret graphql.Marshaler) {
@@ -2207,108 +2270,6 @@ func (ec *executionContext) _KmakeRunJob_args(ctx context.Context, field graphql
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOString2ᚕᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _KmakeRunOperation_job(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRunOperation) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "KmakeRunOperation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Job, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*v1.KmakeRunJob)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOKmakeRunJob2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRunJob(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _KmakeRunOperation_dummy(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRunOperation) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "KmakeRunOperation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Dummy, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*v1.KmakeRunDummy)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOKmakeRunDummy2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRunDummy(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _KmakeRunOperation_filewait(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRunOperation) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "KmakeRunOperation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.FileWait, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*v1.KmakeRunFileWait)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOKmakeRunFileWait2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRunFileWait(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _KmakeScheduleCreate_dummy(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleCreate) (ret graphql.Marshaler) {
@@ -4921,6 +4882,30 @@ func (ec *executionContext) _KmakeObject(ctx context.Context, sel ast.SelectionS
 	}
 }
 
+func (ec *executionContext) _KmakeRunOp(ctx context.Context, sel ast.SelectionSet, obj gql.KmakeRunOperation) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case *v1.KmakeRunJob:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._KmakeRunJob(ctx, sel, obj)
+	case *v1.KmakeRunDummy:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._KmakeRunDummy(ctx, sel, obj)
+	case *v1.KmakeRunFileWait:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._KmakeRunFileWait(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 func (ec *executionContext) _KmakeScheduler(ctx context.Context, sel ast.SelectionSet, obj gql.KmakeScheduler) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
@@ -5182,7 +5167,7 @@ func (ec *executionContext) _KmakeRun(ctx context.Context, sel ast.SelectionSet,
 	return out
 }
 
-var kmakeRunDummyImplementors = []string{"KmakeRunDummy"}
+var kmakeRunDummyImplementors = []string{"KmakeRunDummy", "KmakeRunOp"}
 
 func (ec *executionContext) _KmakeRunDummy(ctx context.Context, sel ast.SelectionSet, obj *v1.KmakeRunDummy) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, kmakeRunDummyImplementors)
@@ -5193,20 +5178,11 @@ func (ec *executionContext) _KmakeRunDummy(ctx context.Context, sel ast.Selectio
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("KmakeRunDummy")
-		case "dummy":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._KmakeRunDummy_dummy(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+		case "Dummy":
+			out.Values[i] = ec._KmakeRunDummy_Dummy(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5218,7 +5194,7 @@ func (ec *executionContext) _KmakeRunDummy(ctx context.Context, sel ast.Selectio
 	return out
 }
 
-var kmakeRunFileWaitImplementors = []string{"KmakeRunFileWait"}
+var kmakeRunFileWaitImplementors = []string{"KmakeRunFileWait", "KmakeRunOp"}
 
 func (ec *executionContext) _KmakeRunFileWait(ctx context.Context, sel ast.SelectionSet, obj *v1.KmakeRunFileWait) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, kmakeRunFileWaitImplementors)
@@ -5229,6 +5205,11 @@ func (ec *executionContext) _KmakeRunFileWait(ctx context.Context, sel ast.Selec
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("KmakeRunFileWait")
+		case "Dummy":
+			out.Values[i] = ec._KmakeRunFileWait_Dummy(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "files":
 			out.Values[i] = ec._KmakeRunFileWait_files(ctx, field, obj)
 		default:
@@ -5242,7 +5223,7 @@ func (ec *executionContext) _KmakeRunFileWait(ctx context.Context, sel ast.Selec
 	return out
 }
 
-var kmakeRunJobImplementors = []string{"KmakeRunJob"}
+var kmakeRunJobImplementors = []string{"KmakeRunJob", "KmakeRunOp"}
 
 func (ec *executionContext) _KmakeRunJob(ctx context.Context, sel ast.SelectionSet, obj *v1.KmakeRunJob) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, kmakeRunJobImplementors)
@@ -5253,6 +5234,11 @@ func (ec *executionContext) _KmakeRunJob(ctx context.Context, sel ast.SelectionS
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("KmakeRunJob")
+		case "Dummy":
+			out.Values[i] = ec._KmakeRunJob_Dummy(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "targets":
 			out.Values[i] = ec._KmakeRunJob_targets(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -5294,34 +5280,6 @@ func (ec *executionContext) _KmakeRunJob(ctx context.Context, sel ast.SelectionS
 				res = ec._KmakeRunJob_args(ctx, field, obj)
 				return res
 			})
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var kmakeRunOperationImplementors = []string{"KmakeRunOperation"}
-
-func (ec *executionContext) _KmakeRunOperation(ctx context.Context, sel ast.SelectionSet, obj *v1.KmakeRunOperation) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, kmakeRunOperationImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("KmakeRunOperation")
-		case "job":
-			out.Values[i] = ec._KmakeRunOperation_job(ctx, field, obj)
-		case "dummy":
-			out.Values[i] = ec._KmakeRunOperation_dummy(ctx, field, obj)
-		case "filewait":
-			out.Values[i] = ec._KmakeRunOperation_filewait(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6855,48 +6813,11 @@ func (ec *executionContext) marshalOKmakeRun2ᚖgithubᚗcomᚋbythepowerofᚋkm
 	return ec._KmakeRun(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOKmakeRunDummy2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRunDummy(ctx context.Context, sel ast.SelectionSet, v v1.KmakeRunDummy) graphql.Marshaler {
-	return ec._KmakeRunDummy(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOKmakeRunDummy2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRunDummy(ctx context.Context, sel ast.SelectionSet, v *v1.KmakeRunDummy) graphql.Marshaler {
+func (ec *executionContext) marshalOKmakeRunOp2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋgqlᚐKmakeRunOperation(ctx context.Context, sel ast.SelectionSet, v gql.KmakeRunOperation) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec._KmakeRunDummy(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOKmakeRunFileWait2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRunFileWait(ctx context.Context, sel ast.SelectionSet, v v1.KmakeRunFileWait) graphql.Marshaler {
-	return ec._KmakeRunFileWait(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOKmakeRunFileWait2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRunFileWait(ctx context.Context, sel ast.SelectionSet, v *v1.KmakeRunFileWait) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._KmakeRunFileWait(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOKmakeRunJob2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRunJob(ctx context.Context, sel ast.SelectionSet, v v1.KmakeRunJob) graphql.Marshaler {
-	return ec._KmakeRunJob(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOKmakeRunJob2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRunJob(ctx context.Context, sel ast.SelectionSet, v *v1.KmakeRunJob) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._KmakeRunJob(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOKmakeRunOperation2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRunOperation(ctx context.Context, sel ast.SelectionSet, v v1.KmakeRunOperation) graphql.Marshaler {
-	return ec._KmakeRunOperation(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOKmakeRunOperation2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRunOperation(ctx context.Context, sel ast.SelectionSet, v *v1.KmakeRunOperation) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._KmakeRunOperation(ctx, sel, v)
+	return ec._KmakeRunOp(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOKmakeScheduleCreate2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleCreate(ctx context.Context, sel ast.SelectionSet, v v1.KmakeScheduleCreate) graphql.Marshaler {

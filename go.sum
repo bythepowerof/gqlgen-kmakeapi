@@ -19,6 +19,8 @@ github.com/bythepowerof/kmake-controller v0.1.3-0.20200123215855-cf615aef376a h1
 github.com/bythepowerof/kmake-controller v0.1.3-0.20200123215855-cf615aef376a/go.mod h1:YT53Xq2+CboG5AcS+uTRs7PZNB1WRPAD/QR31SO5/ss=
 github.com/bythepowerof/kmake-controller v0.1.3-0.20200124025043-1ee553de3bf6 h1:4oh9zSEDyUHbdJEDr87riB0ePISpw/I0I8oGDGQbUrU=
 github.com/bythepowerof/kmake-controller v0.1.3-0.20200124025043-1ee553de3bf6/go.mod h1:YT53Xq2+CboG5AcS+uTRs7PZNB1WRPAD/QR31SO5/ss=
+github.com/bythepowerof/kmake-controller v0.1.3-0.20200124080327-8acfb5b8b264 h1:XsxW7OG02BDnPOQdGbVWfz5qkXu98qDJWuIo85wRd+I=
+github.com/bythepowerof/kmake-controller v0.1.3-0.20200124080327-8acfb5b8b264/go.mod h1:YT53Xq2+CboG5AcS+uTRs7PZNB1WRPAD/QR31SO5/ss=
 github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f h1:lBNOc5arjvs8E5mO2tbpBpLoyyu8B6e44T7hJy6potg=
 github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f/go.mod h1:E3G3o1h8I7cfcXa63jLwjI0eiQQMgzzUDFVpN/nH/eA=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

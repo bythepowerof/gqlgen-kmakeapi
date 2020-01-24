@@ -4,13 +4,13 @@ use warnings;
 
 use Data::Dumper;
 
-my @funcs  = `grep -h "^func" resolver*.go  | sort |uniq -d`;
+my @funcs  = `grep -h "^func" resolver-*.go  | sort |uniq`;
 my %f;
 foreach my $x (@funcs) {
     # chomp $x;
     $f{$x} = 1;
 }
-my @types = `grep -h "^type" resolver*.go |sed -e 's/struct.*/struct\{\}/'  | sort |uniq -d`;
+my @types = `grep -h "^type" resolver-*.go |sed -e 's/struct.*/struct\{\}/'  | sort |uniq`;
 my %t;
 foreach my $x (@types) {
     # chomp $x;

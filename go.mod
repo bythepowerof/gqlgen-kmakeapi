@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/99designs/gqlgen v0.10.2
-	github.com/bythepowerof/kmake-controller v0.1.3-0.20200124025043-1ee553de3bf6
+	github.com/bythepowerof/kmake-controller v0.1.3-0.20200124080327-8acfb5b8b264
 	github.com/coreos/pkg v0.0.0-20180928190104-399ea9e2e55f // indirect
 	github.com/vektah/gqlparser v1.2.0
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect

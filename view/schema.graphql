@@ -62,29 +62,29 @@ type KmakeRun implements KmakeObject {
   GetNamespace: String!
   kmakename: String
   status: String!
-  operation: KmakeRunOperation
+  operation: KmakeRunOp
   schedulerun(kmakescheduler: String, name: String, runtype: RunType): [KmakeScheduleRun]
 }
 
 
-type KmakeRunOperation {
-  job: KmakeRunJob 
-  dummy: KmakeRunDummy
-  filewait: KmakeRunFileWait
-}
+# type KmakeRunOperation {
+#   job: KmakeRunOp 
+# }
 
-type KmakeRunJob {
+type KmakeRunJob implements KmakeRunOp{
+  Dummy: String!
   targets: [String]!
   image: String!
   command: [String]
   args: [String]
 }
 
-type KmakeRunDummy {
-  dummy: String!
+type KmakeRunDummy implements KmakeRunOp{
+  Dummy: String!
 }
 
-type KmakeRunFileWait {
+type KmakeRunFileWait implements KmakeRunOp{
+  Dummy: String!
   files: [String!]
 }
 
@@ -156,4 +156,8 @@ interface KmakeScheduler {
 interface KmakeObject {
 	GetName: String
 	GetNamespace: String
+}
+
+interface KmakeRunOp {
+  Dummy: String
 }
