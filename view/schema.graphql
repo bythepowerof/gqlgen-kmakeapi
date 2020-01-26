@@ -38,9 +38,9 @@ enum RunType {
 type Kmake implements KmakeObject{
   GetName: String!
   GetNamespace: String!
+  GetStatus: String!
   variables: [KV]!
   rules: [Rule]!
-  status: String!
   runs(jobtype: JobType, name: String): [KmakeRun]!
 }
 
@@ -60,8 +60,8 @@ type Rule {
 type KmakeRun implements KmakeObject {
   GetName: String!
   GetNamespace: String!
+  GetStatus: String!
   kmakename: String
-  status: String!
   operation: KmakeRunOp
   schedulerun(kmakescheduler: String, name: String, runtype: RunType): [KmakeScheduleRun]
 }
@@ -91,49 +91,54 @@ type KmakeRunFileWait implements KmakeRunOp{
 type KmakeScheduleRun implements KmakeObject{
   GetName: String!
   GetNamespace: String!
+  GetStatus: String!
   kmakename: String
   kmakerunname: String
   kmakeschedulename: String
-  status: String!
-  operation: KmakeScheduleRunOperation!
+  operation: KmakeScheduleRunOp!
 }
 
-type KmakeScheduleRunOperation {
-  start:  KmakeScheduleRunStart
-	Restart: KmakeScheduleRunRestart
-	Stop:    KmakeScheduleRunStop
-	Delete:  KmakeScheduleDelete
-	Create:  KmakeScheduleCreate
-	Reset:   KmakeScheduleReset
-	Force:   KmakeScheduleForce
+# type KmakeScheduleRunOperation {
+#   start:  KmakeScheduleRunStart
+# 	Restart: KmakeScheduleRunRestart
+# 	Stop:    KmakeScheduleRunStop
+# 	Delete:  KmakeScheduleDelete
+# 	Create:  KmakeScheduleCreate
+# 	Reset:   KmakeScheduleReset
+# 	Force:   KmakeScheduleForce
+# }
+
+type KmakeScheduleRunStart implements KmakeScheduleRunOp {
+    Dummy: String!
 }
 
-type KmakeScheduleRunStart {
-    dummy: String!
-}
-
-type KmakeScheduleRunRestart {
+type KmakeScheduleRunRestart implements KmakeScheduleRunOp {
+  Dummy: String!
 	Run: String!
 }
 
-type KmakeScheduleRunStop {
+type KmakeScheduleRunStop implements KmakeScheduleRunOp {
+  Dummy: String!
 	Run: String!
 }
 
-type KmakeScheduleDelete {
-    dummy: String!
+type KmakeScheduleDelete implements KmakeScheduleRunOp {
+  Dummy: String!
 }
 
-type KmakeScheduleCreate {
-    dummy: String!
+type KmakeScheduleCreate implements KmakeScheduleRunOp {
+  Dummy: String!
+
 }
 
-type KmakeScheduleReset {
+type KmakeScheduleReset implements KmakeScheduleRunOp {
+  Dummy: String!
 	Recurse: String!
 	Full:    String!
 }
 
-type KmakeScheduleForce {
+type KmakeScheduleForce implements KmakeScheduleRunOp {
+  Dummy: String!
 	Operation: String!
 	Recurse:   String!
 }
@@ -141,6 +146,7 @@ type KmakeScheduleForce {
 type KmakeNowScheduler implements KmakeScheduler & KmakeObject{
 	GetName: String
 	GetNamespace: String
+  GetStatus: String!
 	Variables: [KV]
 	Monitor: [String]
   scheduleruns( kmake: String, kmakerun: String, name: String, runtype: RunType): [KmakeScheduleRun]!
@@ -149,6 +155,8 @@ type KmakeNowScheduler implements KmakeScheduler & KmakeObject{
 interface KmakeScheduler {
 	GetName: String
 	GetNamespace: String
+  
+  GetStatus: String
 	Variables: [KV]
 	Monitor: [String]
 }
@@ -156,8 +164,13 @@ interface KmakeScheduler {
 interface KmakeObject {
 	GetName: String
 	GetNamespace: String
+  GetStatus: String
 }
 
 interface KmakeRunOp {
+  Dummy: String
+}
+
+interface KmakeScheduleRunOp {
   Dummy: String
 }

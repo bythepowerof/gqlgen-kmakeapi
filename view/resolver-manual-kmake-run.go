@@ -6,17 +6,11 @@ import (
 	"github.com/bythepowerof/gqlgen-kmakeapi/controller"
 	"github.com/bythepowerof/kmake-controller/api/v1"
 	"github.com/bythepowerof/kmake-controller/gql"
-	// v11 "k8s.io/api/core/v1"
-	// 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func (r *kmakeRunResolver) Status(ctx context.Context, obj *v1.KmakeRun) (string, error) {
 	return obj.Status.Status, nil
 }
-
-// func (r *kmakeRunResolver) Operation(ctx context.Context, obj *v1.KmakeRun) (*v1.KmakeRunOperation, error) {
-// 	return &obj.Spec.KmakeRunOperation, nil
-// }
 
 func (r *kmakeRunJobResolver) Image(ctx context.Context, obj *v1.KmakeRunJob) (string, error) {
 	return obj.Template.Spec.Containers[0].Image, nil

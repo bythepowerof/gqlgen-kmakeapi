@@ -6,8 +6,6 @@ import (
 	"github.com/bythepowerof/gqlgen-kmakeapi/controller"
 	"github.com/bythepowerof/kmake-controller/api/v1"
 	"github.com/bythepowerof/kmake-controller/gql"
-	// v11 "k8s.io/api/core/v1"
-	// 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func (r *queryResolver) Kmakeschedulers(ctx context.Context, namespace string, name *string, monitor *string) ([]gql.KmakeScheduler, error) {

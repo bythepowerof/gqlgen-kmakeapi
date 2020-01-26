@@ -62,3 +62,5 @@ models:
     model: github.com/bythepowerof/kmake-controller/gql.KmakeObject
   KmakeRunOp:
     model: github.com/bythepowerof/kmake-controller/gql.KmakeRunOperation
+  KmakeScheduleRunOp:
+    model: github.com/bythepowerof/kmake-controller/gql.KmakeScheduleRunOperation

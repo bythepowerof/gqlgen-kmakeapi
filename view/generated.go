@@ -43,10 +43,7 @@ type ResolverRoot interface {
 	KmakeNowScheduler() KmakeNowSchedulerResolver
 	KmakeRun() KmakeRunResolver
 	KmakeRunJob() KmakeRunJobResolver
-	KmakeScheduleCreate() KmakeScheduleCreateResolver
-	KmakeScheduleDelete() KmakeScheduleDeleteResolver
 	KmakeScheduleRun() KmakeScheduleRunResolver
-	KmakeScheduleRunStart() KmakeScheduleRunStartResolver
 	Namespace() NamespaceResolver
 	Query() QueryResolver
 }
@@ -63,15 +60,16 @@ type ComplexityRoot struct {
 	Kmake struct {
 		GetName      func(childComplexity int) int
 		GetNamespace func(childComplexity int) int
+		GetStatus    func(childComplexity int) int
 		Rules        func(childComplexity int) int
 		Runs         func(childComplexity int, jobtype *controller.JobType, name *string) int
-		Status       func(childComplexity int) int
 		Variables    func(childComplexity int) int
 	}
 
 	KmakeNowScheduler struct {
 		GetName      func(childComplexity int) int
 		GetNamespace func(childComplexity int) int
+		GetStatus    func(childComplexity int) int
 		Monitor      func(childComplexity int) int
 		Scheduleruns func(childComplexity int, kmake *string, kmakerun *string, name *string, runtype *controller.RunType) int
 		Variables    func(childComplexity int) int
@@ -80,10 +78,10 @@ type ComplexityRoot struct {
 	KmakeRun struct {
 		GetName      func(childComplexity int) int
 		GetNamespace func(childComplexity int) int
+		GetStatus    func(childComplexity int) int
 		Kmakename    func(childComplexity int) int
 		Operation    func(childComplexity int) int
 		Schedulerun  func(childComplexity int, kmakescheduler *string, name *string, runtype *controller.RunType) int
-		Status       func(childComplexity int) int
 	}
 
 	KmakeRunDummy struct {
@@ -112,11 +110,13 @@ type ComplexityRoot struct {
 	}
 
 	KmakeScheduleForce struct {
+		Dummy     func(childComplexity int) int
 		Operation func(childComplexity int) int
 		Recurse   func(childComplexity int) int
 	}
 
 	KmakeScheduleReset struct {
+		Dummy   func(childComplexity int) int
 		Full    func(childComplexity int) int
 		Recurse func(childComplexity int) int
 	}
@@ -124,25 +124,16 @@ type ComplexityRoot struct {
 	KmakeScheduleRun struct {
 		GetName           func(childComplexity int) int
 		GetNamespace      func(childComplexity int) int
+		GetStatus         func(childComplexity int) int
 		Kmakename         func(childComplexity int) int
 		Kmakerunname      func(childComplexity int) int
 		Kmakeschedulename func(childComplexity int) int
 		Operation         func(childComplexity int) int
-		Status            func(childComplexity int) int
-	}
-
-	KmakeScheduleRunOperation struct {
-		Create  func(childComplexity int) int
-		Delete  func(childComplexity int) int
-		Force   func(childComplexity int) int
-		Reset   func(childComplexity int) int
-		Restart func(childComplexity int) int
-		Start   func(childComplexity int) int
-		Stop    func(childComplexity int) int
 	}
 
 	KmakeScheduleRunRestart struct {
-		Run func(childComplexity int) int
+		Dummy func(childComplexity int) int
+		Run   func(childComplexity int) int
 	}
 
 	KmakeScheduleRunStart struct {
@@ -150,7 +141,8 @@ type ComplexityRoot struct {
 	}
 
 	KmakeScheduleRunStop struct {
-		Run func(childComplexity int) int
+		Dummy func(childComplexity int) int
+		Run   func(childComplexity int) int
 	}
 
 	Namespace struct {
@@ -179,7 +171,6 @@ type ComplexityRoot struct {
 type KmakeResolver interface {
 	Variables(ctx context.Context, obj *v1.Kmake) ([]*v1.KV, error)
 	Rules(ctx context.Context, obj *v1.Kmake) ([]*v1.KmakeRule, error)
-	Status(ctx context.Context, obj *v1.Kmake) (string, error)
 	Runs(ctx context.Context, obj *v1.Kmake, jobtype *controller.JobType, name *string) ([]*v1.KmakeRun, error)
 }
 type KmakeNowSchedulerResolver interface {
@@ -187,7 +178,6 @@ type KmakeNowSchedulerResolver interface {
 }
 type KmakeRunResolver interface {
 	Kmakename(ctx context.Context, obj *v1.KmakeRun) (*string, error)
-	Status(ctx context.Context, obj *v1.KmakeRun) (string, error)
 	Operation(ctx context.Context, obj *v1.KmakeRun) (gql.KmakeRunOperation, error)
 	Schedulerun(ctx context.Context, obj *v1.KmakeRun, kmakescheduler *string, name *string, runtype *controller.RunType) ([]*v1.KmakeScheduleRun, error)
 }
@@ -196,21 +186,11 @@ type KmakeRunJobResolver interface {
 	Command(ctx context.Context, obj *v1.KmakeRunJob) ([]*string, error)
 	Args(ctx context.Context, obj *v1.KmakeRunJob) ([]*string, error)
 }
-type KmakeScheduleCreateResolver interface {
-	Dummy(ctx context.Context, obj *v1.KmakeScheduleCreate) (string, error)
-}
-type KmakeScheduleDeleteResolver interface {
-	Dummy(ctx context.Context, obj *v1.KmakeScheduleDelete) (string, error)
-}
 type KmakeScheduleRunResolver interface {
 	Kmakename(ctx context.Context, obj *v1.KmakeScheduleRun) (*string, error)
 	Kmakerunname(ctx context.Context, obj *v1.KmakeScheduleRun) (*string, error)
 	Kmakeschedulename(ctx context.Context, obj *v1.KmakeScheduleRun) (*string, error)
-	Status(ctx context.Context, obj *v1.KmakeScheduleRun) (string, error)
-	Operation(ctx context.Context, obj *v1.KmakeScheduleRun) (*v1.KmakeScheduleRunOperation, error)
-}
-type KmakeScheduleRunStartResolver interface {
-	Dummy(ctx context.Context, obj *v1.KmakeScheduleRunStart) (string, error)
+	Operation(ctx context.Context, obj *v1.KmakeScheduleRun) (gql.KmakeScheduleRunOperation, error)
 }
 type NamespaceResolver interface {
 	Kmakes(ctx context.Context, obj *v11.Namespace, name *string) ([]*v1.Kmake, error)
@@ -267,6 +247,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Kmake.GetNamespace(childComplexity), true
 
+	case "Kmake.GetStatus":
+		if e.complexity.Kmake.GetStatus == nil {
+			break
+		}
+
+		return e.complexity.Kmake.GetStatus(childComplexity), true
+
 	case "Kmake.rules":
 		if e.complexity.Kmake.Rules == nil {
 			break
@@ -285,13 +272,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Kmake.Runs(childComplexity, args["jobtype"].(*controller.JobType), args["name"].(*string)), true
-
-	case "Kmake.status":
-		if e.complexity.Kmake.Status == nil {
-			break
-		}
-
-		return e.complexity.Kmake.Status(childComplexity), true
 
 	case "Kmake.variables":
 		if e.complexity.Kmake.Variables == nil {
@@ -313,6 +293,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.KmakeNowScheduler.GetNamespace(childComplexity), true
+
+	case "KmakeNowScheduler.GetStatus":
+		if e.complexity.KmakeNowScheduler.GetStatus == nil {
+			break
+		}
+
+		return e.complexity.KmakeNowScheduler.GetStatus(childComplexity), true
 
 	case "KmakeNowScheduler.Monitor":
 		if e.complexity.KmakeNowScheduler.Monitor == nil {
@@ -354,6 +341,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.KmakeRun.GetNamespace(childComplexity), true
 
+	case "KmakeRun.GetStatus":
+		if e.complexity.KmakeRun.GetStatus == nil {
+			break
+		}
+
+		return e.complexity.KmakeRun.GetStatus(childComplexity), true
+
 	case "KmakeRun.kmakename":
 		if e.complexity.KmakeRun.Kmakename == nil {
 			break
@@ -379,13 +373,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.KmakeRun.Schedulerun(childComplexity, args["kmakescheduler"].(*string), args["name"].(*string), args["runtype"].(*controller.RunType)), true
-
-	case "KmakeRun.status":
-		if e.complexity.KmakeRun.Status == nil {
-			break
-		}
-
-		return e.complexity.KmakeRun.Status(childComplexity), true
 
 	case "KmakeRunDummy.Dummy":
 		if e.complexity.KmakeRunDummy.Dummy == nil {
@@ -443,19 +430,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.KmakeRunJob.Targets(childComplexity), true
 
-	case "KmakeScheduleCreate.dummy":
+	case "KmakeScheduleCreate.Dummy":
 		if e.complexity.KmakeScheduleCreate.Dummy == nil {
 			break
 		}
 
 		return e.complexity.KmakeScheduleCreate.Dummy(childComplexity), true
 
-	case "KmakeScheduleDelete.dummy":
+	case "KmakeScheduleDelete.Dummy":
 		if e.complexity.KmakeScheduleDelete.Dummy == nil {
 			break
 		}
 
 		return e.complexity.KmakeScheduleDelete.Dummy(childComplexity), true
+
+	case "KmakeScheduleForce.Dummy":
+		if e.complexity.KmakeScheduleForce.Dummy == nil {
+			break
+		}
+
+		return e.complexity.KmakeScheduleForce.Dummy(childComplexity), true
 
 	case "KmakeScheduleForce.Operation":
 		if e.complexity.KmakeScheduleForce.Operation == nil {
@@ -470,6 +464,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.KmakeScheduleForce.Recurse(childComplexity), true
+
+	case "KmakeScheduleReset.Dummy":
+		if e.complexity.KmakeScheduleReset.Dummy == nil {
+			break
+		}
+
+		return e.complexity.KmakeScheduleReset.Dummy(childComplexity), true
 
 	case "KmakeScheduleReset.Full":
 		if e.complexity.KmakeScheduleReset.Full == nil {
@@ -499,6 +500,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.KmakeScheduleRun.GetNamespace(childComplexity), true
 
+	case "KmakeScheduleRun.GetStatus":
+		if e.complexity.KmakeScheduleRun.GetStatus == nil {
+			break
+		}
+
+		return e.complexity.KmakeScheduleRun.GetStatus(childComplexity), true
+
 	case "KmakeScheduleRun.kmakename":
 		if e.complexity.KmakeScheduleRun.Kmakename == nil {
 			break
@@ -527,61 +535,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.KmakeScheduleRun.Operation(childComplexity), true
 
-	case "KmakeScheduleRun.status":
-		if e.complexity.KmakeScheduleRun.Status == nil {
+	case "KmakeScheduleRunRestart.Dummy":
+		if e.complexity.KmakeScheduleRunRestart.Dummy == nil {
 			break
 		}
 
-		return e.complexity.KmakeScheduleRun.Status(childComplexity), true
-
-	case "KmakeScheduleRunOperation.Create":
-		if e.complexity.KmakeScheduleRunOperation.Create == nil {
-			break
-		}
-
-		return e.complexity.KmakeScheduleRunOperation.Create(childComplexity), true
-
-	case "KmakeScheduleRunOperation.Delete":
-		if e.complexity.KmakeScheduleRunOperation.Delete == nil {
-			break
-		}
-
-		return e.complexity.KmakeScheduleRunOperation.Delete(childComplexity), true
-
-	case "KmakeScheduleRunOperation.Force":
-		if e.complexity.KmakeScheduleRunOperation.Force == nil {
-			break
-		}
-
-		return e.complexity.KmakeScheduleRunOperation.Force(childComplexity), true
-
-	case "KmakeScheduleRunOperation.Reset":
-		if e.complexity.KmakeScheduleRunOperation.Reset == nil {
-			break
-		}
-
-		return e.complexity.KmakeScheduleRunOperation.Reset(childComplexity), true
-
-	case "KmakeScheduleRunOperation.Restart":
-		if e.complexity.KmakeScheduleRunOperation.Restart == nil {
-			break
-		}
-
-		return e.complexity.KmakeScheduleRunOperation.Restart(childComplexity), true
-
-	case "KmakeScheduleRunOperation.start":
-		if e.complexity.KmakeScheduleRunOperation.Start == nil {
-			break
-		}
-
-		return e.complexity.KmakeScheduleRunOperation.Start(childComplexity), true
-
-	case "KmakeScheduleRunOperation.Stop":
-		if e.complexity.KmakeScheduleRunOperation.Stop == nil {
-			break
-		}
-
-		return e.complexity.KmakeScheduleRunOperation.Stop(childComplexity), true
+		return e.complexity.KmakeScheduleRunRestart.Dummy(childComplexity), true
 
 	case "KmakeScheduleRunRestart.Run":
 		if e.complexity.KmakeScheduleRunRestart.Run == nil {
@@ -590,12 +549,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.KmakeScheduleRunRestart.Run(childComplexity), true
 
-	case "KmakeScheduleRunStart.dummy":
+	case "KmakeScheduleRunStart.Dummy":
 		if e.complexity.KmakeScheduleRunStart.Dummy == nil {
 			break
 		}
 
 		return e.complexity.KmakeScheduleRunStart.Dummy(childComplexity), true
+
+	case "KmakeScheduleRunStop.Dummy":
+		if e.complexity.KmakeScheduleRunStop.Dummy == nil {
+			break
+		}
+
+		return e.complexity.KmakeScheduleRunStop.Dummy(childComplexity), true
 
 	case "KmakeScheduleRunStop.Run":
 		if e.complexity.KmakeScheduleRunStop.Run == nil {
@@ -819,9 +785,9 @@ enum RunType {
 type Kmake implements KmakeObject{
   GetName: String!
   GetNamespace: String!
+  GetStatus: String!
   variables: [KV]!
   rules: [Rule]!
-  status: String!
   runs(jobtype: JobType, name: String): [KmakeRun]!
 }
 
@@ -841,8 +807,8 @@ type Rule {
 type KmakeRun implements KmakeObject {
   GetName: String!
   GetNamespace: String!
+  GetStatus: String!
   kmakename: String
-  status: String!
   operation: KmakeRunOp
   schedulerun(kmakescheduler: String, name: String, runtype: RunType): [KmakeScheduleRun]
 }
@@ -872,49 +838,54 @@ type KmakeRunFileWait implements KmakeRunOp{
 type KmakeScheduleRun implements KmakeObject{
   GetName: String!
   GetNamespace: String!
+  GetStatus: String!
   kmakename: String
   kmakerunname: String
   kmakeschedulename: String
-  status: String!
-  operation: KmakeScheduleRunOperation!
+  operation: KmakeScheduleRunOp!
 }
 
-type KmakeScheduleRunOperation {
-  start:  KmakeScheduleRunStart
-	Restart: KmakeScheduleRunRestart
-	Stop:    KmakeScheduleRunStop
-	Delete:  KmakeScheduleDelete
-	Create:  KmakeScheduleCreate
-	Reset:   KmakeScheduleReset
-	Force:   KmakeScheduleForce
+# type KmakeScheduleRunOperation {
+#   start:  KmakeScheduleRunStart
+# 	Restart: KmakeScheduleRunRestart
+# 	Stop:    KmakeScheduleRunStop
+# 	Delete:  KmakeScheduleDelete
+# 	Create:  KmakeScheduleCreate
+# 	Reset:   KmakeScheduleReset
+# 	Force:   KmakeScheduleForce
+# }
+
+type KmakeScheduleRunStart implements KmakeScheduleRunOp {
+    Dummy: String!
 }
 
-type KmakeScheduleRunStart {
-    dummy: String!
-}
-
-type KmakeScheduleRunRestart {
+type KmakeScheduleRunRestart implements KmakeScheduleRunOp {
+  Dummy: String!
 	Run: String!
 }
 
-type KmakeScheduleRunStop {
+type KmakeScheduleRunStop implements KmakeScheduleRunOp {
+  Dummy: String!
 	Run: String!
 }
 
-type KmakeScheduleDelete {
-    dummy: String!
+type KmakeScheduleDelete implements KmakeScheduleRunOp {
+  Dummy: String!
 }
 
-type KmakeScheduleCreate {
-    dummy: String!
+type KmakeScheduleCreate implements KmakeScheduleRunOp {
+  Dummy: String!
+
 }
 
-type KmakeScheduleReset {
+type KmakeScheduleReset implements KmakeScheduleRunOp {
+  Dummy: String!
 	Recurse: String!
 	Full:    String!
 }
 
-type KmakeScheduleForce {
+type KmakeScheduleForce implements KmakeScheduleRunOp {
+  Dummy: String!
 	Operation: String!
 	Recurse:   String!
 }
@@ -922,6 +893,7 @@ type KmakeScheduleForce {
 type KmakeNowScheduler implements KmakeScheduler & KmakeObject{
 	GetName: String
 	GetNamespace: String
+  GetStatus: String!
 	Variables: [KV]
 	Monitor: [String]
   scheduleruns( kmake: String, kmakerun: String, name: String, runtype: RunType): [KmakeScheduleRun]!
@@ -930,6 +902,8 @@ type KmakeNowScheduler implements KmakeScheduler & KmakeObject{
 interface KmakeScheduler {
 	GetName: String
 	GetNamespace: String
+  
+  GetStatus: String
 	Variables: [KV]
 	Monitor: [String]
 }
@@ -937,11 +911,17 @@ interface KmakeScheduler {
 interface KmakeObject {
 	GetName: String
 	GetNamespace: String
+  GetStatus: String
 }
 
 interface KmakeRunOp {
   Dummy: String
-}`},
+}
+
+interface KmakeScheduleRunOp {
+  Dummy: String
+}
+`},
 )
 
 // endregion ************************** generated!.gotpl **************************
@@ -1430,6 +1410,43 @@ func (ec *executionContext) _Kmake_GetNamespace(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Kmake_GetStatus(ctx context.Context, field graphql.CollectedField, obj *v1.Kmake) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Kmake",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.GetStatus(), nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Kmake_variables(ctx context.Context, field graphql.CollectedField, obj *v1.Kmake) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -1502,43 +1519,6 @@ func (ec *executionContext) _Kmake_rules(ctx context.Context, field graphql.Coll
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalNRule2ᚕᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRule(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Kmake_status(ctx context.Context, field graphql.CollectedField, obj *v1.Kmake) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "Kmake",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Kmake().Status(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Kmake_runs(ctx context.Context, field graphql.CollectedField, obj *v1.Kmake) (ret graphql.Marshaler) {
@@ -1651,6 +1631,43 @@ func (ec *executionContext) _KmakeNowScheduler_GetNamespace(ctx context.Context,
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _KmakeNowScheduler_GetStatus(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeNowScheduler) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "KmakeNowScheduler",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.GetStatus(), nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _KmakeNowScheduler_Variables(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeNowScheduler) (ret graphql.Marshaler) {
@@ -1839,6 +1856,43 @@ func (ec *executionContext) _KmakeRun_GetNamespace(ctx context.Context, field gr
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _KmakeRun_GetStatus(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRun) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "KmakeRun",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.GetStatus(), nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _KmakeRun_kmakename(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRun) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -1871,43 +1925,6 @@ func (ec *executionContext) _KmakeRun_kmakename(ctx context.Context, field graph
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _KmakeRun_status(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRun) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "KmakeRun",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.KmakeRun().Status(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _KmakeRun_operation(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeRun) (ret graphql.Marshaler) {
@@ -2272,7 +2289,7 @@ func (ec *executionContext) _KmakeRunJob_args(ctx context.Context, field graphql
 	return ec.marshalOString2ᚕᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _KmakeScheduleCreate_dummy(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleCreate) (ret graphql.Marshaler) {
+func (ec *executionContext) _KmakeScheduleCreate_Dummy(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleCreate) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -2291,7 +2308,7 @@ func (ec *executionContext) _KmakeScheduleCreate_dummy(ctx context.Context, fiel
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.KmakeScheduleCreate().Dummy(rctx, obj)
+		return obj.Dummy(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2309,7 +2326,7 @@ func (ec *executionContext) _KmakeScheduleCreate_dummy(ctx context.Context, fiel
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _KmakeScheduleDelete_dummy(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleDelete) (ret graphql.Marshaler) {
+func (ec *executionContext) _KmakeScheduleDelete_Dummy(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleDelete) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -2328,7 +2345,44 @@ func (ec *executionContext) _KmakeScheduleDelete_dummy(ctx context.Context, fiel
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.KmakeScheduleDelete().Dummy(rctx, obj)
+		return obj.Dummy(), nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _KmakeScheduleForce_Dummy(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleForce) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "KmakeScheduleForce",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Dummy(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2403,6 +2457,43 @@ func (ec *executionContext) _KmakeScheduleForce_Recurse(ctx context.Context, fie
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Recurse, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _KmakeScheduleReset_Dummy(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleReset) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "KmakeScheduleReset",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Dummy(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2568,6 +2659,43 @@ func (ec *executionContext) _KmakeScheduleRun_GetNamespace(ctx context.Context, 
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _KmakeScheduleRun_GetStatus(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleRun) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "KmakeScheduleRun",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.GetStatus(), nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _KmakeScheduleRun_kmakename(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleRun) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -2670,43 +2798,6 @@ func (ec *executionContext) _KmakeScheduleRun_kmakeschedulename(ctx context.Cont
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _KmakeScheduleRun_status(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleRun) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "KmakeScheduleRun",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.KmakeScheduleRun().Status(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _KmakeScheduleRun_operation(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleRun) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -2738,13 +2829,13 @@ func (ec *executionContext) _KmakeScheduleRun_operation(ctx context.Context, fie
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*v1.KmakeScheduleRunOperation)
+	res := resTmp.(gql.KmakeScheduleRunOperation)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNKmakeScheduleRunOperation2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleRunOperation(ctx, field.Selections, res)
+	return ec.marshalNKmakeScheduleRunOp2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋgqlᚐKmakeScheduleRunOperation(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _KmakeScheduleRunOperation_start(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleRunOperation) (ret graphql.Marshaler) {
+func (ec *executionContext) _KmakeScheduleRunRestart_Dummy(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleRunRestart) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -2754,232 +2845,31 @@ func (ec *executionContext) _KmakeScheduleRunOperation_start(ctx context.Context
 		ec.Tracer.EndFieldExecution(ctx)
 	}()
 	rctx := &graphql.ResolverContext{
-		Object:   "KmakeScheduleRunOperation",
+		Object:   "KmakeScheduleRunRestart",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Start, nil
+		return obj.Dummy(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*v1.KmakeScheduleRunStart)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOKmakeScheduleRunStart2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleRunStart(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _KmakeScheduleRunOperation_Restart(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleRunOperation) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
 		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "KmakeScheduleRunOperation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Restart, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
 		return graphql.Null
 	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*v1.KmakeScheduleRunRestart)
+	res := resTmp.(string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOKmakeScheduleRunRestart2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleRunRestart(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _KmakeScheduleRunOperation_Stop(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleRunOperation) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "KmakeScheduleRunOperation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Stop, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*v1.KmakeScheduleRunStop)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOKmakeScheduleRunStop2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleRunStop(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _KmakeScheduleRunOperation_Delete(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleRunOperation) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "KmakeScheduleRunOperation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Delete, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*v1.KmakeScheduleDelete)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOKmakeScheduleDelete2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleDelete(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _KmakeScheduleRunOperation_Create(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleRunOperation) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "KmakeScheduleRunOperation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Create, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*v1.KmakeScheduleCreate)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOKmakeScheduleCreate2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleCreate(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _KmakeScheduleRunOperation_Reset(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleRunOperation) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "KmakeScheduleRunOperation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Reset, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*v1.KmakeScheduleReset)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOKmakeScheduleReset2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleReset(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _KmakeScheduleRunOperation_Force(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleRunOperation) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "KmakeScheduleRunOperation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Force, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*v1.KmakeScheduleForce)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOKmakeScheduleForce2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleForce(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _KmakeScheduleRunRestart_Run(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleRunRestart) (ret graphql.Marshaler) {
@@ -3019,7 +2909,7 @@ func (ec *executionContext) _KmakeScheduleRunRestart_Run(ctx context.Context, fi
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _KmakeScheduleRunStart_dummy(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleRunStart) (ret graphql.Marshaler) {
+func (ec *executionContext) _KmakeScheduleRunStart_Dummy(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleRunStart) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -3038,7 +2928,44 @@ func (ec *executionContext) _KmakeScheduleRunStart_dummy(ctx context.Context, fi
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.KmakeScheduleRunStart().Dummy(rctx, obj)
+		return obj.Dummy(), nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _KmakeScheduleRunStop_Dummy(ctx context.Context, field graphql.CollectedField, obj *v1.KmakeScheduleRunStop) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "KmakeScheduleRunStop",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Dummy(), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4906,6 +4833,50 @@ func (ec *executionContext) _KmakeRunOp(ctx context.Context, sel ast.SelectionSe
 	}
 }
 
+func (ec *executionContext) _KmakeScheduleRunOp(ctx context.Context, sel ast.SelectionSet, obj gql.KmakeScheduleRunOperation) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case *v1.KmakeScheduleRunStart:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._KmakeScheduleRunStart(ctx, sel, obj)
+	case *v1.KmakeScheduleRunRestart:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._KmakeScheduleRunRestart(ctx, sel, obj)
+	case *v1.KmakeScheduleRunStop:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._KmakeScheduleRunStop(ctx, sel, obj)
+	case *v1.KmakeScheduleDelete:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._KmakeScheduleDelete(ctx, sel, obj)
+	case *v1.KmakeScheduleCreate:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._KmakeScheduleCreate(ctx, sel, obj)
+	case *v1.KmakeScheduleReset:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._KmakeScheduleReset(ctx, sel, obj)
+	case *v1.KmakeScheduleForce:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._KmakeScheduleForce(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 func (ec *executionContext) _KmakeScheduler(ctx context.Context, sel ast.SelectionSet, obj gql.KmakeScheduler) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
@@ -4977,6 +4948,11 @@ func (ec *executionContext) _Kmake(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "GetStatus":
+			out.Values[i] = ec._Kmake_GetStatus(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "variables":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -5000,20 +4976,6 @@ func (ec *executionContext) _Kmake(ctx context.Context, sel ast.SelectionSet, ob
 					}
 				}()
 				res = ec._Kmake_rules(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "status":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Kmake_status(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -5059,6 +5021,11 @@ func (ec *executionContext) _KmakeNowScheduler(ctx context.Context, sel ast.Sele
 			out.Values[i] = ec._KmakeNowScheduler_GetName(ctx, field, obj)
 		case "GetNamespace":
 			out.Values[i] = ec._KmakeNowScheduler_GetNamespace(ctx, field, obj)
+		case "GetStatus":
+			out.Values[i] = ec._KmakeNowScheduler_GetStatus(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "Variables":
 			out.Values[i] = ec._KmakeNowScheduler_Variables(ctx, field, obj)
 		case "Monitor":
@@ -5109,6 +5076,11 @@ func (ec *executionContext) _KmakeRun(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "GetStatus":
+			out.Values[i] = ec._KmakeRun_GetStatus(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "kmakename":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -5118,20 +5090,6 @@ func (ec *executionContext) _KmakeRun(ctx context.Context, sel ast.SelectionSet,
 					}
 				}()
 				res = ec._KmakeRun_kmakename(ctx, field, obj)
-				return res
-			})
-		case "status":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._KmakeRun_status(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			})
 		case "operation":
@@ -5291,7 +5249,7 @@ func (ec *executionContext) _KmakeRunJob(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
-var kmakeScheduleCreateImplementors = []string{"KmakeScheduleCreate"}
+var kmakeScheduleCreateImplementors = []string{"KmakeScheduleCreate", "KmakeScheduleRunOp"}
 
 func (ec *executionContext) _KmakeScheduleCreate(ctx context.Context, sel ast.SelectionSet, obj *v1.KmakeScheduleCreate) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, kmakeScheduleCreateImplementors)
@@ -5302,20 +5260,11 @@ func (ec *executionContext) _KmakeScheduleCreate(ctx context.Context, sel ast.Se
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("KmakeScheduleCreate")
-		case "dummy":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._KmakeScheduleCreate_dummy(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+		case "Dummy":
+			out.Values[i] = ec._KmakeScheduleCreate_Dummy(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5327,7 +5276,7 @@ func (ec *executionContext) _KmakeScheduleCreate(ctx context.Context, sel ast.Se
 	return out
 }
 
-var kmakeScheduleDeleteImplementors = []string{"KmakeScheduleDelete"}
+var kmakeScheduleDeleteImplementors = []string{"KmakeScheduleDelete", "KmakeScheduleRunOp"}
 
 func (ec *executionContext) _KmakeScheduleDelete(ctx context.Context, sel ast.SelectionSet, obj *v1.KmakeScheduleDelete) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, kmakeScheduleDeleteImplementors)
@@ -5338,20 +5287,11 @@ func (ec *executionContext) _KmakeScheduleDelete(ctx context.Context, sel ast.Se
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("KmakeScheduleDelete")
-		case "dummy":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._KmakeScheduleDelete_dummy(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+		case "Dummy":
+			out.Values[i] = ec._KmakeScheduleDelete_Dummy(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5363,7 +5303,7 @@ func (ec *executionContext) _KmakeScheduleDelete(ctx context.Context, sel ast.Se
 	return out
 }
 
-var kmakeScheduleForceImplementors = []string{"KmakeScheduleForce"}
+var kmakeScheduleForceImplementors = []string{"KmakeScheduleForce", "KmakeScheduleRunOp"}
 
 func (ec *executionContext) _KmakeScheduleForce(ctx context.Context, sel ast.SelectionSet, obj *v1.KmakeScheduleForce) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, kmakeScheduleForceImplementors)
@@ -5374,6 +5314,11 @@ func (ec *executionContext) _KmakeScheduleForce(ctx context.Context, sel ast.Sel
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("KmakeScheduleForce")
+		case "Dummy":
+			out.Values[i] = ec._KmakeScheduleForce_Dummy(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "Operation":
 			out.Values[i] = ec._KmakeScheduleForce_Operation(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -5395,7 +5340,7 @@ func (ec *executionContext) _KmakeScheduleForce(ctx context.Context, sel ast.Sel
 	return out
 }
 
-var kmakeScheduleResetImplementors = []string{"KmakeScheduleReset"}
+var kmakeScheduleResetImplementors = []string{"KmakeScheduleReset", "KmakeScheduleRunOp"}
 
 func (ec *executionContext) _KmakeScheduleReset(ctx context.Context, sel ast.SelectionSet, obj *v1.KmakeScheduleReset) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, kmakeScheduleResetImplementors)
@@ -5406,6 +5351,11 @@ func (ec *executionContext) _KmakeScheduleReset(ctx context.Context, sel ast.Sel
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("KmakeScheduleReset")
+		case "Dummy":
+			out.Values[i] = ec._KmakeScheduleReset_Dummy(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "Recurse":
 			out.Values[i] = ec._KmakeScheduleReset_Recurse(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -5448,6 +5398,11 @@ func (ec *executionContext) _KmakeScheduleRun(ctx context.Context, sel ast.Selec
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "GetStatus":
+			out.Values[i] = ec._KmakeScheduleRun_GetStatus(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "kmakename":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -5481,20 +5436,6 @@ func (ec *executionContext) _KmakeScheduleRun(ctx context.Context, sel ast.Selec
 				res = ec._KmakeScheduleRun_kmakeschedulename(ctx, field, obj)
 				return res
 			})
-		case "status":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._KmakeScheduleRun_status(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		case "operation":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
@@ -5520,43 +5461,7 @@ func (ec *executionContext) _KmakeScheduleRun(ctx context.Context, sel ast.Selec
 	return out
 }
 
-var kmakeScheduleRunOperationImplementors = []string{"KmakeScheduleRunOperation"}
-
-func (ec *executionContext) _KmakeScheduleRunOperation(ctx context.Context, sel ast.SelectionSet, obj *v1.KmakeScheduleRunOperation) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, kmakeScheduleRunOperationImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("KmakeScheduleRunOperation")
-		case "start":
-			out.Values[i] = ec._KmakeScheduleRunOperation_start(ctx, field, obj)
-		case "Restart":
-			out.Values[i] = ec._KmakeScheduleRunOperation_Restart(ctx, field, obj)
-		case "Stop":
-			out.Values[i] = ec._KmakeScheduleRunOperation_Stop(ctx, field, obj)
-		case "Delete":
-			out.Values[i] = ec._KmakeScheduleRunOperation_Delete(ctx, field, obj)
-		case "Create":
-			out.Values[i] = ec._KmakeScheduleRunOperation_Create(ctx, field, obj)
-		case "Reset":
-			out.Values[i] = ec._KmakeScheduleRunOperation_Reset(ctx, field, obj)
-		case "Force":
-			out.Values[i] = ec._KmakeScheduleRunOperation_Force(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var kmakeScheduleRunRestartImplementors = []string{"KmakeScheduleRunRestart"}
+var kmakeScheduleRunRestartImplementors = []string{"KmakeScheduleRunRestart", "KmakeScheduleRunOp"}
 
 func (ec *executionContext) _KmakeScheduleRunRestart(ctx context.Context, sel ast.SelectionSet, obj *v1.KmakeScheduleRunRestart) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, kmakeScheduleRunRestartImplementors)
@@ -5567,6 +5472,11 @@ func (ec *executionContext) _KmakeScheduleRunRestart(ctx context.Context, sel as
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("KmakeScheduleRunRestart")
+		case "Dummy":
+			out.Values[i] = ec._KmakeScheduleRunRestart_Dummy(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "Run":
 			out.Values[i] = ec._KmakeScheduleRunRestart_Run(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -5583,7 +5493,7 @@ func (ec *executionContext) _KmakeScheduleRunRestart(ctx context.Context, sel as
 	return out
 }
 
-var kmakeScheduleRunStartImplementors = []string{"KmakeScheduleRunStart"}
+var kmakeScheduleRunStartImplementors = []string{"KmakeScheduleRunStart", "KmakeScheduleRunOp"}
 
 func (ec *executionContext) _KmakeScheduleRunStart(ctx context.Context, sel ast.SelectionSet, obj *v1.KmakeScheduleRunStart) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, kmakeScheduleRunStartImplementors)
@@ -5594,20 +5504,11 @@ func (ec *executionContext) _KmakeScheduleRunStart(ctx context.Context, sel ast.
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("KmakeScheduleRunStart")
-		case "dummy":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._KmakeScheduleRunStart_dummy(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
+		case "Dummy":
+			out.Values[i] = ec._KmakeScheduleRunStart_Dummy(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5619,7 +5520,7 @@ func (ec *executionContext) _KmakeScheduleRunStart(ctx context.Context, sel ast.
 	return out
 }
 
-var kmakeScheduleRunStopImplementors = []string{"KmakeScheduleRunStop"}
+var kmakeScheduleRunStopImplementors = []string{"KmakeScheduleRunStop", "KmakeScheduleRunOp"}
 
 func (ec *executionContext) _KmakeScheduleRunStop(ctx context.Context, sel ast.SelectionSet, obj *v1.KmakeScheduleRunStop) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, kmakeScheduleRunStopImplementors)
@@ -5630,6 +5531,11 @@ func (ec *executionContext) _KmakeScheduleRunStop(ctx context.Context, sel ast.S
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("KmakeScheduleRunStop")
+		case "Dummy":
+			out.Values[i] = ec._KmakeScheduleRunStop_Dummy(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "Run":
 			out.Values[i] = ec._KmakeScheduleRunStop_Run(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -6292,18 +6198,14 @@ func (ec *executionContext) marshalNKmakeScheduleRun2ᚕᚖgithubᚗcomᚋbythep
 	return ret
 }
 
-func (ec *executionContext) marshalNKmakeScheduleRunOperation2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleRunOperation(ctx context.Context, sel ast.SelectionSet, v v1.KmakeScheduleRunOperation) graphql.Marshaler {
-	return ec._KmakeScheduleRunOperation(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNKmakeScheduleRunOperation2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleRunOperation(ctx context.Context, sel ast.SelectionSet, v *v1.KmakeScheduleRunOperation) graphql.Marshaler {
+func (ec *executionContext) marshalNKmakeScheduleRunOp2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋgqlᚐKmakeScheduleRunOperation(ctx context.Context, sel ast.SelectionSet, v gql.KmakeScheduleRunOperation) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
 		}
 		return graphql.Null
 	}
-	return ec._KmakeScheduleRunOperation(ctx, sel, v)
+	return ec._KmakeScheduleRunOp(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNKmakeScheduler2ᚕgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋgqlᚐKmakeScheduler(ctx context.Context, sel ast.SelectionSet, v []gql.KmakeScheduler) graphql.Marshaler {
@@ -6820,50 +6722,6 @@ func (ec *executionContext) marshalOKmakeRunOp2githubᚗcomᚋbythepowerofᚋkma
 	return ec._KmakeRunOp(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOKmakeScheduleCreate2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleCreate(ctx context.Context, sel ast.SelectionSet, v v1.KmakeScheduleCreate) graphql.Marshaler {
-	return ec._KmakeScheduleCreate(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOKmakeScheduleCreate2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleCreate(ctx context.Context, sel ast.SelectionSet, v *v1.KmakeScheduleCreate) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._KmakeScheduleCreate(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOKmakeScheduleDelete2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleDelete(ctx context.Context, sel ast.SelectionSet, v v1.KmakeScheduleDelete) graphql.Marshaler {
-	return ec._KmakeScheduleDelete(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOKmakeScheduleDelete2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleDelete(ctx context.Context, sel ast.SelectionSet, v *v1.KmakeScheduleDelete) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._KmakeScheduleDelete(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOKmakeScheduleForce2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleForce(ctx context.Context, sel ast.SelectionSet, v v1.KmakeScheduleForce) graphql.Marshaler {
-	return ec._KmakeScheduleForce(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOKmakeScheduleForce2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleForce(ctx context.Context, sel ast.SelectionSet, v *v1.KmakeScheduleForce) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._KmakeScheduleForce(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOKmakeScheduleReset2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleReset(ctx context.Context, sel ast.SelectionSet, v v1.KmakeScheduleReset) graphql.Marshaler {
-	return ec._KmakeScheduleReset(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOKmakeScheduleReset2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleReset(ctx context.Context, sel ast.SelectionSet, v *v1.KmakeScheduleReset) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._KmakeScheduleReset(ctx, sel, v)
-}
-
 func (ec *executionContext) marshalOKmakeScheduleRun2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleRun(ctx context.Context, sel ast.SelectionSet, v v1.KmakeScheduleRun) graphql.Marshaler {
 	return ec._KmakeScheduleRun(ctx, sel, &v)
 }
@@ -6913,39 +6771,6 @@ func (ec *executionContext) marshalOKmakeScheduleRun2ᚖgithubᚗcomᚋbythepowe
 		return graphql.Null
 	}
 	return ec._KmakeScheduleRun(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOKmakeScheduleRunRestart2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleRunRestart(ctx context.Context, sel ast.SelectionSet, v v1.KmakeScheduleRunRestart) graphql.Marshaler {
-	return ec._KmakeScheduleRunRestart(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOKmakeScheduleRunRestart2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleRunRestart(ctx context.Context, sel ast.SelectionSet, v *v1.KmakeScheduleRunRestart) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._KmakeScheduleRunRestart(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOKmakeScheduleRunStart2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleRunStart(ctx context.Context, sel ast.SelectionSet, v v1.KmakeScheduleRunStart) graphql.Marshaler {
-	return ec._KmakeScheduleRunStart(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOKmakeScheduleRunStart2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleRunStart(ctx context.Context, sel ast.SelectionSet, v *v1.KmakeScheduleRunStart) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._KmakeScheduleRunStart(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOKmakeScheduleRunStop2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleRunStop(ctx context.Context, sel ast.SelectionSet, v v1.KmakeScheduleRunStop) graphql.Marshaler {
-	return ec._KmakeScheduleRunStop(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOKmakeScheduleRunStop2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleRunStop(ctx context.Context, sel ast.SelectionSet, v *v1.KmakeScheduleRunStop) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._KmakeScheduleRunStop(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOKmakeScheduler2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋgqlᚐKmakeScheduler(ctx context.Context, sel ast.SelectionSet, v gql.KmakeScheduler) graphql.Marshaler {

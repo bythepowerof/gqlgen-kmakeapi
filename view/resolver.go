@@ -16,17 +16,8 @@ func (r *Resolver) KmakeRun() KmakeRunResolver {
 func (r *Resolver) KmakeRunJob() KmakeRunJobResolver {
 	return &kmakeRunJobResolver{r}
 }
-func (r *Resolver) KmakeScheduleCreate() KmakeScheduleCreateResolver {
-	return &kmakeScheduleCreateResolver{r}
-}
-func (r *Resolver) KmakeScheduleDelete() KmakeScheduleDeleteResolver {
-	return &kmakeScheduleDeleteResolver{r}
-}
 func (r *Resolver) KmakeScheduleRun() KmakeScheduleRunResolver {
 	return &kmakeScheduleRunResolver{r}
-}
-func (r *Resolver) KmakeScheduleRunStart() KmakeScheduleRunStartResolver {
-	return &kmakeScheduleRunStartResolver{r}
 }
 func (r *Resolver) Namespace() NamespaceResolver {
 	return &namespaceResolver{r}
@@ -43,13 +34,7 @@ type kmakeRunResolver struct{ *Resolver }
 
 type kmakeRunJobResolver struct{ *Resolver }
 
-type kmakeScheduleCreateResolver struct{ *Resolver }
-
-type kmakeScheduleDeleteResolver struct{ *Resolver }
-
 type kmakeScheduleRunResolver struct{ *Resolver }
-
-type kmakeScheduleRunStartResolver struct{ *Resolver }
 
 type namespaceResolver struct{ *Resolver }
 
