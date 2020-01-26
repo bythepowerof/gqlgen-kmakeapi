@@ -1,6 +1,6 @@
 
 # Build manager binary
-api: build
+api: bin fmt vet
 	go build -o bin/api server/server.go
 
 server: build
@@ -17,8 +17,12 @@ fix: view/resolver.go
 diff: fix
 	-diff -q --from-file view/resolver.go viw/resolver.go.sav 
 
-build: diff bin
+build: diff bin fmt vet
+
+fmt:
 	go fmt ./...
+
+vet:
 	go vet ./...
 
 bin:
