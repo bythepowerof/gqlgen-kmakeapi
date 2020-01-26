@@ -1,0 +1,18 @@
+language: go
+
+go:
+- "1.13"
+
+cache:
+  directories:
+  - $HOME/.cache/go-build
+  - $HOME/gopath/pkg/mod
+
+script:
+- go mod download
+- make test server
+- ./go.test.sh
+
+after_success:
+- bash <(curl -s https://codecov.io/bash)
+- test $TRAVIS_BRANCH = "master" && curl -d "repo=github.com/bythepowerof/gql-kmakeapi" https://goreportcard.com/checks

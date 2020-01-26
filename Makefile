@@ -1,4 +1,8 @@
 
+# Build manager binary
+api: build
+	go build -o bin/api server/server.go
+
 server: build
 	go run server/server.go
 
@@ -16,7 +20,6 @@ diff: fix
 build: diff bin
 	go fmt ./...
 	go vet ./...
-	go run server/server.go
 
 bin:
 	mkdir $@
