@@ -10,7 +10,7 @@ cache:
 
 script:
 - go mod download
-- make test server
+- make test api
 - ./go.test.sh
 
 after_success:
