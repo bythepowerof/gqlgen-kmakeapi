@@ -21,10 +21,24 @@ models:
     model: k8s.io/api/core/v1.Namespace
   Kmake:
     model: v1.Kmake
+    fields:
+      name:
+        fieldName: GetName
+      namespace:
+        fieldName: GetNamespace
+      status:
+        fieldName: GetStatus
   Rule:
     model: v1.KmakeRule
   KmakeRun:
-    model: v1.KmakeRun   
+    model: v1.KmakeRun
+    fields:
+      name:
+        fieldName: GetName   
+      namespace:
+        fieldName: GetNamespace
+      status:
+        fieldName: GetStatus
   KmakeRunOperation:
     model: v1.KmakeRunOperation
   KmakeRunJob:
@@ -41,6 +55,13 @@ models:
     model: v1.KV
   KmakeScheduleRun:
     model: v1.KmakeScheduleRun
+    fields:
+      name:
+        fieldName: GetName
+      namespace:
+        fieldName: GetNamespace
+      status:
+        fieldName: GetStatus
   KmakeScheduleRunOperation:
     model: v1.KmakeScheduleRunOperation
   KmakeScheduleRunStart:
@@ -59,10 +80,31 @@ models:
     model: v1.KmakeScheduleForce
   KmakeNowScheduler:
     model: v1.KmakeNowScheduler
+    fields:
+      name:
+        fieldName: GetName
+      namespace:
+        fieldName: GetNamespace
+      status:
+        fieldName: GetStatus
   KmakeScheduler:
     model: gql.KmakeScheduler
+    fields:
+      name:
+        fieldName: GetName
+      namespace:
+        fieldName: GetNamespace
+      status:
+        fieldName: GetStatus
   KmakeObject:
     model: gql.KmakeObject
+    fields:
+      name:
+        fieldName: GetName
+      namespace:
+        fieldName: GetNamespace
+      status:
+        fieldName: GetStatus
   KmakeRunOp:
     model: gql.KmakeRunOperation
   KmakeScheduleRunOp:

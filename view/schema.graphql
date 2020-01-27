@@ -36,9 +36,9 @@ enum RunType {
 }
 
 type Kmake implements KmakeObject{
-  GetName: String!
-  GetNamespace: String!
-  GetStatus: String!
+  name: String!
+  namespace: String!
+  status: String!
   variables: [KV]!
   rules: [Rule]!
   runs(jobtype: JobType, name: String): [KmakeRun]!
@@ -58,9 +58,9 @@ type Rule {
 }
 
 type KmakeRun implements KmakeObject {
-  GetName: String!
-  GetNamespace: String!
-  GetStatus: String!
+  name: String!
+  namespace: String!
+  status: String!
   kmakename: String
   operation: KmakeRunOp
   schedulerun(kmakescheduler: String, name: String, runtype: RunType): [KmakeScheduleRun]
@@ -89,9 +89,9 @@ type KmakeRunFileWait implements KmakeRunOp{
 }
 
 type KmakeScheduleRun implements KmakeObject{
-  GetName: String!
-  GetNamespace: String!
-  GetStatus: String!
+  name: String!
+  namespace: String!
+  status: String!
   kmakename: String
   kmakerunname: String
   kmakeschedulename: String
@@ -144,27 +144,26 @@ type KmakeScheduleForce implements KmakeScheduleRunOp {
 }
 
 type KmakeNowScheduler implements KmakeScheduler & KmakeObject{
-	GetName: String
-	GetNamespace: String
-  GetStatus: String!
+	name: String
+	namespace: String
+  status: String
 	Variables: [KV]
 	Monitor: [String]
   scheduleruns( kmake: String, kmakerun: String, name: String, runtype: RunType): [KmakeScheduleRun]!
 }
 
 interface KmakeScheduler {
-	GetName: String
-	GetNamespace: String
-  
-  GetStatus: String
+	name: String
+	namespace: String
+  status: String
 	Variables: [KV]
 	Monitor: [String]
 }
 
 interface KmakeObject {
-	GetName: String
-	GetNamespace: String
-  GetStatus: String
+	name: String
+	namespace: String
+  status: String
 }
 
 interface KmakeRunOp {
