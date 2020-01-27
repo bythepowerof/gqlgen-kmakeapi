@@ -12,55 +12,58 @@ model:
 resolver:
   filename: resolver.go
   type: Resolver
-autobind: []
+autobind: 
+  - github.com/bythepowerof/kmake-controller/api/v1
+  - github.com/bythepowerof/kmake-controller/gql
+  - github.com/bythepowerof/gqlgen-kmakeapi/controller
 models:
   Namespace:
     model: k8s.io/api/core/v1.Namespace
   Kmake:
-    model: github.com/bythepowerof/kmake-controller/api/v1.Kmake
+    model: v1.Kmake
   Rule:
-    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeRule
+    model: v1.KmakeRule
   KmakeRun:
-    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeRun   
+    model: v1.KmakeRun   
   KmakeRunOperation:
-    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeRunOperation
+    model: v1.KmakeRunOperation
   KmakeRunJob:
-    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeRunJob
+    model: v1.KmakeRunJob
   KmakeRunFileWait:
-    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeRunFileWait
+    model: v1.KmakeRunFileWait
   KmakeRunDummy:
-    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeRunDummy
+    model: v1.KmakeRunDummy
   JobType:
-    model: github.com/bythepowerof/gqlgen-kmakeapi/controller.JobType
+    model: controller.JobType
   RunType:
-    model: github.com/bythepowerof/gqlgen-kmakeapi/controller.RunType
+    model: controller.RunType
   KV:
-    model: github.com/bythepowerof/kmake-controller/api/v1.KV
+    model: v1.KV
   KmakeScheduleRun:
-    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleRun
+    model: v1.KmakeScheduleRun
   KmakeScheduleRunOperation:
-    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleRunOperation
+    model: v1.KmakeScheduleRunOperation
   KmakeScheduleRunStart:
-    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleRunStart
+    model: v1.KmakeScheduleRunStart
   KmakeScheduleRunRestart:
-    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleRunRestart
+    model: v1.KmakeScheduleRunRestart
   KmakeScheduleRunStop:
-    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleRunStop
+    model: v1.KmakeScheduleRunStop
   KmakeScheduleDelete:
-    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleDelete
+    model: v1.KmakeScheduleDelete
   KmakeScheduleCreate:
-    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleCreate
+    model: v1.KmakeScheduleCreate
   KmakeScheduleReset:
-    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleReset
+    model: v1.KmakeScheduleReset
   KmakeScheduleForce:
-    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeScheduleForce
+    model: v1.KmakeScheduleForce
   KmakeNowScheduler:
-    model: github.com/bythepowerof/kmake-controller/api/v1.KmakeNowScheduler
+    model: v1.KmakeNowScheduler
   KmakeScheduler:
-    model: github.com/bythepowerof/kmake-controller/gql.KmakeScheduler
+    model: gql.KmakeScheduler
   KmakeObject:
-    model: github.com/bythepowerof/kmake-controller/gql.KmakeObject
+    model: gql.KmakeObject
   KmakeRunOp:
-    model: github.com/bythepowerof/kmake-controller/gql.KmakeRunOperation
+    model: gql.KmakeRunOperation
   KmakeScheduleRunOp:
-    model: github.com/bythepowerof/kmake-controller/gql.KmakeScheduleRunOperation
+    model: gql.KmakeScheduleRunOperation
