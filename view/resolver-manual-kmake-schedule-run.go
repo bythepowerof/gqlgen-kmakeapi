@@ -29,9 +29,6 @@ func (r *kmakeScheduleRunResolver) Kmakeschedulename(ctx context.Context, obj *v
 	}
 	return &ret, nil
 }
-func (r *kmakeScheduleRunResolver) Status(ctx context.Context, obj *v1.KmakeScheduleRun) (string, error) {
-	return obj.Status.Status, nil
-}
 
 func (r *kmakeScheduleRunResolver) Operation(ctx context.Context, obj *v1.KmakeScheduleRun) (gql.KmakeScheduleRunOperation, error) {
 	if obj.Spec.KmakeScheduleRunOperation.Start != nil {

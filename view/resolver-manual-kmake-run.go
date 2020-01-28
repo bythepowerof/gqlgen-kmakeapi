@@ -8,10 +8,6 @@ import (
 	"github.com/bythepowerof/kmake-controller/gql"
 )
 
-func (r *kmakeRunResolver) Status(ctx context.Context, obj *v1.KmakeRun) (string, error) {
-	return obj.Status.Status, nil
-}
-
 func (r *kmakeRunJobResolver) Image(ctx context.Context, obj *v1.KmakeRunJob) (string, error) {
 	return obj.Template.Spec.Containers[0].Image, nil
 }
