@@ -19,6 +19,9 @@ func (r *Resolver) KmakeRunJob() KmakeRunJobResolver {
 func (r *Resolver) KmakeScheduleRun() KmakeScheduleRunResolver {
 	return &kmakeScheduleRunResolver{r}
 }
+func (r *Resolver) Mutation() MutationResolver {
+	return &mutationResolver{r}
+}
 func (r *Resolver) Namespace() NamespaceResolver {
 	return &namespaceResolver{r}
 }
@@ -35,6 +38,8 @@ type kmakeRunResolver struct{ *Resolver }
 type kmakeRunJobResolver struct{ *Resolver }
 
 type kmakeScheduleRunResolver struct{ *Resolver }
+
+type mutationResolver struct{ *Resolver }
 
 type namespaceResolver struct{ *Resolver }
 
