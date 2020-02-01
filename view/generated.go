@@ -148,6 +148,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		Reset func(childComplexity int, input controller.NewReset) int
+		Stop  func(childComplexity int, input controller.NewStop) int
 	}
 
 	Namespace struct {
@@ -199,6 +200,7 @@ type KmakeScheduleRunResolver interface {
 }
 type MutationResolver interface {
 	Reset(ctx context.Context, input controller.NewReset) (*v1.KmakeScheduleRun, error)
+	Stop(ctx context.Context, input controller.NewStop) (*v1.KmakeScheduleRun, error)
 }
 type NamespaceResolver interface {
 	Kmakes(ctx context.Context, obj *v11.Namespace, name *string) ([]*v1.Kmake, error)
@@ -590,6 +592,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.Reset(childComplexity, args["input"].(controller.NewReset)), true
 
+	case "Mutation.stop":
+		if e.complexity.Mutation.Stop == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_stop_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Stop(childComplexity, args["input"].(controller.NewStop)), true
+
 	case "Namespace.kmakes":
 		if e.complexity.Namespace.Kmakes == nil {
 			break
@@ -797,8 +811,15 @@ input NewReset {
   full: Boolean!
 }
 
+input NewStop {
+  namespace: String!
+  kmakerun: String!
+  kmakescheduler: String!
+}
+
 type Mutation {
   reset(input: NewReset!): KmakeScheduleRun!
+  stop(input: NewStop!): KmakeScheduleRun!
 }
 
 type Namespace {
@@ -1048,6 +1069,20 @@ func (ec *executionContext) field_Mutation_reset_args(ctx context.Context, rawAr
 	var arg0 controller.NewReset
 	if tmp, ok := rawArgs["input"]; ok {
 		arg0, err = ec.unmarshalNNewReset2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋcontrollerᚐNewReset(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_stop_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 controller.NewStop
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalNNewStop2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋcontrollerᚐNewStop(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3099,6 +3134,50 @@ func (ec *executionContext) _Mutation_reset(ctx context.Context, field graphql.C
 	return ec.marshalNKmakeScheduleRun2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleRun(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_stop(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_stop_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().Stop(rctx, args["input"].(controller.NewStop))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v1.KmakeScheduleRun)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNKmakeScheduleRun2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleRun(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Namespace_name(ctx context.Context, field graphql.CollectedField, obj *v11.Namespace) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
@@ -4885,6 +4964,36 @@ func (ec *executionContext) unmarshalInputNewReset(ctx context.Context, obj inte
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputNewStop(ctx context.Context, obj interface{}) (controller.NewStop, error) {
+	var it controller.NewStop
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "namespace":
+			var err error
+			it.Namespace, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "kmakerun":
+			var err error
+			it.Kmakerun, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "kmakescheduler":
+			var err error
+			it.Kmakescheduler, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -5678,6 +5787,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "stop":
+			out.Values[i] = ec._Mutation_stop(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6435,6 +6549,10 @@ func (ec *executionContext) marshalNNamespace2ᚕᚖk8sᚗioᚋapiᚋcoreᚋv1�
 
 func (ec *executionContext) unmarshalNNewReset2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋcontrollerᚐNewReset(ctx context.Context, v interface{}) (controller.NewReset, error) {
 	return ec.unmarshalInputNewReset(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNNewStop2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋcontrollerᚐNewStop(ctx context.Context, v interface{}) (controller.NewStop, error) {
+	return ec.unmarshalInputNewStop(ctx, v)
 }
 
 func (ec *executionContext) marshalNRule2ᚕᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRule(ctx context.Context, sel ast.SelectionSet, v []*v1.KmakeRule) graphql.Marshaler {

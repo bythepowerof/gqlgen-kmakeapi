@@ -33,6 +33,11 @@ type NewReset struct {
 	Kmakescheduler string `json:"kmakescheduler"`
 	Full           bool   `json:"full"`
 }
+type NewStop struct {
+	Namespace      string `json:"namespace"`
+	Kmakerun       string `json:"kmakerun"`
+	Kmakescheduler string `json:"kmakescheduler"`
+}
 type KmakeController interface {
 	Namespaces(ctx context.Context, name *string) ([]*v11.Namespace, error)
 	Kmakes(ctx context.Context, namespace *string, name *string) ([]*v1.Kmake, error)
@@ -230,17 +235,28 @@ func (r *KubernetesController) CreateScheduleRun(ctx context.Context, namespace 
 			full = "yes"
 		}
 		op.Reset = &v1.KmakeScheduleReset{Full: full}
+	case RunTypeStop:
+		op.Stop = &v1.KmakeScheduleRunStop{}
 	}
 
 	kmakeschedulerun := &v1.KmakeScheduleRun{
 		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: "kmakenowscheduler-gql-reset-",
+			GenerateName: "kmakenowscheduler-gql-stop-",
 			Namespace:    namespace,
 			Labels: map[string]string{
-				"bythepowerof.github.io/schedule-instance": *kmakescheduler,
-				"bythepowerof.github.io/workload":          "no"},
+				"bythepowerof.github.io/workload": "no"},
 		},
 		Spec: v1.KmakeScheduleRunSpec{KmakeScheduleRunOperation: op},
+	}
+
+	if kmakescheduler != nil {
+		kmakeschedulerun.Labels["bythepowerof.github.io/schedule-instance"] = *kmakescheduler
+	}
+	if kmakerun != nil {
+		kmakeschedulerun.Labels["bythepowerof.github.io/run"] = *kmakerun
+	}
+	if kmake != nil {
+		kmakeschedulerun.Labels["bythepowerof.github.io/kmake"] = *kmake
 	}
 
 	err := r.Client.Create(context.Background(), kmakeschedulerun)
@@ -248,16 +264,4 @@ func (r *KubernetesController) CreateScheduleRun(ctx context.Context, namespace 
 		return nil, err
 	}
 	return kmakeschedulerun, nil
-	// metadata:
-	//   generateName: kmakenowscheduler-reset-kmsr-
-	//   generation: 1
-	//   labels:
-	//     bythepowerof.github.io/schedule-instance: kmakenowscheduler-sample
-	//     bythepowerof.github.io/workload: "no"
-
-	// spec:
-	//   operation:
-	//     reset:
-	//       full: "yes"
-
 }

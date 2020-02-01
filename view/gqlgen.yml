@@ -53,6 +53,8 @@ models:
     model: controller.RunType
   NewReset:
     model: controller.NewReset
+  NewStop:
+    model: controller.NewStop
   KV:
     model: v1.KV
   KmakeScheduleRun:

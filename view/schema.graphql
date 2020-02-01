@@ -17,8 +17,15 @@ input NewReset {
   full: Boolean!
 }
 
+input NewStop {
+  namespace: String!
+  kmakerun: String!
+  kmakescheduler: String!
+}
+
 type Mutation {
   reset(input: NewReset!): KmakeScheduleRun!
+  stop(input: NewStop!): KmakeScheduleRun!
 }
 
 type Namespace {

@@ -15,6 +15,11 @@ func (r *mutationResolver) Reset(ctx context.Context, input controller.NewReset)
 	op := controller.RunTypeReset
 
 	return r.KmakeController.CreateScheduleRun(ctx, input.Namespace, nil, nil, &input.Kmakescheduler, &op, opt)
-	// func CreateScheduleRun(ctx context.Context, namespace string, kmake *string, kmakerun *string, kmakescheduler *string, runtype *RunType, opts *map[string]string) (*v1.KmakeScheduleRun, error) {
+}
 
+func (r *mutationResolver) Stop(ctx context.Context, input controller.NewStop) (*v1.KmakeScheduleRun, error) {
+	opt := make(map[string]string)
+	op := controller.RunTypeStop
+
+	return r.KmakeController.CreateScheduleRun(ctx, input.Namespace, nil, &input.Kmakerun, &input.Kmakescheduler, &op, opt)
 }
