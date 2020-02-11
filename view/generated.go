@@ -147,8 +147,9 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		Reset func(childComplexity int, input controller.NewReset) int
-		Stop  func(childComplexity int, input controller.NewStop) int
+		Reset   func(childComplexity int, input controller.NewReset) int
+		Restart func(childComplexity int, input controller.RunLevelIn) int
+		Stop    func(childComplexity int, input controller.RunLevelIn) int
 	}
 
 	Namespace struct {
@@ -200,7 +201,8 @@ type KmakeScheduleRunResolver interface {
 }
 type MutationResolver interface {
 	Reset(ctx context.Context, input controller.NewReset) (*v1.KmakeScheduleRun, error)
-	Stop(ctx context.Context, input controller.NewStop) (*v1.KmakeScheduleRun, error)
+	Stop(ctx context.Context, input controller.RunLevelIn) (*v1.KmakeScheduleRun, error)
+	Restart(ctx context.Context, input controller.RunLevelIn) (*v1.KmakeScheduleRun, error)
 }
 type NamespaceResolver interface {
 	Kmakes(ctx context.Context, obj *v11.Namespace, name *string) ([]*v1.Kmake, error)
@@ -592,6 +594,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.Reset(childComplexity, args["input"].(controller.NewReset)), true
 
+	case "Mutation.restart":
+		if e.complexity.Mutation.Restart == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_restart_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.Restart(childComplexity, args["input"].(controller.RunLevelIn)), true
+
 	case "Mutation.stop":
 		if e.complexity.Mutation.Stop == nil {
 			break
@@ -602,7 +616,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.Stop(childComplexity, args["input"].(controller.NewStop)), true
+		return e.complexity.Mutation.Stop(childComplexity, args["input"].(controller.RunLevelIn)), true
 
 	case "Namespace.kmakes":
 		if e.complexity.Namespace.Kmakes == nil {
@@ -811,7 +825,7 @@ input NewReset {
   full: Boolean!
 }
 
-input NewStop {
+input RunLevelIn {
   namespace: String!
   kmakerun: String!
   kmakescheduler: String!
@@ -819,7 +833,8 @@ input NewStop {
 
 type Mutation {
   reset(input: NewReset!): KmakeScheduleRun!
-  stop(input: NewStop!): KmakeScheduleRun!
+  stop(input: RunLevelIn!): KmakeScheduleRun!
+  restart(input: RunLevelIn!): KmakeScheduleRun!
 }
 
 type Namespace {
@@ -1077,12 +1092,26 @@ func (ec *executionContext) field_Mutation_reset_args(ctx context.Context, rawAr
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_restart_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 controller.RunLevelIn
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalNRunLevelIn2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋcontrollerᚐRunLevelIn(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_stop_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 controller.NewStop
+	var arg0 controller.RunLevelIn
 	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = ec.unmarshalNNewStop2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋcontrollerᚐNewStop(ctx, tmp)
+		arg0, err = ec.unmarshalNRunLevelIn2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋcontrollerᚐRunLevelIn(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -3160,7 +3189,51 @@ func (ec *executionContext) _Mutation_stop(ctx context.Context, field graphql.Co
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().Stop(rctx, args["input"].(controller.NewStop))
+		return ec.resolvers.Mutation().Stop(rctx, args["input"].(controller.RunLevelIn))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*v1.KmakeScheduleRun)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNKmakeScheduleRun2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleRun(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_restart(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_restart_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().Restart(rctx, args["input"].(controller.RunLevelIn))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4964,8 +5037,8 @@ func (ec *executionContext) unmarshalInputNewReset(ctx context.Context, obj inte
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputNewStop(ctx context.Context, obj interface{}) (controller.NewStop, error) {
-	var it controller.NewStop
+func (ec *executionContext) unmarshalInputRunLevelIn(ctx context.Context, obj interface{}) (controller.RunLevelIn, error) {
+	var it controller.RunLevelIn
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
@@ -5792,6 +5865,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "restart":
+			out.Values[i] = ec._Mutation_restart(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6551,10 +6629,6 @@ func (ec *executionContext) unmarshalNNewReset2githubᚗcomᚋbythepowerofᚋgql
 	return ec.unmarshalInputNewReset(ctx, v)
 }
 
-func (ec *executionContext) unmarshalNNewStop2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋcontrollerᚐNewStop(ctx context.Context, v interface{}) (controller.NewStop, error) {
-	return ec.unmarshalInputNewStop(ctx, v)
-}
-
 func (ec *executionContext) marshalNRule2ᚕᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRule(ctx context.Context, sel ast.SelectionSet, v []*v1.KmakeRule) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -6590,6 +6664,10 @@ func (ec *executionContext) marshalNRule2ᚕᚖgithubᚗcomᚋbythepowerofᚋkma
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) unmarshalNRunLevelIn2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋcontrollerᚐRunLevelIn(ctx context.Context, v interface{}) (controller.RunLevelIn, error) {
+	return ec.unmarshalInputRunLevelIn(ctx, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

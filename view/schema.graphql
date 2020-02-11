@@ -17,7 +17,7 @@ input NewReset {
   full: Boolean!
 }
 
-input NewStop {
+input RunLevelIn {
   namespace: String!
   kmakerun: String!
   kmakescheduler: String!
@@ -25,7 +25,8 @@ input NewStop {
 
 type Mutation {
   reset(input: NewReset!): KmakeScheduleRun!
-  stop(input: NewStop!): KmakeScheduleRun!
+  stop(input: RunLevelIn!): KmakeScheduleRun!
+  restart(input: RunLevelIn!): KmakeScheduleRun!
 }
 
 type Namespace {

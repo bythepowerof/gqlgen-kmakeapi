@@ -54,7 +54,7 @@ models:
   NewReset:
     model: controller.NewReset
   NewStop:
-    model: controller.NewStop
+    model: controller.RunLevelIn
   KV:
     model: v1.KV
   KmakeScheduleRun:

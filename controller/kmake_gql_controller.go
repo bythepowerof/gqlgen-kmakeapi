@@ -33,7 +33,7 @@ type NewReset struct {
 	Kmakescheduler string `json:"kmakescheduler"`
 	Full           bool   `json:"full"`
 }
-type NewStop struct {
+type RunLevelIn struct {
 	Namespace      string `json:"namespace"`
 	Kmakerun       string `json:"kmakerun"`
 	Kmakescheduler string `json:"kmakescheduler"`
@@ -228,6 +228,14 @@ func (r *KubernetesController) CreateScheduleRun(ctx context.Context, namespace 
 
 	op := v1.KmakeScheduleRunOperation{}
 
+	kmakeschedulerun := &v1.KmakeScheduleRun{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: namespace,
+			Labels: map[string]string{
+				"bythepowerof.github.io/workload": "no"},
+		},
+	}
+
 	switch *runtype {
 	case RunTypeReset:
 		full := "no"
@@ -235,29 +243,34 @@ func (r *KubernetesController) CreateScheduleRun(ctx context.Context, namespace 
 			full = "yes"
 		}
 		op.Reset = &v1.KmakeScheduleReset{Full: full}
+		kmakeschedulerun.ObjectMeta.GenerateName = "kmakenowscheduler-reset-gql-"
+		if kmakescheduler != nil {
+			kmakeschedulerun.Labels["bythepowerof.github.io/schedule-instance"] = *kmakescheduler
+		}
 	case RunTypeStop:
 		op.Stop = &v1.KmakeScheduleRunStop{}
+		kmakeschedulerun.ObjectMeta.GenerateName = "kmakenowscheduler-stop-gql-"
+		if kmakescheduler != nil {
+			kmakeschedulerun.Labels["bythepowerof.github.io/schedule-instance"] = *kmakescheduler
+		}
+		if kmakerun != nil {
+			kmakeschedulerun.Labels["bythepowerof.github.io/run"] = *kmakerun
+		}
+	case RunTypeRestart:
+		op.Restart = &v1.KmakeScheduleRunRestart{
+			Run: *kmakerun,
+		}
+		kmakeschedulerun.ObjectMeta.GenerateName = "kmakenowscheduler-restart-gql-"
+		if kmakescheduler != nil {
+			kmakeschedulerun.Labels["bythepowerof.github.io/schedule-instance"] = *kmakescheduler
+		}
 	}
 
-	kmakeschedulerun := &v1.KmakeScheduleRun{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: "kmakenowscheduler-gql-stop-",
-			Namespace:    namespace,
-			Labels: map[string]string{
-				"bythepowerof.github.io/workload": "no"},
-		},
-		Spec: v1.KmakeScheduleRunSpec{KmakeScheduleRunOperation: op},
-	}
+	kmakeschedulerun.Spec.KmakeScheduleRunOperation = op
 
-	if kmakescheduler != nil {
-		kmakeschedulerun.Labels["bythepowerof.github.io/schedule-instance"] = *kmakescheduler
-	}
-	if kmakerun != nil {
-		kmakeschedulerun.Labels["bythepowerof.github.io/run"] = *kmakerun
-	}
-	if kmake != nil {
-		kmakeschedulerun.Labels["bythepowerof.github.io/kmake"] = *kmake
-	}
+	// if kmake != nil {
+	// 	kmakeschedulerun.Labels["bythepowerof.github.io/kmake"] = *kmake
+	// }
 
 	err := r.Client.Create(context.Background(), kmakeschedulerun)
 	if err != nil {
