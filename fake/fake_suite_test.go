@@ -1,4 +1,4 @@
-package gqlgen_kmakeapi_test
+package fake_test
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestView(t *testing.T) {
+func TestFake(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "View Suite")
+	RunSpecs(t, "Fake Suite")
 }
