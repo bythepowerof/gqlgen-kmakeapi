@@ -40,16 +40,20 @@ func RealHTTPServer(c client.Client) {
 	)
 }
 
+func processArgs(fakeK8sClient *bool, fakeHTTPServer *bool, port *string) {
+	flag.BoolVar(fakeK8sClient, "fake-k8s", false, "Use fake k8s client")
+	flag.BoolVar(fakeHTTPServer, "fake-http", false, "Use fake k8s server")
+	flag.StringVar(port, "port", defaultPort, "Port to listen to")
+
+	flag.Parse()
+}
+
 func main() {
 	var fakeK8sClient bool
 	var fakeHTTPServer bool
 	var port string
 
-	flag.BoolVar(&fakeK8sClient, "fake-k8s", false, "Use fake k8s client")
-	flag.BoolVar(&fakeHTTPServer, "fake-http", false, "Use fake k8s server")
-	flag.StringVar(&port, "port", defaultPort, "Port to listen to")
-
-	flag.Parse()
+	processArgs(&fakeK8sClient, &fakeHTTPServer, &port)
 
 	scheme := runtime.NewScheme()
 	_ = clientgoscheme.AddToScheme(scheme)
@@ -70,7 +74,7 @@ func main() {
 	}
 
 	if fakeHTTPServer {
-
+		fake.FakeHTTPServer(c)
 	} else {
 		RealHTTPServer(c)
 	}
