@@ -40,10 +40,22 @@ var _ = Describe("Controller", func() {
         Context("fetches", func() {
             It("kmake", func() {
                 ns := "ns1"
-                kmakes, err := kmc.Kmakes(context.Background(), &ns, nil)
+                n := "test-kmake"
+                kmakes, err := kmc.Kmakes(context.Background(), &ns, &n)
                 Expect(err).To(BeNil())
-                Expect(kmakes[0].GetName()).To(Equal("test-kmake"))
+                Expect(kmakes[0].GetName()).To(Equal(n))
+                Expect(kmakes[0].GetNamespace()).To(Equal(ns))
+                Expect(len(kmakes)).To(Equal(1))
+
             })
+            // It("kmakeruns", func() {
+            //     ns := "ns1"
+            //     n := "test-kmake"
+            //     kmakeruns, err := kmc.Kmakerunss(context.Background(), &ns, &n)
+            //     Expect(err).To(BeNil())
+            //     Expect(kmakes[0].GetName()).To(Equal(n))
+            //     Expect(kmakes[0].GetNamespace()).To(Equal(ns))
+            // })
         })
     })
 })
