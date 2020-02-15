@@ -1,4 +1,4 @@
-package fake_test
+package fakek8s_test
 
 import (
 	"testing"

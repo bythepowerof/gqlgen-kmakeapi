@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/99designs/gqlgen/handler"
-	"github.com/bythepowerof/gqlgen-kmakeapi/controller"
-	"github.com/bythepowerof/gqlgen-kmakeapi/fake"
+	// "github.com/99designs/gqlgen/handler"
+	// "github.com/bythepowerof/gqlgen-kmakeapi/controller"
+	"github.com/bythepowerof/gqlgen-kmakeapi/fakek8s"
 	"github.com/bythepowerof/gqlgen-kmakeapi/view"
 
 	bythepowerofv1 "github.com/bythepowerof/kmake-controller/api/v1"
@@ -18,6 +18,13 @@ import (
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
+
+	// k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	// myhandler "github.com/99designs/gqlgen/graphql/handler"
+	// gclient "github.com/99designs/gqlgen/client"
+
+
+
 )
 
 const defaultPort = "8080"
@@ -26,19 +33,31 @@ func RealK8sClient(config *rest.Config, options client.Options) (client.Client, 
 	return client.New(config, options)
 }
 
-func RealHTTPServer(c client.Client) {
-	http.Handle("/", handler.Playground("GraphQL playground", "/query"))
-	http.Handle("/query", handler.GraphQL(
-		gqlgen_kmakeapi.NewExecutableSchema(
-			gqlgen_kmakeapi.Config{
-				Resolvers: &gqlgen_kmakeapi.Resolver{
-					KmakeController: &controller.KubernetesController{Client: c},
-				},
-			},
-		),
-	),
-	)
-}
+// func RealHTTPServer(c client.Client) {
+// 	http.Handle("/", handler.Playground("GraphQL playground", "/query"))
+// 	http.Handle("/query", handler.GraphQL(
+// 		gqlgen_kmakeapi.NewExecutableSchema(
+// 			gqlgen_kmakeapi.Config{
+// 				Resolvers: &gqlgen_kmakeapi.Resolver{
+// 					KmakeController: &controller.KubernetesController{Client: c},
+// 				},
+// 			},
+// 		),
+// 	),
+// 	)
+// }
+
+// func FakeHTTPServer(c k8sclient.Client) {
+// 	gclient.New(myhandler.NewDefaultServer(gqlgen_kmakeapi.NewExecutableSchema(
+// 		gqlgen_kmakeapi.Config{
+// 			Resolvers: &gqlgen_kmakeapi.Resolver{
+// 				KmakeController: &controller.KubernetesController{
+// 					Client: c,
+// 				},
+// 			},
+// 		},
+// 	)))
+// }
 
 func processArgs(fakeK8sClient *bool, fakeHTTPServer *bool, port *string) {
 	flag.BoolVar(fakeK8sClient, "fake-k8s", false, "Use fake k8s client")
@@ -63,7 +82,7 @@ func main() {
 	var err error
 
 	if fakeK8sClient {
-		c, err = fake.FakeK8sClient(scheme)
+		c, err = fakek8s.FakeK8sClient()
 	} else {
 		c, err = RealK8sClient(config.GetConfigOrDie(), client.Options{Scheme: scheme})
 	}
@@ -74,22 +93,10 @@ func main() {
 	}
 
 	if fakeHTTPServer {
-		fake.FakeHTTPServer(c)
+		gqlgen_kmakeapi.FakeHTTPServer(c)
 	} else {
-		RealHTTPServer(c)
+		gqlgen_kmakeapi.RealHTTPServer(c)
 	}
-
-	// http.Handle("/", handler.Playground("GraphQL playground", "/query"))
-	// http.Handle("/query", handler.GraphQL(
-	// 	gqlgen_kmakeapi.NewExecutableSchema(
-	// 		gqlgen_kmakeapi.Config{
-	// 			Resolvers: &gqlgen_kmakeapi.Resolver{
-	// 				KmakeController: &controller.KubernetesController{Client: c},
-	// 			},
-	// 		},
-	// 	),
-	// ),
-	// )
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
