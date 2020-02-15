@@ -1,10 +1,6 @@
-package fakek8s
+package k8s
 
 import (
-	// "github.com/99designs/gqlgen/client"
-	// "github.com/99designs/gqlgen/graphql/handler"
-	// "github.com/bythepowerof/gqlgen-kmakeapi/controller"
-	// "github.com/bythepowerof/gqlgen-kmakeapi/view"
 	bythepowerofv1 "github.com/bythepowerof/kmake-controller/api/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -33,21 +29,6 @@ func FakeK8sClient() (k8sclient.Client, error) {
 
 	return k8sfakeclient.NewFakeClientWithScheme(scheme,
 		kmake,
-		// kmakerun,
-		// kmakeschedulerun,
-		// kmakesnowscheduler,
-		// namespace,
 	), nil
 }
 
-// func FakeHTTPServer(c k8sclient.Client) {
-// 	client.New(handler.NewDefaultServer(gqlgen_kmakeapi.NewExecutableSchema(
-// 		gqlgen_kmakeapi.Config{
-// 			Resolvers: &gqlgen_kmakeapi.Resolver{
-// 				KmakeController: &controller.KubernetesController{
-// 					Client: c,
-// 				},
-// 			},
-// 		},
-// 	)))
-// }

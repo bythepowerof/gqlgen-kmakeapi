@@ -1,7 +1,6 @@
 
 package gqlgen_kmakeapi
 
-
 import (
 	"net/http"
 
@@ -27,8 +26,8 @@ func RealHTTPServer(c client.Client) {
 	)
 }
 
-func FakeHTTPServer(c k8sclient.Client) {
-	gclient.New(myhandler.NewDefaultServer(NewExecutableSchema(
+func FakeHTTPServer(c k8sclient.Client) *gclient.Client{
+	return gclient.New(myhandler.NewDefaultServer(NewExecutableSchema(
 		Config{
 			Resolvers: &Resolver{
 				KmakeController: &controller.KubernetesController{
