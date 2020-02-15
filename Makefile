@@ -1,4 +1,6 @@
 
+PKGS := $(shell go list github.com/bythepowerof/gqlgen-kmakeapi/...)
+
 # Build manager binary
 api: bin fmt vet
 	go build -o bin/api server/server.go
@@ -29,6 +31,6 @@ bin:
 	mkdir $@
 
 test:
-	go test ./...
+	go test -count 1 -coverpkg $(PKGS) ./...
 
 .PHONY: server build test fix diff

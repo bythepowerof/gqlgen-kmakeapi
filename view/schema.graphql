@@ -11,8 +11,23 @@ type Query {
 
 }
 
-# type Mutation {
-# }
+input NewReset {
+  namespace: String!
+  kmakescheduler: String!
+  full: Boolean!
+}
+
+input RunLevelIn {
+  namespace: String!
+  kmakerun: String!
+  kmakescheduler: String!
+}
+
+type Mutation {
+  reset(input: NewReset!): KmakeScheduleRun!
+  stop(input: RunLevelIn!): KmakeScheduleRun!
+  restart(input: RunLevelIn!): KmakeScheduleRun!
+}
 
 type Namespace {
   name: String!

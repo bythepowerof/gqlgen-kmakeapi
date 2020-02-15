@@ -51,6 +51,10 @@ models:
     model: controller.JobType
   RunType:
     model: controller.RunType
+  NewReset:
+    model: controller.NewReset
+  NewStop:
+    model: controller.RunLevelIn
   KV:
     model: v1.KV
   KmakeScheduleRun:
