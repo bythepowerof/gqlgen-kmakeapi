@@ -33,4 +33,4 @@ bin:
 test:
 	go test -count 1 -coverpkg $(PKGS) ./...
 
-.PHONY: server build test fix diff
+.PHONY: server build test fix diff fmt vet 

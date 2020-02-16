@@ -2,3 +2,4 @@
 bin
 resolver.go.sav
 *.out
+coverage.txt
