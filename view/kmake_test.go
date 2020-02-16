@@ -6,9 +6,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"github.com/99designs/gqlgen/client"
 	"github.com/bythepowerof/gqlgen-kmakeapi/k8s"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var _ = Describe("Fake client", func() {

@@ -19,7 +19,10 @@ fix: view/resolver.go
 diff: fix
 	-diff -q --from-file view/resolver.go viw/resolver.go.sav 
 
-build: diff bin fmt vet
+build: diff bin tidy fmt vet
+
+tidy:
+	go mod tidy
 
 fmt:
 	go fmt ./...
@@ -33,4 +36,4 @@ bin:
 test:
 	go test -count 1 -coverpkg $(PKGS) ./...
 
-.PHONY: server build test fix diff
+.PHONY: server build test fix diff fmt vet tidy
