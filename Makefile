@@ -1,5 +1,5 @@
 
-PKGS := $(shell go list github.com/bythepowerof/gqlgen-kmakeapi/...)
+PKGS := github.com/bythepowerof/gqlgen-kmakeapi,github.com/bythepowerof/gqlgen-kmakeapi/controller,github.com/bythepowerof/gqlgen-kmakeapi/k8s github.com/bythepowerof/gqlgen-kmakeapi/view
 
 # Build manager binary
 api: bin fmt vet
