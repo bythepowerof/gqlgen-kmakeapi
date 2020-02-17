@@ -3,10 +3,10 @@ PKGS := $(shell go list github.com/bythepowerof/gqlgen-kmakeapi/...)
 
 # Build manager binary
 api: bin fmt vet
-	go build -o bin/api server/server.go
+	go build -o bin/api 
 
 server: build
-	go run server/server.go
+	go run main.go
 
 view/resolver.go: view/schema.graphql view/gqlgen.yml
 	-mv view/resolver.go view/resolver.go.sav
