@@ -1,5 +1,5 @@
 
-PKGS := github.com/bythepowerof/gqlgen-kmakeapi,github.com/bythepowerof/gqlgen-kmakeapi/controller,github.com/bythepowerof/gqlgen-kmakeapi/k8s github.com/bythepowerof/gqlgen-kmakeapi/view
+PKGS := github.com/bythepowerof/gqlgen-kmakeapi,github.com/bythepowerof/gqlgen-kmakeapi/controller,github.com/bythepowerof/gqlgen-kmakeapi/k8s,github.com/bythepowerof/gqlgen-kmakeapi/view
 
 # Build manager binary
 api: bin fmt vet
@@ -34,6 +34,9 @@ bin:
 	mkdir $@
 
 test:
-	go test -count 1 -coverpkg $(PKGS) ./...
+	go test -count 1 -coverpkg $(PKGS) -coverprofile cover.out ./...
 
-.PHONY: server build test fix diff fmt vet tidy
+cover: test
+	go tool cover -html=cover.out
+
+.PHONY: server build test fix diff fmt vet tidy cover

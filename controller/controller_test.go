@@ -37,6 +37,13 @@ var _ = Describe("Controller", func() {
 			})
 		})
 		Context("fetches", func() {
+			It("namespace", func() {
+				ns := "ns1"
+				namespaces, err := kmc.Namespaces(context.Background(), &ns)
+				Expect(err).To(BeNil())
+				Expect(namespaces[0].GetName()).To(Equal(ns))
+				Expect(len(namespaces)).To(Equal(1))
+			})
 			It("kmake", func() {
 				ns := "ns1"
 				n := "test-kmake"
@@ -45,16 +52,90 @@ var _ = Describe("Controller", func() {
 				Expect(kmakes[0].GetName()).To(Equal(n))
 				Expect(kmakes[0].GetNamespace()).To(Equal(ns))
 				Expect(len(kmakes)).To(Equal(1))
-
 			})
-			// It("kmakeruns", func() {
-			//     ns := "ns1"
-			//     n := "test-kmake"
-			//     kmakeruns, err := kmc.Kmakerunss(context.Background(), &ns, &n)
-			//     Expect(err).To(BeNil())
-			//     Expect(kmakes[0].GetName()).To(Equal(n))
-			//     Expect(kmakes[0].GetNamespace()).To(Equal(ns))
-			// })
+			It("kmakerun", func() {
+				ns := "ns1"
+				n := "test-kmake-run"
+				km := "test-kmake"
+				jt := JobTypeJob
+				kmakeruns, err := kmc.Kmakeruns(context.Background(), &ns, &km, &jt, &n)
+
+				Expect(err).To(BeNil())
+				Expect(kmakeruns[0].GetName()).To(Equal(n))
+				Expect(kmakeruns[0].GetNamespace()).To(Equal(ns))
+				Expect(len(kmakeruns)).To(Equal(1))
+			})
+			It("now scheduler", func() {
+				ns := "ns1"
+				n := "test-now-scheduler"
+				mon := "now"
+				schedulers, err := kmc.Kmakenowschedulers(context.Background(), ns, &n, &mon)
+				Expect(err).To(BeNil())
+				Expect(schedulers[0].GetName()).To(Equal(n))
+				Expect(schedulers[0].GetNamespace()).To(Equal(ns))
+				Expect(len(schedulers)).To(Equal(1))
+			})
+			It("kmakeschedulerun", func() {
+				ns := "ns1"
+				n := "test-kmakeschedulerun"
+				km := "test-kmake"
+				kmr := "test-kmake-run"
+				sched := "test-now-scheduler"
+				rt := RunTypeStart
+
+				kmsr, err := kmc.Kmakescheduleruns(context.Background(), ns, &km, &kmr, &sched, &n, &rt)
+
+				Expect(err).To(BeNil())
+				Expect(kmsr[0].GetName()).To(Equal(n))
+				Expect(kmsr[0].GetNamespace()).To(Equal(ns))
+				Expect(len(kmsr)).To(Equal(1))
+			})
+		})
+	})
+
+	// these have to separate as GenerateName does not work for fake clients
+	Describe("resetting a schedule", func() {
+		Context("resetting a scheduler", func() {
+			It("create schedule run", func() {
+				ns := "ns1"
+				sched := "test-now-scheduler"
+				rt := RunTypeReset
+
+				By("resetting a scheduler")
+				kmsr, err := kmc.CreateScheduleRun(context.Background(), ns, nil, nil, &sched, &rt, map[string]string{"full": "true"})
+				Expect(err).To(BeNil())
+				Expect(kmsr.GetNamespace()).To(Equal(ns))
+			})
+		})
+	})
+	Describe("stopping a run", func() {
+		Context("stopping a run", func() {
+			It("stopping a run", func() {
+				ns := "ns1"
+				sched := "test-now-scheduler"
+				rt := RunTypeStop
+				kmr := "test-kmake-run"
+
+				By("stopping a run")
+				kmsr2, err := kmc.CreateScheduleRun(context.Background(), ns, nil, &kmr, &sched, &rt, nil)
+				Expect(err).To(BeNil())
+				Expect(kmsr2.GetNamespace()).To(Equal(ns))
+			})
+		})
+	})
+	Describe("restarting a run", func() {
+		Context("restarting a run", func() {
+			It("restarting a run", func() {
+				ns := "ns1"
+				sched := "test-now-scheduler"
+				rt := RunTypeRestart
+				kmr := "test-kmake-run"
+
+				By("stopping a run")
+				kmsr2, err := kmc.CreateScheduleRun(context.Background(), ns, nil, &kmr, &sched, &rt, nil)
+				Expect(err).To(BeNil())
+				Expect(kmsr2.GetNamespace()).To(Equal(ns))
+			})
 		})
 	})
 })
