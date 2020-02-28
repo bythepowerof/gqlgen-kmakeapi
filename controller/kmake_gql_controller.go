@@ -219,7 +219,7 @@ func (r *KubernetesController) Kmakenowschedulers(ctx context.Context, namespace
 		if monitor == nil {
 			ret = append(ret, &kmakeNowSchedulerList.Items[i])
 		} else {
-			for _, m := range(kmakeNowSchedulerList.Items[i].Spec.Monitor) {
+			for _, m := range kmakeNowSchedulerList.Items[i].Spec.Monitor {
 				if m == *monitor {
 					ret = append(ret, &kmakeNowSchedulerList.Items[i])
 					break

@@ -26,30 +26,6 @@ var _ = Describe("Fake client", func() {
 
 	Context("with default scheme.Scheme", func() {
 		It("should be able to get", func() {
-			By("Namespace")
-			var resp1 struct {
-				Namespaces []struct{ Name string }
-			}
-			c.MustPost(`{ namespaces(name: "ns1") { name } }`, &resp1)
-
-			Expect(resp1.Namespaces[0].Name).To(Equal("ns1"))
-
-			By("Kmake")
-			var resp struct {
-				Kmakes []struct{ Name string }
-			}
-			c.MustPost(`{ kmakes(namespace: "ns1") { name } }`, &resp)
-
-			Expect(resp.Kmakes[0].Name).To(Equal("test-kmake"))
-
-			By("Kmakerun")
-			var resp3 struct {
-				Kmakeruns []struct{ Name string }
-			}
-			c.MustPost(`{ kmakeruns(namespace: "ns1") { name } }`, &resp3)
-
-			Expect(resp3.Kmakeruns[0].Name).To(Equal("test-kmake-run"))
-
 			By("scheduler")
 			var resp2 struct {
 				KmakeSchedulers []struct{ Name string }
@@ -60,15 +36,4 @@ var _ = Describe("Fake client", func() {
 		})
 
 	})
-
-	// Context("with given scheme", func() {
-	// 	BeforeEach(func(done Done) {
-	// 		scheme := runtime.NewScheme()
-	// 		Expect(corev1.AddToScheme(scheme)).To(Succeed())
-	// 		Expect(appsv1.AddToScheme(scheme)).To(Succeed())
-	// 		cl = fake.NewFakeClientWithScheme(scheme, dep, dep2, cm)
-	// 		close(done)
-	// 	})
-	// 	AssertClientBehavior()
-	// })
 })

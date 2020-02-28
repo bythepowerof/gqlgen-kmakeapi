@@ -26,13 +26,13 @@ var _ = Describe("Fake client", func() {
 
 	Context("with default scheme.Scheme", func() {
 		It("should be able to get", func() {
-			By("schedulerun")
+			By("Kmakerun")
 			var resp struct {
-				KmakeScheduleruns []struct{ Name string }
+				Kmakeruns []struct{ Name string }
 			}
-			c.MustPost(`{ kmakescheduleruns(namespace: "ns1") { name } }`, &resp)
+			c.MustPost(`{ kmakeruns(namespace: "ns1") { name } }`, &resp)
 
-			Expect(resp.KmakeScheduleruns[0].Name).To(Equal("test-kmakeschedulerun"))
+			Expect(resp.Kmakeruns[0].Name).To(Equal("test-kmake-run"))
 		})
 
 	})
