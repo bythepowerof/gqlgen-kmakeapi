@@ -32,7 +32,7 @@ var _ = Describe("Fake client", func() {
 			}
 			c.MustPost(`{ namespaces(name: "ns1") { name } }`, &resp)
 
-			 Expect(resp.Namespaces[0].Name).To(Equal("ns1"))
+			Expect(resp.Namespaces[0].Name).To(Equal("ns1"))
 		})
 
 	})
