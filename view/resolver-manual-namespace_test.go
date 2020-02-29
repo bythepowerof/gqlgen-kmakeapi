@@ -26,13 +26,13 @@ var _ = Describe("Fake client", func() {
 
 	Context("with default scheme.Scheme", func() {
 		It("should be able to get", func() {
-			By("kmake objects")
+			By("namespace")
 			var resp struct {
-				KmakeObjects []struct{ Name string }
+				Namespaces []struct{ Name string }
 			}
-			c.MustPost(`{ kmakeObjects(namespace: "ns1") { name } }`, &resp)
+			c.MustPost(`{ namespaces(name: "ns1") { name } }`, &resp)
 
-			Expect(len(resp.KmakeObjects)).To(Equal(4))
+			 Expect(resp.Namespaces[0].Name).To(Equal("ns1"))
 		})
 
 	})
