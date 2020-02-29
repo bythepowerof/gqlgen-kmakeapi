@@ -26,14 +26,14 @@ var _ = Describe("Fake client", func() {
 
 	Context("with default scheme.Scheme", func() {
 		It("should be able to get", func() {
-			By("Kmake")
+			By("kmake obkects")
 			var resp struct {
-				Kmakes []struct{ Name string }
+				KmakeObjects []struct{ Name string }
 			}
-			c.MustPost(`{ kmakes(namespace: "ns1") { name } }`, &resp)
+			c.MustPost(`{ kmakeObjects(namespace: "ns1") { name } }`, &resp)
 
-			Expect(resp.Kmakes[0].Name).To(Equal("test-kmake"))
-
+			Expect(len(resp.KmakeObjects)).To(Equal(4))
 		})
+
 	})
 })
