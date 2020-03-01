@@ -11,6 +11,7 @@ import (
 func (r *kmakeRunJobResolver) Image(ctx context.Context, obj *v1.KmakeRunJob) (string, error) {
 	return obj.Template.Spec.Containers[0].Image, nil
 }
+
 func (r *kmakeRunJobResolver) Command(ctx context.Context, obj *v1.KmakeRunJob) ([]*string, error) {
 	ret := make([]*string, 0)
 
@@ -20,10 +21,12 @@ func (r *kmakeRunJobResolver) Command(ctx context.Context, obj *v1.KmakeRunJob) 
 
 	return ret, nil
 }
+
 func (r *kmakeRunResolver) Kmakename(ctx context.Context, obj *v1.KmakeRun) (*string, error) {
 	kmakename := obj.GetKmakeName()
 	return &kmakename, nil
 }
+
 func (r *kmakeRunJobResolver) Args(ctx context.Context, obj *v1.KmakeRunJob) ([]*string, error) {
 	ret := make([]*string, 0)
 
@@ -31,10 +34,6 @@ func (r *kmakeRunJobResolver) Args(ctx context.Context, obj *v1.KmakeRunJob) ([]
 		ret = append(ret, &obj.Template.Spec.Containers[0].Args[i])
 	}
 	return ret, nil
-}
-
-func (r *queryResolver) Kmakeruns(ctx context.Context, namespace string, kmake *string, jobtype *controller.JobType, kmakerun *string) ([]*v1.KmakeRun, error) {
-	return r.KmakeController.Kmakeruns(ctx, &namespace, kmake, jobtype, kmakerun)
 }
 
 func (r *kmakeRunResolver) Schedulerun(ctx context.Context, obj *v1.KmakeRun, kmakescheduler *string, name *string, runtype *controller.RunType) ([]*v1.KmakeScheduleRun, error) {

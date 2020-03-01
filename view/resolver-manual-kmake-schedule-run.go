@@ -3,14 +3,9 @@ package gqlgen_kmakeapi
 import (
 	"context"
 
-	"github.com/bythepowerof/gqlgen-kmakeapi/controller"
 	"github.com/bythepowerof/kmake-controller/api/v1"
 	"github.com/bythepowerof/kmake-controller/gql"
 )
-
-func (r *queryResolver) Kmakescheduleruns(ctx context.Context, namespace string, kmake *string, kmakerun *string, kmakescheduler *string, name *string, runtype *controller.RunType) ([]*v1.KmakeScheduleRun, error) {
-	return r.KmakeController.Kmakescheduleruns(ctx, namespace, kmake, kmakerun, kmakescheduler, name, runtype)
-}
 
 func (r *kmakeScheduleRunResolver) Kmakename(ctx context.Context, obj *v1.KmakeScheduleRun) (*string, error) {
 	ret := obj.GetKmakeName()
