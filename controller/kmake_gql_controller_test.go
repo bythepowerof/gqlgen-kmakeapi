@@ -14,10 +14,13 @@ import (
 var _ = Describe("Controller", func() {
 	var k k8sclient.Client
 	var kmc *KubernetesController
+	var fo *k8s.FakeObjects
 
 	BeforeEach(func() {
 		var err error
-		k, err = k8s.FakeK8sClient()
+		fo = &k8s.FakeObjects{}
+
+		k, err = fo.FakeK8sClient()
 		Expect(err).To(BeNil())
 
 		kmc = &KubernetesController{Client: k}

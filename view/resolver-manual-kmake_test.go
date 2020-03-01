@@ -2,6 +2,7 @@ package gqlgen_kmakeapi
 
 import (
 	// "encoding/json"
+	"context"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -14,14 +15,19 @@ import (
 var _ = Describe("Fake client", func() {
 	var k k8sclient.Client
 	var c *client.Client
+	var fo *k8s.FakeObjects
+	var r *kmakeResolver
 
 	BeforeEach(func() {
 
 		var err error
-		k, err = k8s.FakeK8sClient()
+		fo = &k8s.FakeObjects{}
+
+		k, err = fo.FakeK8sClient()
 		Expect(err).To(BeNil())
 
 		c = FakeHTTPServer(k)
+		r = &kmakeResolver{}
 	})
 
 	Context("with default scheme.Scheme", func() {
@@ -31,9 +37,13 @@ var _ = Describe("Fake client", func() {
 				Kmakes []struct{ Name string }
 			}
 			c.MustPost(`{ kmakes(namespace: "ns1") { name } }`, &resp)
-
 			Expect(resp.Kmakes[0].Name).To(Equal("test-kmake"))
 
+			By("Variables")
+			vars, err := r.Variables(context.Background(), fo.FakeKmake())
+			Expect(err).To(BeNil())
+			Expect(len(vars)).To(Equal(2))
 		})
 	})
 })
+

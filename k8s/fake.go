@@ -10,25 +10,33 @@ import (
 	k8sfakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-func FakeK8sClient() (k8sclient.Client, error) {
-	scheme := runtime.NewScheme()
-	_ = clientgoscheme.AddToScheme(scheme)
-	_ = bythepowerofv1.AddToScheme(scheme)
+type FakeObjects struct {}
 
-	ns := &v11.Namespace{
+func (*FakeObjects) FakeNs() *v11.Namespace { 
+	return &v11.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "ns1",
 		},
 	}
+}
 
-	kmake := &bythepowerofv1.Kmake{
+func (*FakeObjects) FakeKmake() *bythepowerofv1.Kmake { 
+	return &bythepowerofv1.Kmake{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-kmake",
 			Namespace: "ns1",
 		},
+		Spec: bythepowerofv1.KmakeSpec{
+			Variables: map[string]string{
+				"VAR1": "Value1",
+				"VAR2": "Value2",
+			},
+		},
 	}
+}
 
-	kmakerun := &bythepowerofv1.KmakeRun{
+func (*FakeObjects) FakeKmakeRun() *bythepowerofv1.KmakeRun { 
+	return &bythepowerofv1.KmakeRun{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-kmake-run",
 			Namespace: "ns1",
@@ -44,8 +52,10 @@ func FakeK8sClient() (k8sclient.Client, error) {
 			},
 		},
 	}
+}
 
-	kmakescheduler := &bythepowerofv1.KmakeNowScheduler{
+func (*FakeObjects) FakeKmakeNowScheduler() *bythepowerofv1.KmakeNowScheduler { 
+	return &bythepowerofv1.KmakeNowScheduler{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-now-scheduler",
 			Namespace: "ns1",
@@ -54,8 +64,10 @@ func FakeK8sClient() (k8sclient.Client, error) {
 			Monitor: []string{"now"},
 		},
 	}
+}
 
-	kmakeschedulerun := &bythepowerofv1.KmakeScheduleRun{
+func (*FakeObjects) KmakeScheduleRun() *bythepowerofv1.KmakeScheduleRun { 
+	return &bythepowerofv1.KmakeScheduleRun{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-kmakeschedulerun",
 			Namespace: "ns1",
@@ -71,8 +83,14 @@ func FakeK8sClient() (k8sclient.Client, error) {
 			},
 		},
 	}
+}
+
+func (fo *FakeObjects) FakeK8sClient() (k8sclient.Client, error) {
+	scheme := runtime.NewScheme()
+	_ = clientgoscheme.AddToScheme(scheme)
+	_ = bythepowerofv1.AddToScheme(scheme)
 
 	return k8sfakeclient.NewFakeClientWithScheme(scheme,
-		ns, kmake, kmakerun, kmakescheduler, kmakeschedulerun,
+		fo.FakeNs(), fo.FakeKmake(), fo.FakeKmakeRun(), fo.FakeKmakeNowScheduler(), fo.KmakeScheduleRun(),
 	), nil
 }
