@@ -10,13 +10,15 @@ import (
 	"github.com/99designs/gqlgen/client"
 	"github.com/bythepowerof/gqlgen-kmakeapi/k8s"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/bythepowerof/gqlgen-kmakeapi/controller"
+
 )
 
 var _ = Describe("Fake client", func() {
 	var k k8sclient.Client
 	var c *client.Client
 	var fo *k8s.FakeObjects
-	var r *kmakeResolver
+	var r KmakeResolver
 
 	BeforeEach(func() {
 
@@ -27,7 +29,12 @@ var _ = Describe("Fake client", func() {
 		Expect(err).To(BeNil())
 
 		c = FakeHTTPServer(k)
-		r = &kmakeResolver{}
+		res := &Resolver{
+			KmakeController: &controller.KubernetesController{
+				Client: k,
+			},
+		}
+		r = res.Kmake()
 	})
 
 	Context("with default scheme.Scheme", func() {
@@ -43,6 +50,17 @@ var _ = Describe("Fake client", func() {
 			vars, err := r.Variables(context.Background(), fo.FakeKmake())
 			Expect(err).To(BeNil())
 			Expect(len(vars)).To(Equal(2))
+
+
+			By("Rules")
+			rules, err := r.Rules(context.Background(), fo.FakeKmake())
+			Expect(err).To(BeNil())
+			Expect(len(rules)).To(Equal(2))
+
+			By("Runs")
+			runs, err := r.Runs(context.Background(), fo.FakeKmake(), nil, nil)
+			Expect(err).To(BeNil())
+			Expect(len(runs)).To(Equal(1))
 		})
 	})
 })

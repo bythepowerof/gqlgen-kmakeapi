@@ -31,6 +31,16 @@ func (*FakeObjects) FakeKmake() *bythepowerofv1.Kmake {
 				"VAR1": "Value1",
 				"VAR2": "Value2",
 			},
+			Rules: []bythepowerofv1.KmakeRule{
+				bythepowerofv1.KmakeRule{
+					Targets: []string{"Rule1"},
+					Commands: []string{"@echo $@"},
+				},
+				bythepowerofv1.KmakeRule{
+					Targets: []string{"Rule2"},
+					Commands: []string{"@echo $@"},
+				},
+			},
 		},
 	}
 }
