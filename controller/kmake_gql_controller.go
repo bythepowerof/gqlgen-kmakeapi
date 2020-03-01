@@ -216,7 +216,16 @@ func (r *KubernetesController) Kmakenowschedulers(ctx context.Context, namespace
 	}
 
 	for i := 0; i < len(kmakeNowSchedulerList.Items); i++ {
-		ret = append(ret, &kmakeNowSchedulerList.Items[i])
+		if monitor == nil {
+			ret = append(ret, &kmakeNowSchedulerList.Items[i])
+		} else {
+			for _, m := range kmakeNowSchedulerList.Items[i].Spec.Monitor {
+				if m == *monitor {
+					ret = append(ret, &kmakeNowSchedulerList.Items[i])
+					break
+				}
+			}
+		}
 	}
 	return ret, nil
 }
@@ -267,10 +276,6 @@ func (r *KubernetesController) CreateScheduleRun(ctx context.Context, namespace 
 	}
 
 	kmakeschedulerun.Spec.KmakeScheduleRunOperation = op
-
-	// if kmake != nil {
-	// 	kmakeschedulerun.Labels["bythepowerof.github.io/kmake"] = *kmake
-	// }
 
 	err := r.Client.Create(context.Background(), kmakeschedulerun)
 	if err != nil {

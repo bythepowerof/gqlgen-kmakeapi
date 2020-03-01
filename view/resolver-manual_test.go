@@ -14,11 +14,14 @@ import (
 var _ = Describe("Fake client", func() {
 	var k k8sclient.Client
 	var c *client.Client
+	var fo *k8s.FakeObjects
 
 	BeforeEach(func() {
 
 		var err error
-		k, err = k8s.FakeK8sClient()
+		fo = &k8s.FakeObjects{}
+
+		k, err = fo.FakeK8sClient()
 		Expect(err).To(BeNil())
 
 		c = FakeHTTPServer(k)
@@ -26,24 +29,14 @@ var _ = Describe("Fake client", func() {
 
 	Context("with default scheme.Scheme", func() {
 		It("should be able to get", func() {
-			By("Kmake")
+			By("kmake objects")
 			var resp struct {
-				Kmakes []struct{ Name string }
+				KmakeObjects []struct{ Name string }
 			}
-			c.MustPost(`{ kmakes(namespace: "ns1") { name } }`, &resp)
+			c.MustPost(`{ kmakeObjects(namespace: "ns1") { name } }`, &resp)
 
-			Expect(resp.Kmakes[0].Name).To(Equal("test-kmake"))
+			Expect(len(resp.KmakeObjects)).To(Equal(4))
 		})
-	})
 
-	// Context("with given scheme", func() {
-	// 	BeforeEach(func(done Done) {
-	// 		scheme := runtime.NewScheme()
-	// 		Expect(corev1.AddToScheme(scheme)).To(Succeed())
-	// 		Expect(appsv1.AddToScheme(scheme)).To(Succeed())
-	// 		cl = fake.NewFakeClientWithScheme(scheme, dep, dep2, cm)
-	// 		close(done)
-	// 	})
-	// 	AssertClientBehavior()
-	// })
+	})
 })

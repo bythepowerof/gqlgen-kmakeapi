@@ -41,7 +41,8 @@ func main() {
 	var err error
 
 	if fakeK8sClient {
-		c, err = k8s.FakeK8sClient()
+		fo := &k8s.FakeObjects{}
+		c, err = fo.FakeK8sClient()
 	} else {
 		c, err = k8s.RealK8sClient(config.GetConfigOrDie(), client.Options{Scheme: scheme})
 	}

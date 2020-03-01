@@ -5,13 +5,7 @@ import (
 
 	"github.com/bythepowerof/gqlgen-kmakeapi/controller"
 	"github.com/bythepowerof/kmake-controller/api/v1"
-	v11 "k8s.io/api/core/v1"
 )
-
-func (r *namespaceResolver) Kmakes(ctx context.Context, obj *v11.Namespace, name *string) ([]*v1.Kmake, error) {
-	namespace := obj.GetName()
-	return r.KmakeController.Kmakes(ctx, &namespace, name)
-}
 
 func (r *kmakeResolver) Variables(ctx context.Context, obj *v1.Kmake) ([]*v1.KV, error) {
 
@@ -38,8 +32,4 @@ func (r *kmakeResolver) Runs(ctx context.Context, obj *v1.Kmake, jobtype *contro
 	kmakename := obj.GetName()
 
 	return r.KmakeController.Kmakeruns(ctx, &namespace, &kmakename, jobtype, name)
-}
-
-func (r *queryResolver) Kmakes(ctx context.Context, namespace string, kmake *string) ([]*v1.Kmake, error) {
-	return r.KmakeController.Kmakes(ctx, &namespace, kmake)
 }
