@@ -6,9 +6,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/bythepowerof/gqlgen-kmakeapi/controller"
 	"github.com/bythepowerof/gqlgen-kmakeapi/k8s"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
-	"github.com/bythepowerof/gqlgen-kmakeapi/controller"
 )
 
 var _ = Describe("Fake client", func() {
@@ -34,7 +34,7 @@ var _ = Describe("Fake client", func() {
 	Describe("with kmake method", func() {
 		Context("should be able to get", func() {
 
-			It("Variables",func() {
+			It("Variables", func() {
 				vars, err := r.Variables(context.Background(), fo.FakeKmake())
 				Expect(err).To(BeNil())
 				Expect(len(vars)).To(Equal(2))

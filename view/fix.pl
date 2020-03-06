@@ -113,6 +113,7 @@ var _ = Describe("Fake client", func() {
 |;
 
 foreach (keys %tests) {
+	my $original_file = $_;
 	my ($k) = s/.go/_test.go/;
 	if (-e $_) {
 		print "$_ exists\n";
@@ -122,4 +123,17 @@ foreach (keys %tests) {
 		printf f $test_file, "XXX", "XXX";
 		close f;
 	}
+
+	my @res = `grep It $_`;
+	my %defined_tests;
+	foreach my $l (@res) {
+		my ($f) = $l =~ /"(\w+)"/;
+		$defined_tests{$f} = $l;
+	}
+
+	print "file $original_file\n";
+	foreach my $l (@{$tests{$original_file}}) {
+		print $l;
+	}
+
 }

@@ -39,19 +39,19 @@ type RunLevelIn struct {
 	Kmakescheduler string `json:"kmakescheduler"`
 }
 type KmakeController interface {
-	Namespaces(ctx context.Context, name *string) ([]*v11.Namespace, error)
-	Kmakes(ctx context.Context, namespace *string, name *string) ([]*v1.Kmake, error)
-	Kmakeruns(ctx context.Context, namespace *string, kmakename *string, jobtype *JobType, name *string) ([]*v1.KmakeRun, error)
-	Kmakescheduleruns(ctx context.Context, namespace string, kmake *string, kmakerun *string, kmakescheduler *string, name *string, runtype *RunType) ([]*v1.KmakeScheduleRun, error)
-	Kmakenowschedulers(ctx context.Context, namespace string, name *string, monitor *string) ([]*v1.KmakeNowScheduler, error)
-	CreateScheduleRun(ctx context.Context, namespace string, kmake *string, kmakerun *string, kmakescheduler *string, runtype *RunType, opts map[string]string) (*v1.KmakeScheduleRun, error)
+	Namespaces(name *string) ([]*v11.Namespace, error)
+	Kmakes(namespace *string, name *string) ([]*v1.Kmake, error)
+	Kmakeruns(namespace *string, kmakename *string, jobtype *JobType, name *string) ([]*v1.KmakeRun, error)
+	Kmakescheduleruns(namespace string, kmake *string, kmakerun *string, kmakescheduler *string, name *string, runtype *RunType) ([]*v1.KmakeScheduleRun, error)
+	Kmakenowschedulers(namespace string, name *string, monitor *string) ([]*v1.KmakeNowScheduler, error)
+	CreateScheduleRun(namespace string, kmake *string, kmakerun *string, kmakescheduler *string, runtype *RunType, opts map[string]string) (*v1.KmakeScheduleRun, error)
 }
 
 type KubernetesController struct {
 	Client client.Client
 }
 
-func (r *KubernetesController) Namespaces(ctx context.Context, name *string) ([]*v11.Namespace, error) {
+func (r *KubernetesController) Namespaces(name *string) ([]*v11.Namespace, error) {
 
 	ret := make([]*v11.Namespace, 0)
 
@@ -74,7 +74,7 @@ func (r *KubernetesController) Namespaces(ctx context.Context, name *string) ([]
 	return ret, nil
 }
 
-func (r *KubernetesController) Kmakes(ctx context.Context, namespace *string, name *string) ([]*v1.Kmake, error) {
+func (r *KubernetesController) Kmakes(namespace *string, name *string) ([]*v1.Kmake, error) {
 	ret := make([]*v1.Kmake, 0)
 
 	kmakeList := &v1.KmakeList{}
@@ -97,7 +97,7 @@ func (r *KubernetesController) Kmakes(ctx context.Context, namespace *string, na
 	return ret, nil
 }
 
-func (r *KubernetesController) Kmakeruns(ctx context.Context, namespace *string, kmakename *string, jobtype *JobType, name *string) ([]*v1.KmakeRun, error) {
+func (r *KubernetesController) Kmakeruns(namespace *string, kmakename *string, jobtype *JobType, name *string) ([]*v1.KmakeRun, error) {
 	ret := make([]*v1.KmakeRun, 0)
 
 	kmakerunList := &v1.KmakeRunList{}
@@ -137,7 +137,7 @@ func (r *KubernetesController) Kmakeruns(ctx context.Context, namespace *string,
 	return ret, nil
 }
 
-func (r *KubernetesController) Kmakescheduleruns(ctx context.Context, namespace string, kmake *string, kmakerun *string, kmakescheduler *string, name *string, runtype *RunType) ([]*v1.KmakeScheduleRun, error) {
+func (r *KubernetesController) Kmakescheduleruns(namespace string, kmake *string, kmakerun *string, kmakescheduler *string, name *string, runtype *RunType) ([]*v1.KmakeScheduleRun, error) {
 	ret := make([]*v1.KmakeScheduleRun, 0)
 
 	kmakeschedulerunList := &v1.KmakeScheduleRunList{}
@@ -198,7 +198,7 @@ func (r *KubernetesController) Kmakescheduleruns(ctx context.Context, namespace 
 	return ret, nil
 }
 
-func (r *KubernetesController) Kmakenowschedulers(ctx context.Context, namespace string, name *string, monitor *string) ([]*v1.KmakeNowScheduler, error) {
+func (r *KubernetesController) Kmakenowschedulers(namespace string, name *string, monitor *string) ([]*v1.KmakeNowScheduler, error) {
 	ret := make([]*v1.KmakeNowScheduler, 0)
 
 	kmakeNowSchedulerList := &v1.KmakeNowSchedulerList{}
@@ -230,7 +230,7 @@ func (r *KubernetesController) Kmakenowschedulers(ctx context.Context, namespace
 	return ret, nil
 }
 
-func (r *KubernetesController) CreateScheduleRun(ctx context.Context, namespace string, kmake *string, kmakerun *string, kmakescheduler *string, runtype *RunType, opts map[string]string) (*v1.KmakeScheduleRun, error) {
+func (r *KubernetesController) CreateScheduleRun(namespace string, kmake *string, kmakerun *string, kmakescheduler *string, runtype *RunType, opts map[string]string) (*v1.KmakeScheduleRun, error) {
 	// make sure the scheduler exists...
 
 	// create a rset job for it

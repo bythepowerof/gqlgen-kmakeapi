@@ -1,4 +1,3 @@
-
 package gqlgen_kmakeapi
 
 import (
@@ -7,9 +6,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/bythepowerof/gqlgen-kmakeapi/controller"
 	"github.com/bythepowerof/gqlgen-kmakeapi/k8s"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
-	"github.com/bythepowerof/gqlgen-kmakeapi/controller"
 )
 
 var _ = Describe("Fake client", func() {
@@ -34,7 +33,7 @@ var _ = Describe("Fake client", func() {
 
 	Describe("with KmakeScheduleRun method", func() {
 		Context("should be able to get", func() {
-        //+ Methods Here
+			//+ Methods Here
 
 		})
 	})

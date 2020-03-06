@@ -4,7 +4,6 @@ import ()
 
 // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
-
 func (r *Resolver) Kmake() KmakeResolver {
 	return &kmakeResolver{r}
 }
@@ -32,24 +31,16 @@ func (r *Resolver) Query() QueryResolver {
 
 type kmakeResolver struct{ *Resolver }
 
-
 type kmakeNowSchedulerResolver struct{ *Resolver }
-
 
 type kmakeRunResolver struct{ *Resolver }
 
-
 type kmakeRunJobResolver struct{ *Resolver }
-
 
 type kmakeScheduleRunResolver struct{ *Resolver }
 
-
 type mutationResolver struct{ *Resolver }
-
 
 type namespaceResolver struct{ *Resolver }
 
-
 type queryResolver struct{ *Resolver }
-

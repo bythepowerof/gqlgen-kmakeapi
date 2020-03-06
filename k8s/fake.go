@@ -10,9 +10,9 @@ import (
 	k8sfakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-type FakeObjects struct {}
+type FakeObjects struct{}
 
-func (*FakeObjects) FakeNs() *v11.Namespace { 
+func (*FakeObjects) FakeNs() *v11.Namespace {
 	return &v11.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "ns1",
@@ -20,7 +20,7 @@ func (*FakeObjects) FakeNs() *v11.Namespace {
 	}
 }
 
-func (*FakeObjects) FakeKmake() *bythepowerofv1.Kmake { 
+func (*FakeObjects) FakeKmake() *bythepowerofv1.Kmake {
 	return &bythepowerofv1.Kmake{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-kmake",
@@ -33,11 +33,11 @@ func (*FakeObjects) FakeKmake() *bythepowerofv1.Kmake {
 			},
 			Rules: []bythepowerofv1.KmakeRule{
 				bythepowerofv1.KmakeRule{
-					Targets: []string{"Rule1"},
+					Targets:  []string{"Rule1"},
 					Commands: []string{"@echo $@"},
 				},
 				bythepowerofv1.KmakeRule{
-					Targets: []string{"Rule2"},
+					Targets:  []string{"Rule2"},
 					Commands: []string{"@echo $@"},
 				},
 			},
@@ -45,7 +45,7 @@ func (*FakeObjects) FakeKmake() *bythepowerofv1.Kmake {
 	}
 }
 
-func (*FakeObjects) FakeKmakeRun() *bythepowerofv1.KmakeRun { 
+func (*FakeObjects) FakeKmakeRun() *bythepowerofv1.KmakeRun {
 	return &bythepowerofv1.KmakeRun{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-kmake-run",
@@ -64,7 +64,7 @@ func (*FakeObjects) FakeKmakeRun() *bythepowerofv1.KmakeRun {
 	}
 }
 
-func (*FakeObjects) FakeKmakeNowScheduler() *bythepowerofv1.KmakeNowScheduler { 
+func (*FakeObjects) FakeKmakeNowScheduler() *bythepowerofv1.KmakeNowScheduler {
 	return &bythepowerofv1.KmakeNowScheduler{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-now-scheduler",
@@ -76,7 +76,7 @@ func (*FakeObjects) FakeKmakeNowScheduler() *bythepowerofv1.KmakeNowScheduler {
 	}
 }
 
-func (*FakeObjects) KmakeScheduleRun() *bythepowerofv1.KmakeScheduleRun { 
+func (*FakeObjects) KmakeScheduleRun() *bythepowerofv1.KmakeScheduleRun {
 	return &bythepowerofv1.KmakeScheduleRun{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-kmakeschedulerun",

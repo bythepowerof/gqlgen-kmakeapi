@@ -39,7 +39,7 @@ func (r *kmakeRunJobResolver) Args(ctx context.Context, obj *v1.KmakeRunJob) ([]
 func (r *kmakeRunResolver) Schedulerun(ctx context.Context, obj *v1.KmakeRun, kmakescheduler *string, name *string, runtype *controller.RunType) ([]*v1.KmakeScheduleRun, error) {
 	kmake := obj.GetKmakeName()
 	kmakerun := obj.GetName()
-	return r.KmakeController.Kmakescheduleruns(ctx, obj.GetNamespace(), &kmake, &kmakerun, kmakescheduler, name, runtype)
+	return r.KmakeController.Kmakescheduleruns(obj.GetNamespace(), &kmake, &kmakerun, kmakescheduler, name, runtype)
 }
 
 func (r *kmakeRunResolver) Operation(ctx context.Context, obj *v1.KmakeRun) (gql.KmakeRunOperation, error) {
