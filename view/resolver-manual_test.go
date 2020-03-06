@@ -1,42 +1,40 @@
+
 package gqlgen_kmakeapi
 
 import (
-	// "encoding/json"
+	// "context"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/99designs/gqlgen/client"
 	"github.com/bythepowerof/gqlgen-kmakeapi/k8s"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/bythepowerof/gqlgen-kmakeapi/controller"
 )
 
 var _ = Describe("Fake client", func() {
 	var k k8sclient.Client
-	var c *client.Client
 	var fo *k8s.FakeObjects
+	var r *Resolver
 
 	BeforeEach(func() {
-
 		var err error
 		fo = &k8s.FakeObjects{}
 
 		k, err = fo.FakeK8sClient()
 		Expect(err).To(BeNil())
 
-		c = FakeHTTPServer(k)
+		r = &Resolver{
+			KmakeController: &controller.KubernetesController{
+				Client: k,
+			},
+		}
 	})
 
-	Context("with default scheme.Scheme", func() {
-		It("should be able to get", func() {
-			By("kmake objects")
-			var resp struct {
-				KmakeObjects []struct{ Name string }
-			}
-			c.MustPost(`{ kmakeObjects(namespace: "ns1") { name } }`, &resp)
+	Describe("with XXX method", func() {
+		Context("should be able to get", func() {
+        //+ Methods Here
 
-			Expect(len(resp.KmakeObjects)).To(Equal(4))
 		})
-
 	})
 })

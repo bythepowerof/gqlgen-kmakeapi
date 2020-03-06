@@ -1,7 +1,8 @@
+
 package gqlgen_kmakeapi
 
 import (
-	"context"
+	// "context"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -14,7 +15,7 @@ import (
 var _ = Describe("Fake client", func() {
 	var k k8sclient.Client
 	var fo *k8s.FakeObjects
-	var r KmakeResolver
+	var r MutationResolver
 
 	BeforeEach(func() {
 		var err error
@@ -28,29 +29,13 @@ var _ = Describe("Fake client", func() {
 				Client: k,
 			},
 		}
-		r = res.Kmake()
+		r = res.Mutation()
 	})
 
-	Describe("with kmake method", func() {
+	Describe("with Mutation method", func() {
 		Context("should be able to get", func() {
+        //+ Methods Here
 
-			It("Variables",func() {
-				vars, err := r.Variables(context.Background(), fo.FakeKmake())
-				Expect(err).To(BeNil())
-				Expect(len(vars)).To(Equal(2))
-			})
-
-			It("Rules", func() {
-				rules, err := r.Rules(context.Background(), fo.FakeKmake())
-				Expect(err).To(BeNil())
-				Expect(len(rules)).To(Equal(2))
-			})
-
-			It("Runs", func() {
-				runs, err := r.Runs(context.Background(), fo.FakeKmake(), nil, nil)
-				Expect(err).To(BeNil())
-				Expect(len(runs)).To(Equal(1))
-			})
 		})
 	})
 })
