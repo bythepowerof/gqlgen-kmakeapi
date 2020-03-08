@@ -1,7 +1,7 @@
 package gqlgen_kmakeapi
 
 import (
-	// "context"
+	"context"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -33,8 +33,26 @@ var _ = Describe("Fake client", func() {
 
 	Describe("with Mutation method", func() {
 		Context("should be able to get", func() {
-			//+ Methods Here
 
+			It("Reset", func() {
+				reset, err := r.Reset(context.Background(), fo.FakeReset())
+				Expect(err).To(BeNil())
+				Expect(len(reset)).To(Equal(1))
+			})
+
+			It("Stop", func() {
+				stop, err := r.Stop(context.Background(), fo.FakeStop())
+				Expect(err).To(BeNil())
+				Expect(len(stop)).To(Equal(1))
+			})
+
+			It("Restart", func() {
+				restart, err := r.Restart(context.Background(), fo.FakeRestart())
+				Expect(err).To(BeNil())
+				Expect(len(restart)).To(Equal(1))
+			})
+
+			//+ Methods Here
 		})
 	})
 })

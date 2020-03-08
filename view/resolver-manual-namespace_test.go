@@ -1,7 +1,7 @@
 package gqlgen_kmakeapi
 
 import (
-	// "context"
+	"context"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -33,8 +33,14 @@ var _ = Describe("Fake client", func() {
 
 	Describe("with Namespace method", func() {
 		Context("should be able to get", func() {
-			//+ Methods Here
 
+			It("Kmakes", func() {
+				kmakes, err := r.Kmakes(context.Background(), fo.FakeNs(), nil)
+				Expect(err).To(BeNil())
+				Expect(len(kmakes)).To(Equal(1))
+			})
+
+			//+ Methods Here
 		})
 	})
 })

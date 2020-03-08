@@ -112,6 +112,14 @@ var _ = Describe("Fake client", func() {
 })
 |;
 
+my $test_code = q|
+			It("%s", func() {
+				%s, err := r.%s(context.Background(), fo.Fake%s())
+				Expect(err).To(BeNil())
+				Expect(len(%s)).To(Equal(1))
+			})
+|;
+
 foreach (keys %tests) {
 	my $original_file = $_;
 	my ($k) = s/.go/_test.go/;
@@ -131,9 +139,32 @@ foreach (keys %tests) {
 		$defined_tests{$f} = $l;
 	}
 
-	print "file $original_file\n";
+	my $new_tests;
+
 	foreach my $l (@{$tests{$original_file}}) {
-		print $l;
+		my ($t) = $l =~ /\)\s*(\w+)\(/;
+		if ($defined_tests{$t}) {
+			print "test exists for $t\n";
+		} else {
+			print "generating test for $t\n";
+			$new_tests .= sprintf($test_code, $t, lc $t, $t, $t, lc $t)
+		}
+	}
+
+	if ($new_tests) {
+		open (ff, "<$_") || die "cannot open $_: $!";
+		my @current_tests = <ff>;
+		close ff;
+
+		open (ff, ">$_") || die "cannot open $_: $!";
+
+		foreach my $l (@current_tests) {
+			if ($l =~ /\/\/\+ Methods Here/) {
+				$l = "$new_tests\n\t\t\t\//+ Methods Here";
+			}
+			print ff $l;
+		}
+		close ff;
 	}
 
 }

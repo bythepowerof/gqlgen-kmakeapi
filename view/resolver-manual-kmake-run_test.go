@@ -1,7 +1,7 @@
 package gqlgen_kmakeapi
 
 import (
-	// "context"
+	"context"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -33,8 +33,49 @@ var _ = Describe("Fake client", func() {
 
 	Describe("with KmakeRun method", func() {
 		Context("should be able to get", func() {
-			//+ Methods Here
 
+			It("Kmakename", func() {
+				kmakename, err := r.Kmakename(context.Background(), fo.FakeKmakeRun())
+				Expect(err).To(BeNil())
+				Expect(*kmakename).To(Equal("test-kmake"))
+			})
+
+			It("Operation", func() {
+				operation, err := r.Operation(context.Background(), fo.FakeKmakeRun())
+				Expect(err).To(BeNil())
+				Expect(operation).NotTo(BeNil())
+			})
+
+			It("Schedulerun", func() {
+				n := "test-kmakeschedulerun"
+				sched := "test-now-scheduler"
+				rt := controller.RunTypeStart
+
+				schedulerun, err := r.Schedulerun(context.Background(), fo.FakeKmakeRun(), &sched, &n, &rt)
+
+				Expect(err).To(BeNil())
+				Expect(schedulerun[0].GetName()).To(Equal("test-kmakeschedulerun"))
+			})
+
+			// It("Image", func() {
+			// 	image, err := r.Image(context.Background(), fo.FakeKmakeRun())
+			// 	Expect(err).To(BeNil())
+			// 	Expect(image).To(Equal(1))
+			// })
+
+			// It("Command", func() {
+			// 	command, err := r.Command(context.Background(), fo.FakeKmakeRun())
+			// 	Expect(err).To(BeNil())
+			// 	Expect(command).To(Equal(1))
+			// })
+
+			// It("Args", func() {
+			// 	args, err := r.Args(context.Background(), fo.FakeKmakeRun())
+			// 	Expect(err).To(BeNil())
+			// 	Expect(len(args)).To(Equal(1))
+			// })
+
+			//+ Methods Here
 		})
 	})
 })

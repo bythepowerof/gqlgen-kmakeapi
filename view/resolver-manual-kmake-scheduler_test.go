@@ -1,7 +1,7 @@
 package gqlgen_kmakeapi
 
 import (
-	// "context"
+	"context"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -33,8 +33,16 @@ var _ = Describe("Fake client", func() {
 
 	Describe("with KmakeNowScheduler method", func() {
 		Context("should be able to get", func() {
-			//+ Methods Here
 
+			It("Scheduleruns", func() {
+				scheduleruns, err := r.Scheduleruns(context.Background(), fo.FakeKmakeNowScheduler(), nil, nil, nil, nil)
+				// Scheduleruns(ctx context.Context, obj *v1.KmakeNowScheduler, kmake *string, kmakerun *string, name *string, runtype *controller.RunType) ([]*v1.KmakeScheduleRun, error) {
+
+				Expect(err).To(BeNil())
+				Expect(len(scheduleruns)).To(Equal(1))
+			})
+
+			//+ Methods Here
 		})
 	})
 })
