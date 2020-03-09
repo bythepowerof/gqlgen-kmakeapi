@@ -34,22 +34,40 @@ var _ = Describe("Fake client", func() {
 	Describe("with Mutation method", func() {
 		Context("should be able to get", func() {
 
-			It("Reset", func() {
-				reset, err := r.Reset(context.Background(), fo.FakeReset())
+			It("Reset", func() {				
+				in := controller.NewReset{
+					Namespace: "ns1",
+					Kmakescheduler:  "test-now-scheduler",
+					Full: true,
+				}
+
+				reset, err := r.Reset(context.Background(), in)
 				Expect(err).To(BeNil())
-				Expect(len(reset)).To(Equal(1))
+				Expect(reset).NotTo(BeNil())
 			})
 
 			It("Stop", func() {
-				stop, err := r.Stop(context.Background(), fo.FakeStop())
+				in := controller.RunLevelIn{
+					Namespace: "ns1",
+					Kmakescheduler:  "test-now-scheduler",
+					Kmakerun: "test-kmake-run",
+				}
+
+				stop, err := r.Stop(context.Background(), in)
 				Expect(err).To(BeNil())
-				Expect(len(stop)).To(Equal(1))
+				Expect(stop).NotTo(BeNil())
 			})
 
 			It("Restart", func() {
-				restart, err := r.Restart(context.Background(), fo.FakeRestart())
+				in := controller.RunLevelIn{
+					Namespace: "ns1",
+					Kmakescheduler:  "test-now-scheduler",
+					Kmakerun: "test-kmake-run",
+				}
+
+				restart, err := r.Restart(context.Background(), in)
 				Expect(err).To(BeNil())
-				Expect(len(restart)).To(Equal(1))
+				Expect(restart).NotTo(BeNil())
 			})
 
 			//+ Methods Here
