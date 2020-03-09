@@ -8,32 +8,9 @@ import (
 	"github.com/bythepowerof/kmake-controller/gql"
 )
 
-func (r *kmakeRunJobResolver) Image(ctx context.Context, obj *v1.KmakeRunJob) (string, error) {
-	return obj.Template.Spec.Containers[0].Image, nil
-}
-
-func (r *kmakeRunJobResolver) Command(ctx context.Context, obj *v1.KmakeRunJob) ([]*string, error) {
-	ret := make([]*string, 0)
-
-	for i := 0; i < len(obj.Template.Spec.Containers[0].Command); i++ {
-		ret = append(ret, &obj.Template.Spec.Containers[0].Command[i])
-	}
-
-	return ret, nil
-}
-
 func (r *kmakeRunResolver) Kmakename(ctx context.Context, obj *v1.KmakeRun) (*string, error) {
 	kmakename := obj.GetKmakeName()
 	return &kmakename, nil
-}
-
-func (r *kmakeRunJobResolver) Args(ctx context.Context, obj *v1.KmakeRunJob) ([]*string, error) {
-	ret := make([]*string, 0)
-
-	for i := 0; i < len(obj.Template.Spec.Containers[0].Args); i++ {
-		ret = append(ret, &obj.Template.Spec.Containers[0].Args[i])
-	}
-	return ret, nil
 }
 
 func (r *kmakeRunResolver) Schedulerun(ctx context.Context, obj *v1.KmakeRun, kmakescheduler *string, name *string, runtype *controller.RunType) ([]*v1.KmakeScheduleRun, error) {

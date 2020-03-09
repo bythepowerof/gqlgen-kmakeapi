@@ -58,7 +58,19 @@ func (*FakeObjects) FakeKmakeRun() *bythepowerofv1.KmakeRun {
 		},
 		Spec: bythepowerofv1.KmakeRunSpec{
 			KmakeRunOperation: bythepowerofv1.KmakeRunOperation{
-				Job: &bythepowerofv1.KmakeRunJob{},
+				Job: &bythepowerofv1.KmakeRunJob{
+					Template: v11.PodTemplateSpec{
+						Spec: v11.PodSpec{
+							Containers: []v11.Container{
+								v11.Container{
+									Command: []string{"command text"},
+									Image: "image:latest",
+									Args: []string{"arg1","arg2"},
+								},
+							},
+						},
+					},
+				},
 			},
 		},
 	}

@@ -14,7 +14,7 @@ import (
 var _ = Describe("Fake client", func() {
 	var k k8sclient.Client
 	var fo *k8s.FakeObjects
-	var r KmakeRunResolver
+	var r KmakeRunJobResolver
 
 	BeforeEach(func() {
 		var err error
@@ -28,33 +28,28 @@ var _ = Describe("Fake client", func() {
 				Client: k,
 			},
 		}
-		r = res.KmakeRun()
+		r = res.KmakeRunJob()
 	})
 
 	Describe("with KmakeRun method", func() {
 		Context("should be able to get", func() {
 
-			It("Kmakename", func() {
-				kmakename, err := r.Kmakename(context.Background(), fo.FakeKmakeRun())
+			It("Image", func() {
+				image, err := r.Image(context.Background(), fo.FakeKmakeRun().Spec.KmakeRunOperation.Job)
 				Expect(err).To(BeNil())
-				Expect(*kmakename).To(Equal("test-kmake"))
+				Expect(image).To(Equal("image:latest"))
 			})
 
-			It("Operation", func() {
-				operation, err := r.Operation(context.Background(), fo.FakeKmakeRun())
+			It("Command", func() {
+				command, err := r.Command(context.Background(), fo.FakeKmakeRun().Spec.KmakeRunOperation.Job)
 				Expect(err).To(BeNil())
-				Expect(operation).NotTo(BeNil())
+				Expect(len(command)).To(Equal(1))
 			})
 
-			It("Schedulerun", func() {
-				n := "test-kmakeschedulerun"
-				sched := "test-now-scheduler"
-				rt := controller.RunTypeStart
-
-				schedulerun, err := r.Schedulerun(context.Background(), fo.FakeKmakeRun(), &sched, &n, &rt)
-
+			It("Args", func() {
+				args, err := r.Args(context.Background(), fo.FakeKmakeRun().Spec.KmakeRunOperation.Job)
 				Expect(err).To(BeNil())
-				Expect(schedulerun[0].GetName()).To(Equal("test-kmakeschedulerun"))
+				Expect(len(args)).To(Equal(2))
 			})
 
 			//+ Methods Here
