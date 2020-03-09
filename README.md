@@ -16,3 +16,4 @@ linux       |[![Build Status](https://travis-ci.org/bythepowerof/gqlgen-kmakeapi
 ### TODO
 
 * Add a bootstrap to load new kmake/kmake-run from a docker image
+* Dockerise it so it can run in the cluster
