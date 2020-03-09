@@ -4,8 +4,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	context "context"
-
 	. "github.com/bythepowerof/gqlgen-kmakeapi/controller"
 	"github.com/bythepowerof/gqlgen-kmakeapi/k8s"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -42,7 +40,7 @@ var _ = Describe("Controller", func() {
 		Context("fetches", func() {
 			It("namespace", func() {
 				ns := "ns1"
-				namespaces, err := kmc.Namespaces(context.Background(), &ns)
+				namespaces, err := kmc.Namespaces(&ns)
 				Expect(err).To(BeNil())
 				Expect(namespaces[0].GetName()).To(Equal(ns))
 				Expect(len(namespaces)).To(Equal(1))
@@ -50,7 +48,7 @@ var _ = Describe("Controller", func() {
 			It("kmake", func() {
 				ns := "ns1"
 				n := "test-kmake"
-				kmakes, err := kmc.Kmakes(context.Background(), &ns, &n)
+				kmakes, err := kmc.Kmakes(&ns, &n)
 				Expect(err).To(BeNil())
 				Expect(kmakes[0].GetName()).To(Equal(n))
 				Expect(kmakes[0].GetNamespace()).To(Equal(ns))
@@ -61,7 +59,7 @@ var _ = Describe("Controller", func() {
 				n := "test-kmake-run"
 				km := "test-kmake"
 				jt := JobTypeJob
-				kmakeruns, err := kmc.Kmakeruns(context.Background(), &ns, &km, &jt, &n)
+				kmakeruns, err := kmc.Kmakeruns(&ns, &km, &jt, &n)
 
 				Expect(err).To(BeNil())
 				Expect(kmakeruns[0].GetName()).To(Equal(n))
@@ -72,7 +70,7 @@ var _ = Describe("Controller", func() {
 				ns := "ns1"
 				n := "test-now-scheduler"
 				mon := "now"
-				schedulers, err := kmc.Kmakenowschedulers(context.Background(), ns, &n, &mon)
+				schedulers, err := kmc.Kmakenowschedulers(ns, &n, &mon)
 				Expect(err).To(BeNil())
 				Expect(schedulers[0].GetName()).To(Equal(n))
 				Expect(schedulers[0].GetNamespace()).To(Equal(ns))
@@ -86,7 +84,7 @@ var _ = Describe("Controller", func() {
 				sched := "test-now-scheduler"
 				rt := RunTypeStart
 
-				kmsr, err := kmc.Kmakescheduleruns(context.Background(), ns, &km, &kmr, &sched, &n, &rt)
+				kmsr, err := kmc.Kmakescheduleruns(ns, &km, &kmr, &sched, &n, &rt)
 
 				Expect(err).To(BeNil())
 				Expect(kmsr[0].GetName()).To(Equal(n))
@@ -105,7 +103,7 @@ var _ = Describe("Controller", func() {
 				rt := RunTypeReset
 
 				By("resetting a scheduler")
-				kmsr, err := kmc.CreateScheduleRun(context.Background(), ns, nil, nil, &sched, &rt, map[string]string{"full": "true"})
+				kmsr, err := kmc.CreateScheduleRun(ns, nil, nil, &sched, &rt, map[string]string{"full": "true"})
 				Expect(err).To(BeNil())
 				Expect(kmsr.GetNamespace()).To(Equal(ns))
 			})
@@ -120,7 +118,7 @@ var _ = Describe("Controller", func() {
 				kmr := "test-kmake-run"
 
 				By("stopping a run")
-				kmsr2, err := kmc.CreateScheduleRun(context.Background(), ns, nil, &kmr, &sched, &rt, nil)
+				kmsr2, err := kmc.CreateScheduleRun(ns, nil, &kmr, &sched, &rt, nil)
 				Expect(err).To(BeNil())
 				Expect(kmsr2.GetNamespace()).To(Equal(ns))
 			})
@@ -135,7 +133,7 @@ var _ = Describe("Controller", func() {
 				kmr := "test-kmake-run"
 
 				By("stopping a run")
-				kmsr2, err := kmc.CreateScheduleRun(context.Background(), ns, nil, &kmr, &sched, &rt, nil)
+				kmsr2, err := kmc.CreateScheduleRun(ns, nil, &kmr, &sched, &rt, nil)
 				Expect(err).To(BeNil())
 				Expect(kmsr2.GetNamespace()).To(Equal(ns))
 			})

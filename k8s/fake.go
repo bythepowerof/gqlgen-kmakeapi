@@ -10,9 +10,9 @@ import (
 	k8sfakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-type FakeObjects struct {}
+type FakeObjects struct{}
 
-func (*FakeObjects) FakeNs() *v11.Namespace { 
+func (*FakeObjects) FakeNs() *v11.Namespace {
 	return &v11.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "ns1",
@@ -20,7 +20,7 @@ func (*FakeObjects) FakeNs() *v11.Namespace {
 	}
 }
 
-func (*FakeObjects) FakeKmake() *bythepowerofv1.Kmake { 
+func (*FakeObjects) FakeKmake() *bythepowerofv1.Kmake {
 	return &bythepowerofv1.Kmake{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-kmake",
@@ -33,11 +33,11 @@ func (*FakeObjects) FakeKmake() *bythepowerofv1.Kmake {
 			},
 			Rules: []bythepowerofv1.KmakeRule{
 				bythepowerofv1.KmakeRule{
-					Targets: []string{"Rule1"},
+					Targets:  []string{"Rule1"},
 					Commands: []string{"@echo $@"},
 				},
 				bythepowerofv1.KmakeRule{
-					Targets: []string{"Rule2"},
+					Targets:  []string{"Rule2"},
 					Commands: []string{"@echo $@"},
 				},
 			},
@@ -45,7 +45,7 @@ func (*FakeObjects) FakeKmake() *bythepowerofv1.Kmake {
 	}
 }
 
-func (*FakeObjects) FakeKmakeRun() *bythepowerofv1.KmakeRun { 
+func (*FakeObjects) FakeKmakeRun() *bythepowerofv1.KmakeRun {
 	return &bythepowerofv1.KmakeRun{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-kmake-run",
@@ -58,13 +58,25 @@ func (*FakeObjects) FakeKmakeRun() *bythepowerofv1.KmakeRun {
 		},
 		Spec: bythepowerofv1.KmakeRunSpec{
 			KmakeRunOperation: bythepowerofv1.KmakeRunOperation{
-				Job: &bythepowerofv1.KmakeRunJob{},
+				Job: &bythepowerofv1.KmakeRunJob{
+					Template: v11.PodTemplateSpec{
+						Spec: v11.PodSpec{
+							Containers: []v11.Container{
+								v11.Container{
+									Command: []string{"command text"},
+									Image: "image:latest",
+									Args: []string{"arg1","arg2"},
+								},
+							},
+						},
+					},
+				},
 			},
 		},
 	}
 }
 
-func (*FakeObjects) FakeKmakeNowScheduler() *bythepowerofv1.KmakeNowScheduler { 
+func (*FakeObjects) FakeKmakeNowScheduler() *bythepowerofv1.KmakeNowScheduler {
 	return &bythepowerofv1.KmakeNowScheduler{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-now-scheduler",
@@ -76,7 +88,7 @@ func (*FakeObjects) FakeKmakeNowScheduler() *bythepowerofv1.KmakeNowScheduler {
 	}
 }
 
-func (*FakeObjects) KmakeScheduleRun() *bythepowerofv1.KmakeScheduleRun { 
+func (*FakeObjects) FakeKmakeScheduleRun() *bythepowerofv1.KmakeScheduleRun {
 	return &bythepowerofv1.KmakeScheduleRun{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-kmakeschedulerun",
@@ -101,6 +113,6 @@ func (fo *FakeObjects) FakeK8sClient() (k8sclient.Client, error) {
 	_ = bythepowerofv1.AddToScheme(scheme)
 
 	return k8sfakeclient.NewFakeClientWithScheme(scheme,
-		fo.FakeNs(), fo.FakeKmake(), fo.FakeKmakeRun(), fo.FakeKmakeNowScheduler(), fo.KmakeScheduleRun(),
+		fo.FakeNs(), fo.FakeKmake(), fo.FakeKmakeRun(), fo.FakeKmakeNowScheduler(), fo.FakeKmakeScheduleRun(),
 	), nil
 }

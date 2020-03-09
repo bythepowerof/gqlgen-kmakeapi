@@ -31,5 +31,5 @@ func (r *kmakeResolver) Runs(ctx context.Context, obj *v1.Kmake, jobtype *contro
 	namespace := obj.GetNamespace()
 	kmakename := obj.GetName()
 
-	return r.KmakeController.Kmakeruns(ctx, &namespace, &kmakename, jobtype, name)
+	return r.KmakeController.Kmakeruns(&namespace, &kmakename, jobtype, name)
 }

@@ -14,19 +14,19 @@ func (r *mutationResolver) Reset(ctx context.Context, input controller.NewReset)
 	opt["full"] = strconv.FormatBool(input.Full)
 	op := controller.RunTypeReset
 
-	return r.KmakeController.CreateScheduleRun(ctx, input.Namespace, nil, nil, &input.Kmakescheduler, &op, opt)
+	return r.KmakeController.CreateScheduleRun(input.Namespace, nil, nil, &input.Kmakescheduler, &op, opt)
 }
 
 func (r *mutationResolver) Stop(ctx context.Context, input controller.RunLevelIn) (*v1.KmakeScheduleRun, error) {
 	opt := make(map[string]string)
 	op := controller.RunTypeStop
 
-	return r.KmakeController.CreateScheduleRun(ctx, input.Namespace, nil, &input.Kmakerun, &input.Kmakescheduler, &op, opt)
+	return r.KmakeController.CreateScheduleRun(input.Namespace, nil, &input.Kmakerun, &input.Kmakescheduler, &op, opt)
 }
 
 func (r *mutationResolver) Restart(ctx context.Context, input controller.RunLevelIn) (*v1.KmakeScheduleRun, error) {
 	opt := make(map[string]string)
 	op := controller.RunTypeRestart
 
-	return r.KmakeController.CreateScheduleRun(ctx, input.Namespace, nil, &input.Kmakerun, &input.Kmakescheduler, &op, opt)
+	return r.KmakeController.CreateScheduleRun(input.Namespace, nil, &input.Kmakerun, &input.Kmakescheduler, &op, opt)
 }

@@ -1,42 +1,46 @@
 package gqlgen_kmakeapi
 
 import (
-	// "encoding/json"
+	"context"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/99designs/gqlgen/client"
+	"github.com/bythepowerof/gqlgen-kmakeapi/controller"
 	"github.com/bythepowerof/gqlgen-kmakeapi/k8s"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var _ = Describe("Fake client", func() {
 	var k k8sclient.Client
-	var c *client.Client
 	var fo *k8s.FakeObjects
+	var r NamespaceResolver
 
 	BeforeEach(func() {
-
 		var err error
 		fo = &k8s.FakeObjects{}
 
 		k, err = fo.FakeK8sClient()
 		Expect(err).To(BeNil())
 
-		c = FakeHTTPServer(k)
+		res := &Resolver{
+			KmakeController: &controller.KubernetesController{
+				Client: k,
+			},
+		}
+		r = res.Namespace()
 	})
 
-	Context("with default scheme.Scheme", func() {
-		It("should be able to get", func() {
-			By("namespace")
-			var resp struct {
-				Namespaces []struct{ Name string }
-			}
-			c.MustPost(`{ namespaces(name: "ns1") { name } }`, &resp)
+	Describe("with Namespace method", func() {
+		Context("should be able to get", func() {
 
-			Expect(resp.Namespaces[0].Name).To(Equal("ns1"))
+			It("Kmakes", func() {
+				kmakes, err := r.Kmakes(context.Background(), fo.FakeNs(), nil)
+				Expect(err).To(BeNil())
+				Expect(len(kmakes)).To(Equal(1))
+			})
+
+			//+ Methods Here
 		})
-
 	})
 })

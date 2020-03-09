@@ -1,42 +1,64 @@
 package gqlgen_kmakeapi
 
 import (
-	// "encoding/json"
+	"context"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/99designs/gqlgen/client"
+	"github.com/bythepowerof/gqlgen-kmakeapi/controller"
 	"github.com/bythepowerof/gqlgen-kmakeapi/k8s"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var _ = Describe("Fake client", func() {
 	var k k8sclient.Client
-	var c *client.Client
 	var fo *k8s.FakeObjects
+	var r KmakeScheduleRunResolver
 
 	BeforeEach(func() {
-
 		var err error
 		fo = &k8s.FakeObjects{}
 
 		k, err = fo.FakeK8sClient()
 		Expect(err).To(BeNil())
 
-		c = FakeHTTPServer(k)
+		res := &Resolver{
+			KmakeController: &controller.KubernetesController{
+				Client: k,
+			},
+		}
+		r = res.KmakeScheduleRun()
 	})
 
-	Context("with default scheme.Scheme", func() {
-		It("should be able to get", func() {
-			By("schedulerun")
-			var resp struct {
-				KmakeScheduleruns []struct{ Name string }
-			}
-			c.MustPost(`{ kmakescheduleruns(namespace: "ns1") { name } }`, &resp)
+	Describe("with KmakeScheduleRun method", func() {
+		Context("should be able to get", func() {
 
-			Expect(resp.KmakeScheduleruns[0].Name).To(Equal("test-kmakeschedulerun"))
+			It("Kmakename", func() {
+				kmakename, err := r.Kmakename(context.Background(), fo.FakeKmakeScheduleRun())
+				Expect(err).To(BeNil())
+				Expect(*kmakename).To(Equal("test-kmake"))
+			})
+
+			It("Kmakerunname", func() {
+				kmakerunname, err := r.Kmakerunname(context.Background(), fo.FakeKmakeScheduleRun())
+				Expect(err).To(BeNil())
+				Expect(*kmakerunname).To(Equal("test-kmake-run"))
+			})
+
+			It("Kmakeschedulename", func() {
+				kmakeschedulename, err := r.Kmakeschedulename(context.Background(), fo.FakeKmakeScheduleRun())
+				Expect(err).To(BeNil())
+				Expect(*kmakeschedulename).To(Equal("test-now-scheduler"))
+			})
+
+			It("Operation", func() {
+				operation, err := r.Operation(context.Background(), fo.FakeKmakeScheduleRun())
+				Expect(err).To(BeNil())
+				Expect(operation).NotTo(BeNil())
+			})
+
+			//+ Methods Here
 		})
-
 	})
 })

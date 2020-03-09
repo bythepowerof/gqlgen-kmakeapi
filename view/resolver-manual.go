@@ -5,9 +5,9 @@ import (
 	"context"
 
 	"github.com/bythepowerof/gqlgen-kmakeapi/controller"
+	"github.com/bythepowerof/kmake-controller/api/v1"
 	"github.com/bythepowerof/kmake-controller/gql"
 	v11 "k8s.io/api/core/v1"
-	"github.com/bythepowerof/kmake-controller/api/v1"
 )
 
 type Resolver struct {
@@ -15,28 +15,28 @@ type Resolver struct {
 }
 
 func (r *queryResolver) Namespaces(ctx context.Context, name *string) ([]*v11.Namespace, error) {
-	return r.KmakeController.Namespaces(ctx, name)
+	return r.KmakeController.Namespaces(name)
 }
 
 func (r *queryResolver) KmakeObjects(ctx context.Context, namespace string, name *string) ([]gql.KmakeObject, error) {
 	ret := []gql.KmakeObject{}
 
-	kms, _ := r.KmakeController.Kmakenowschedulers(ctx, namespace, name, nil)
+	kms, _ := r.KmakeController.Kmakenowschedulers(namespace, name, nil)
 	for _, v := range kms {
 		ret = append(ret, v)
 	}
 
-	km, _ := r.KmakeController.Kmakes(ctx, &namespace, name)
+	km, _ := r.KmakeController.Kmakes(&namespace, name)
 	for _, v := range km {
 		ret = append(ret, v)
 	}
 
-	kmr, _ := r.KmakeController.Kmakeruns(ctx, &namespace, nil, nil, name)
+	kmr, _ := r.KmakeController.Kmakeruns(&namespace, nil, nil, name)
 	for _, v := range kmr {
 		ret = append(ret, v)
 	}
 
-	kmsr, _ := r.KmakeController.Kmakescheduleruns(ctx, namespace, nil, nil, nil, name, nil)
+	kmsr, _ := r.KmakeController.Kmakescheduleruns(namespace, nil, nil, nil, name, nil)
 
 	for _, v := range kmsr {
 		ret = append(ret, v)
@@ -46,15 +46,15 @@ func (r *queryResolver) KmakeObjects(ctx context.Context, namespace string, name
 }
 
 func (r *queryResolver) Kmakeruns(ctx context.Context, namespace string, kmake *string, jobtype *controller.JobType, kmakerun *string) ([]*v1.KmakeRun, error) {
-	return r.KmakeController.Kmakeruns(ctx, &namespace, kmake, jobtype, kmakerun)
+	return r.KmakeController.Kmakeruns(&namespace, kmake, jobtype, kmakerun)
 }
 
 func (r *queryResolver) Kmakescheduleruns(ctx context.Context, namespace string, kmake *string, kmakerun *string, kmakescheduler *string, name *string, runtype *controller.RunType) ([]*v1.KmakeScheduleRun, error) {
-	return r.KmakeController.Kmakescheduleruns(ctx, namespace, kmake, kmakerun, kmakescheduler, name, runtype)
+	return r.KmakeController.Kmakescheduleruns(namespace, kmake, kmakerun, kmakescheduler, name, runtype)
 }
 
 func (r *queryResolver) Kmakeschedulers(ctx context.Context, namespace string, name *string, monitor *string) ([]gql.KmakeScheduler, error) {
-	kms, _ := r.KmakeController.Kmakenowschedulers(ctx, namespace, name, monitor)
+	kms, _ := r.KmakeController.Kmakenowschedulers(namespace, name, monitor)
 	ret := []gql.KmakeScheduler{}
 
 	for _, v := range kms {
@@ -64,5 +64,5 @@ func (r *queryResolver) Kmakeschedulers(ctx context.Context, namespace string, n
 }
 
 func (r *queryResolver) Kmakes(ctx context.Context, namespace string, kmake *string) ([]*v1.Kmake, error) {
-	return r.KmakeController.Kmakes(ctx, &namespace, kmake)
+	return r.KmakeController.Kmakes(&namespace, kmake)
 }
