@@ -34,11 +34,11 @@ var _ = Describe("Fake client", func() {
 	Describe("with Mutation method", func() {
 		Context("should be able to get", func() {
 
-			It("Reset", func() {				
+			It("Reset", func() {
 				in := controller.NewReset{
-					Namespace: "ns1",
-					Kmakescheduler:  "test-now-scheduler",
-					Full: true,
+					Namespace:      "ns1",
+					Kmakescheduler: "test-now-scheduler",
+					Full:           true,
 				}
 
 				reset, err := r.Reset(context.Background(), in)
@@ -48,9 +48,9 @@ var _ = Describe("Fake client", func() {
 
 			It("Stop", func() {
 				in := controller.RunLevelIn{
-					Namespace: "ns1",
-					Kmakescheduler:  "test-now-scheduler",
-					Kmakerun: "test-kmake-run",
+					Namespace:      "ns1",
+					Kmakescheduler: "test-now-scheduler",
+					Kmakerun:       "test-kmake-run",
 				}
 
 				stop, err := r.Stop(context.Background(), in)
@@ -60,9 +60,9 @@ var _ = Describe("Fake client", func() {
 
 			It("Restart", func() {
 				in := controller.RunLevelIn{
-					Namespace: "ns1",
-					Kmakescheduler:  "test-now-scheduler",
-					Kmakerun: "test-kmake-run",
+					Namespace:      "ns1",
+					Kmakescheduler: "test-now-scheduler",
+					Kmakerun:       "test-kmake-run",
 				}
 
 				restart, err := r.Restart(context.Background(), in)

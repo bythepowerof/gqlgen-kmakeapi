@@ -30,4 +30,3 @@ func (r *kmakeRunJobResolver) Args(ctx context.Context, obj *v1.KmakeRunJob) ([]
 	}
 	return ret, nil
 }
-

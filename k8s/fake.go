@@ -64,8 +64,8 @@ func (*FakeObjects) FakeKmakeRun() *bythepowerofv1.KmakeRun {
 							Containers: []v11.Container{
 								v11.Container{
 									Command: []string{"command text"},
-									Image: "image:latest",
-									Args: []string{"arg1","arg2"},
+									Image:   "image:latest",
+									Args:    []string{"arg1", "arg2"},
 								},
 							},
 						},
