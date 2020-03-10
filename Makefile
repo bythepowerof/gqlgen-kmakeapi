@@ -1,3 +1,5 @@
+# Image URL to use all building/pushing image targets
+IMG ?= bythepowerof/gqlgen-kmakeapi:latest
 
 # PKGS := github.com/bythepowerof/gqlgen-kmakeapi,github.com/bythepowerof/gqlgen-kmakeapi/controller,github.com/bythepowerof/gqlgen-kmakeapi/k8s,github.com/bythepowerof/gqlgen-kmakeapi/view
 
@@ -40,4 +42,17 @@ test:
 cover: test
 	go tool cover -html=cover.out
 
-.PHONY: server build test fix diff fmt vet tidy cover
+# Build the docker image
+docker-build: test
+	docker build . -t ${IMG}
+
+# Push the docker image
+docker-push:
+	docker push ${IMG}	
+
+# Deploy controller in the configured Kubernetes cluster in ~/.kube/config
+deploy:
+	cd config/api && kustomize edit set image api=${IMG}
+	kustomize build config/default | kubectl apply -f -
+
+.PHONY: server build test fix diff fmt vet tidy cover docker-push docker-build

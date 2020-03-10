@@ -1,0 +1,11 @@
+resources:
+- api.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+images:
+- name: api
+  newName: bythepowerof/gqlgen-kmakeapi
+  newTag: latest
+- name: controller
+  newName: bythepowerof/kmake-controller
+  newTag: latest

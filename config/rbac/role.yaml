@@ -1,0 +1,88 @@
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: gqlgen-kmkeapi-role
+rules:
+- apiGroups:
+  - bythepowerof.github.com
+  resources:
+  - kmakenowschedulers
+  verbs:
+  # - create
+  # - delete
+  - get
+  - list
+  # - patch
+  # - update
+  # - watch
+- apiGroups:
+  - bythepowerof.github.com
+  resources:
+  - kmakenowschedulers/status
+  verbs:
+  - get
+  # - patch
+  # - update
+- apiGroups:
+  - bythepowerof.github.com
+  resources:
+  - kmakeruns
+  verbs:
+  # - create
+  # - delete
+  - get
+  - list
+  # - patch
+  # - update
+  # - watch
+- apiGroups:
+  - bythepowerof.github.com
+  resources:
+  - kmakeruns/status
+  verbs:
+  - get
+  # - patch
+  # - update
+- apiGroups:
+  - bythepowerof.github.com
+  resources:
+  - kmakes
+  verbs:
+  # - create
+  # - delete
+  - get
+  - list
+  # - patch
+  # - update
+  # - watch
+- apiGroups:
+  - bythepowerof.github.com
+  resources:
+  - kmakes/status
+  verbs:
+  - get
+  # - patch
+  # - update
+- apiGroups:
+  - bythepowerof.github.com
+  resources:
+  - kmakescheduleruns
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  # - patch
+  # - update
+  # - watch
+- apiGroups:
+  - bythepowerof.github.com
+  resources:
+  - kmakescheduleruns/status
+  verbs:
+  - get
+  # - patch
+  # - update
