@@ -15,7 +15,7 @@ spec:
   ports:
     - port: 8080
   selector:
-    app: gqlgen-kmkeapi
+    app: gqlgen-kmakeapi
     tier: frontend
   type: LoadBalancer
 ---

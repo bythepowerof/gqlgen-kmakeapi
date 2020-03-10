@@ -16,7 +16,10 @@ script:
 after_success:
 - bash <(curl -s https://codecov.io/bash)
 - test $TRAVIS_BRANCH = "master" && curl -d "repo=github.com/bythepowerof/gql-kmakeapi" https://goreportcard.com/checks
-
+# docker login is required if you want to push docker images.
+# DOCKER_PASSWORD should be a secret in your .travis.yml configuration.
+- test -n "$TRAVIS_TAG" && docker login -u=jeremymarshall -p="$DOCKER_PASSWORD"
+  
 deploy:
   - provider: script
     skip_cleanup: true

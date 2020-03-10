@@ -55,4 +55,7 @@ deploy:
 	cd config/api && kustomize edit set image api=${IMG}
 	kustomize build config/default | kubectl apply -f -
 
+clean:
+	-rm -fr dist bin cover.out coverage.txt cp.out
+
 .PHONY: server build test fix diff fmt vet tidy cover docker-push docker-build
