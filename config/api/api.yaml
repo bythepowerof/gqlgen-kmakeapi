@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    control-plane: gqlgen-kmakeapi
+  name: system
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gqlgen-kmkeapi
+  labels:
+    app: gqlgen-kmkeapi
+spec:
+  ports:
+    - port: 8080
+  selector:
+    app: gqlgen-kmakeapi
+    tier: frontend
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gqlgen-kmkeapi
+  namespace: system
+  labels:
+    app: gqlgen-kmkeapi
+    tier: frontend
+    control-plane: gqlgen-kmakeapi
+spec:
+  selector:
+    matchLabels:
+      app: gqlgen-kmakeapi
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: gqlgen-kmakeapi
+        tier: frontend
+    spec:
+      containers:
+      - command:
+        - /api
+        image: api:latest
+        # envFrom:
+        # - configMapRef:
+        #     name: manager-env
+        name: api
+        ports:
+          - containerPort: 8080
+            name: gqlgen-kmakeapi
+        resources:
+          limits:
+            cpu: 100m
+            memory: 30Mi
+          requests:
+            cpu: 100m
+            memory: 20Mi
+      terminationGracePeriodSeconds: 10
