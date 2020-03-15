@@ -1,0 +1,4 @@
+ignore:
+  - "view/generated.go"
+  - "view/resolver.go"
+
