@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/99designs/gqlgen v0.10.3-0.20191128123652-f869f5a85385
 	github.com/agnivade/levenshtein v1.0.3 // indirect
-	github.com/bythepowerof/kmake-controller v0.1.3
+	github.com/bythepowerof/kmake-controller v0.1.9
 	github.com/gorilla/websocket v1.4.1 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/mitchellh/mapstructure v1.1.2 // indirect
@@ -19,7 +19,7 @@ require (
 	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 	k8s.io/api v0.17.0
-	k8s.io/apimachinery v0.0.0-20190404173353-6a84e37a896d
+	k8s.io/apimachinery v0.0.0-20191020214737-6c8691705fc5
 	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
 	k8s.io/utils v0.0.0-20200109141947-94aeca20bf09 // indirect
 	sigs.k8s.io/controller-runtime v0.2.2
