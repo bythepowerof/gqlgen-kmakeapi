@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/99designs/gqlgen v0.10.3-0.20191128123652-f869f5a85385
 	github.com/agnivade/levenshtein v1.0.3 // indirect
-	github.com/bythepowerof/kmake-controller v0.1.9
+	github.com/bythepowerof/kmake-controller v0.1.10
 	github.com/gorilla/websocket v1.4.1 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/mitchellh/mapstructure v1.1.2 // indirect
