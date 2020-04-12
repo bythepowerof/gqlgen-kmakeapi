@@ -1,5 +1,5 @@
 # Image URL to use all building/pushing image targets
-IMG ?= bythepowerof/gqlgen-kmakeapi:v0.1.8
+IMG ?= bythepowerof/gqlgen-kmakeapi:v0.1.10
 
 # PKGS := github.com/bythepowerof/gqlgen-kmakeapi,github.com/bythepowerof/gqlgen-kmakeapi/controller,github.com/bythepowerof/gqlgen-kmakeapi/k8s,github.com/bythepowerof/gqlgen-kmakeapi/view
 
