@@ -16,8 +16,8 @@ import (
 	"github.com/bythepowerof/gqlgen-kmakeapi/controller"
 	"github.com/bythepowerof/kmake-controller/api/v1"
 	"github.com/bythepowerof/kmake-controller/gql"
-	"github.com/vektah/gqlparser"
-	"github.com/vektah/gqlparser/ast"
+	gqlparser "github.com/vektah/gqlparser/v2"
+	"github.com/vektah/gqlparser/v2/ast"
 	v11 "k8s.io/api/core/v1"
 )
 
@@ -807,7 +807,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
-var parsedSchema = gqlparser.MustLoadSchema(
+var sources = []*ast.Source{
 	&ast.Source{Name: "schema.graphql", Input: `
 type Query {
   namespaces(name: String): [Namespace]!
@@ -983,8 +983,9 @@ interface KmakeRunOp {
 interface KmakeScheduleRunOp {
   dummy: String
 }
-`},
-)
+`, BuiltIn: false},
+}
+var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // endregion ************************** generated!.gotpl **************************
 

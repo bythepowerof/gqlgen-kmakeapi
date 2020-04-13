@@ -3,8 +3,7 @@ module github.com/bythepowerof/gqlgen-kmakeapi
 go 1.13
 
 require (
-	github.com/99designs/gqlgen v0.10.3-0.20191128123652-f869f5a85385
-	github.com/agnivade/levenshtein v1.0.3 // indirect
+	github.com/99designs/gqlgen v0.11.3
 	github.com/bythepowerof/kmake-controller v0.1.10
 	github.com/gorilla/websocket v1.4.1 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
@@ -13,7 +12,8 @@ require (
 	github.com/onsi/ginkgo v1.12.0
 	github.com/onsi/gomega v1.9.0
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/vektah/gqlparser v1.3.1
+	github.com/rs/cors v1.6.0
+	github.com/vektah/gqlparser/v2 v2.0.1
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543 // indirect
