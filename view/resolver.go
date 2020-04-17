@@ -2,8 +2,6 @@ package gqlgen_kmakeapi
 
 // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
-import ()
-
 // Kmake returns KmakeResolver implementation.
 func (r *Resolver) Kmake() KmakeResolver { return &kmakeResolver{r} }
 
@@ -28,6 +26,9 @@ func (r *Resolver) Namespace() NamespaceResolver { return &namespaceResolver{r} 
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+// Subscription returns SubscriptionResolver implementation.
+func (r *Resolver) Subscription() SubscriptionResolver { return &subscriptionResolver{r} }
+
 type kmakeResolver struct{ *Resolver }
 type kmakeNowSchedulerResolver struct{ *Resolver }
 type kmakeRunResolver struct{ *Resolver }
@@ -36,3 +37,4 @@ type kmakeScheduleRunResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type namespaceResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type subscriptionResolver struct{ *Resolver }

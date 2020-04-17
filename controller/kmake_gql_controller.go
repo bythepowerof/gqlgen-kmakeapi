@@ -38,6 +38,9 @@ type RunLevelIn struct {
 	Kmakerun       string `json:"kmakerun"`
 	Kmakescheduler string `json:"kmakescheduler"`
 }
+type SubNamespace struct {
+	Namespace string `json:"namespace"`
+}
 type KmakeController interface {
 	Namespaces(name *string) ([]*v11.Namespace, error)
 	Kmakes(namespace *string, name *string) ([]*v1.Kmake, error)
