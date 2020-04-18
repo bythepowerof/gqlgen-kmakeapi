@@ -34,7 +34,7 @@ type Mutation {
 }
 
 type Subscription {
-  changed(input: SubNamespace): [KmakeObject!]
+  changed(input: SubNamespace): KmakeObject!
 }
 
 type Namespace {

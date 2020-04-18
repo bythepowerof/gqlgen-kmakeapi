@@ -222,7 +222,7 @@ type QueryResolver interface {
 	Kmakescheduleruns(ctx context.Context, namespace string, kmake *string, kmakerun *string, kmakescheduler *string, name *string, runtype *controller.RunType) ([]*v1.KmakeScheduleRun, error)
 }
 type SubscriptionResolver interface {
-	Changed(ctx context.Context, input *controller.SubNamespace) (<-chan []gql.KmakeObject, error)
+	Changed(ctx context.Context, input *controller.SubNamespace) (<-chan gql.KmakeObject, error)
 }
 
 type executableSchema struct {
@@ -882,7 +882,7 @@ type Mutation {
 }
 
 type Subscription {
-  changed(input: SubNamespace): [KmakeObject!]
+  changed(input: SubNamespace): KmakeObject!
 }
 
 type Namespace {
@@ -3752,10 +3752,13 @@ func (ec *executionContext) _Subscription_changed(ctx context.Context, field gra
 		return nil
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return nil
 	}
 	return func() graphql.Marshaler {
-		res, ok := <-resTmp.(<-chan []gql.KmakeObject)
+		res, ok := <-resTmp.(<-chan gql.KmakeObject)
 		if !ok {
 			return nil
 		}
@@ -3763,7 +3766,7 @@ func (ec *executionContext) _Subscription_changed(ctx context.Context, field gra
 			w.Write([]byte{'{'})
 			graphql.MarshalString(field.Alias).MarshalGQL(w)
 			w.Write([]byte{':'})
-			ec.marshalOKmakeObject2ᚕgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋgqlᚐKmakeObjectᚄ(ctx, field.Selections, res).MarshalGQL(w)
+			ec.marshalNKmakeObject2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋgqlᚐKmakeObject(ctx, field.Selections, res).MarshalGQL(w)
 			w.Write([]byte{'}'})
 		})
 	}
@@ -6918,46 +6921,6 @@ func (ec *executionContext) marshalOKmakeObject2githubᚗcomᚋbythepowerofᚋkm
 		return graphql.Null
 	}
 	return ec._KmakeObject(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOKmakeObject2ᚕgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋgqlᚐKmakeObjectᚄ(ctx context.Context, sel ast.SelectionSet, v []gql.KmakeObject) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNKmakeObject2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋgqlᚐKmakeObject(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
 }
 
 func (ec *executionContext) marshalOKmakeRun2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRun(ctx context.Context, sel ast.SelectionSet, v v1.KmakeRun) graphql.Marshaler {
