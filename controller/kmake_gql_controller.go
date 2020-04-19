@@ -330,10 +330,7 @@ func (r *KubernetesController) KmakeChanges(namespace string) ([]*v1.Kmake, erro
 	// Create a new Controller that will call the provided Reconciler function in response
 	// to events.
 	c, err := controller.New("pod-controller", mgr, controller.Options{
-		Reconciler: reconcile.Func(func(o reconcile.Request) (reconcile.Result, error) {
-			// Your business logic to implement the API by creating, updating, deleting objects goes here.
-			return reconcile.Result{}, nil
-		}),
+		Reconciler: reconcile.Func(r.WatchChanges),
 	})
 	if err != nil {
 		return nil, err
@@ -353,4 +350,21 @@ func (r *KubernetesController) KmakeChanges(namespace string) ([]*v1.Kmake, erro
 	}()
 
 	return nil, nil
+}
+
+func (r *KubernetesController) WatchChanges(o reconcile.Request) (reconcile.Result, error) {
+	// Your business logic to implement the API by creating, updating, deleting objects goes here.
+	ret := &v1.Kmake{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      o.Name,
+			Namespace: o.Namespace,
+		},
+	}
+	// Notify new message
+	r.Mutex.Lock()
+	for _, ch := range r.Changes {
+		ch <- ret
+	}
+	r.Mutex.Unlock()
+	return reconcile.Result{}, nil
 }
