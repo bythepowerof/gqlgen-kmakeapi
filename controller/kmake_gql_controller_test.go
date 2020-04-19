@@ -21,7 +21,7 @@ var _ = Describe("Controller", func() {
 		k, err = fo.FakeK8sClient()
 		Expect(err).To(BeNil())
 
-		kmc = &KubernetesController{Client: k}
+		kmc = NewKubernetesController(k, nil, "all")
 	})
 
 	Describe("KubernetesController", func() {

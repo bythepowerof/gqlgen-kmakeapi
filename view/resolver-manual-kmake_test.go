@@ -24,9 +24,7 @@ var _ = Describe("Fake client", func() {
 		Expect(err).To(BeNil())
 
 		res := &Resolver{
-			KmakeController: &controller.KubernetesController{
-				Client: k,
-			},
+			KmakeController: controller.NewKubernetesController(k, nil, "all"),
 		}
 		r = res.Kmake()
 	})

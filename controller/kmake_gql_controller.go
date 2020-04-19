@@ -9,7 +9,6 @@ import (
 	v11 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -62,10 +61,24 @@ type KmakeController interface {
 }
 
 type KubernetesController struct {
-	Client  client.Client
-	Mutex   sync.Mutex
-	Changes map[int]chan gql.KmakeObject
-	index   int
+	client    client.Client
+	manager   manager.Manager
+	mutex     sync.Mutex
+	changes   map[int]chan gql.KmakeObject
+	index     int
+	namespace string
+}
+
+func NewKubernetesController(client client.Client, manager manager.Manager, namespace string) *KubernetesController {
+
+	return &KubernetesController{
+		client:    client,
+		manager:   manager,
+		mutex:     sync.Mutex{},
+		changes:   map[int]chan gql.KmakeObject{},
+		namespace: namespace,
+	}
+
 }
 
 func (r *KubernetesController) Namespaces(name *string) ([]*v11.Namespace, error) {
@@ -80,7 +93,7 @@ func (r *KubernetesController) Namespaces(name *string) ([]*v11.Namespace, error
 		client.MatchingFields(fields).ApplyToList(o)
 	}
 
-	err := r.Client.List(context.Background(), nsList, o)
+	err := r.client.List(context.Background(), nsList, o)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +116,7 @@ func (r *KubernetesController) Kmakes(namespace *string, name *string) ([]*v1.Km
 		client.MatchingFields(fields).ApplyToList(o)
 	}
 
-	err := r.Client.List(context.Background(), kmakeList, o)
+	err := r.client.List(context.Background(), kmakeList, o)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +145,7 @@ func (r *KubernetesController) Kmakeruns(namespace *string, kmakename *string, j
 		client.MatchingLabels(labels).ApplyToList(o)
 	}
 
-	err := r.Client.List(context.Background(), kmakerunList, o)
+	err := r.client.List(context.Background(), kmakerunList, o)
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +194,7 @@ func (r *KubernetesController) Kmakescheduleruns(namespace string, kmake *string
 		labels := map[string]string{"bythepowerof.github.io/schedule-instance": *kmakescheduler}
 		client.MatchingLabels(labels).ApplyToList(o)
 	}
-	err := r.Client.List(context.Background(), kmakeschedulerunList, o)
+	err := r.client.List(context.Background(), kmakeschedulerunList, o)
 	if err != nil {
 		return nil, err
 	}
@@ -227,7 +240,7 @@ func (r *KubernetesController) Kmakenowschedulers(namespace string, name *string
 		client.MatchingFields(fields).ApplyToList(o)
 	}
 
-	err := r.Client.List(context.Background(), kmakeNowSchedulerList, o)
+	err := r.client.List(context.Background(), kmakeNowSchedulerList, o)
 	if err != nil {
 		return nil, err
 	}
@@ -294,7 +307,7 @@ func (r *KubernetesController) CreateScheduleRun(namespace string, kmake *string
 
 	kmakeschedulerun.Spec.KmakeScheduleRunOperation = op
 
-	err := r.Client.Create(context.Background(), kmakeschedulerun)
+	err := r.client.Create(context.Background(), kmakeschedulerun)
 	if err != nil {
 		return nil, err
 	}
@@ -303,33 +316,25 @@ func (r *KubernetesController) CreateScheduleRun(namespace string, kmake *string
 
 func (r *KubernetesController) AddChangeClient(ctx context.Context, namespace string) (<-chan gql.KmakeObject, error) {
 	kmo := make(chan gql.KmakeObject, 1)
-	r.Mutex.Lock()
+	r.mutex.Lock()
 	r.index++
-	r.Changes[r.index] = kmo
-	r.Mutex.Unlock()
+	r.changes[r.index] = kmo
+	r.mutex.Unlock()
 
 	// Delete channel when done
 	go func() {
 		<-ctx.Done()
-		r.Mutex.Lock()
-		delete(r.Changes, r.index)
-		r.Mutex.Unlock()
+		r.mutex.Lock()
+		delete(r.changes, r.index)
+		r.mutex.Unlock()
 	}()
 	return kmo, nil
 }
 
 func (r *KubernetesController) KmakeChanges(namespace string) ([]*v1.Kmake, error) {
-	// mgr is a manager.Manager
-	cfg := config.GetConfigOrDie()
-
-	mgr, err := manager.New(cfg, manager.Options{MetricsBindAddress: "0"})
-	if err != nil {
-		return nil, err
-	}
-
 	// Create a new Controller that will call the provided Reconciler function in response
 	// to events.
-	c, err := controller.New("pod-controller", mgr, controller.Options{
+	c, err := controller.New("pod-controller", r.manager, controller.Options{
 		Reconciler: reconcile.Func(r.WatchChanges),
 	})
 	if err != nil {
@@ -344,7 +349,7 @@ func (r *KubernetesController) KmakeChanges(namespace string) ([]*v1.Kmake, erro
 
 	// Start the Controller through the manager.
 	go func() {
-		if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
+		if err := r.manager.Start(signals.SetupSignalHandler()); err != nil {
 			panic(err)
 		}
 	}()
@@ -361,10 +366,10 @@ func (r *KubernetesController) WatchChanges(o reconcile.Request) (reconcile.Resu
 		},
 	}
 	// Notify new message
-	r.Mutex.Lock()
-	for _, ch := range r.Changes {
+	r.mutex.Lock()
+	for _, ch := range r.changes {
 		ch <- ret
 	}
-	r.Mutex.Unlock()
+	r.mutex.Unlock()
 	return reconcile.Result{}, nil
 }

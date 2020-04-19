@@ -2,7 +2,6 @@ package gqlgen_kmakeapi
 
 import (
 	"net/http"
-	"sync"
 	"time"
 
 	gclient "github.com/99designs/gqlgen/client"
@@ -15,20 +14,15 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/bythepowerof/kmake-controller/gql"
 	"github.com/gorilla/websocket"
 	"github.com/rs/cors"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
-func RealHTTPServer(c client.Client) {
+func RealHTTPServer(c client.Client, m manager.Manager, namespace string) {
 	cl := cors.Default()
 
-	kc := &controller.KubernetesController{
-		Client:  c,
-		Mutex:   sync.Mutex{},
-		Changes: map[int]chan gql.KmakeObject{},
-	}
-
+	kc := controller.NewKubernetesController(c, m, namespace)
 	kc.KmakeChanges("xxx")
 
 	srv := handler.New(NewExecutableSchema(Config{
@@ -59,11 +53,7 @@ func FakeHTTPServer(c k8sclient.Client) *gclient.Client {
 	return gclient.New(handler.NewDefaultServer(NewExecutableSchema(
 		Config{
 			Resolvers: &Resolver{
-				KmakeController: &controller.KubernetesController{
-					Client:  c,
-					Mutex:   sync.Mutex{},
-					Changes: map[int]chan gql.KmakeObject{},
-				},
+				controller.NewKubernetesController(c, nil, "all"),
 			},
 		},
 	)))
