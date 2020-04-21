@@ -2,6 +2,7 @@ package controller
 
 import (
 	context "context"
+	"fmt"
 	"sync"
 
 	"github.com/bythepowerof/kmake-controller/api/v1"
@@ -89,6 +90,10 @@ func (r *KubernetesController) Namespaces(name *string) ([]*v11.Namespace, error
 	nsList := &v11.NamespaceList{}
 	o := &client.ListOptions{}
 
+	if r.namespace != "all" && r.namespace != *name {
+		return nil, fmt.Errorf("namespace %q not supported", *name)
+	}
+
 	if name != nil {
 		fields := map[string]string{"metadata.name": *name}
 		client.MatchingFields(fields).ApplyToList(o)
@@ -107,6 +112,10 @@ func (r *KubernetesController) Namespaces(name *string) ([]*v11.Namespace, error
 
 func (r *KubernetesController) Kmakes(namespace *string, name *string) ([]*v1.Kmake, error) {
 	ret := make([]*v1.Kmake, 0)
+
+	if r.namespace != "all" && r.namespace != *namespace {
+		return nil, fmt.Errorf("namespace %q not supported", *namespace)
+	}
 
 	kmakeList := &v1.KmakeList{}
 	o := &client.ListOptions{}
@@ -130,6 +139,10 @@ func (r *KubernetesController) Kmakes(namespace *string, name *string) ([]*v1.Km
 
 func (r *KubernetesController) Kmakeruns(namespace *string, kmakename *string, jobtype *JobType, name *string) ([]*v1.KmakeRun, error) {
 	ret := make([]*v1.KmakeRun, 0)
+
+	if r.namespace != "all" && r.namespace != *namespace {
+		return nil, fmt.Errorf("namespace %q not supported", *namespace)
+	}
 
 	kmakerunList := &v1.KmakeRunList{}
 
@@ -170,6 +183,10 @@ func (r *KubernetesController) Kmakeruns(namespace *string, kmakename *string, j
 
 func (r *KubernetesController) Kmakescheduleruns(namespace string, kmake *string, kmakerun *string, kmakescheduler *string, name *string, runtype *RunType) ([]*v1.KmakeScheduleRun, error) {
 	ret := make([]*v1.KmakeScheduleRun, 0)
+
+	if r.namespace != "all" && r.namespace != namespace {
+		return nil, fmt.Errorf("namespace %s not supported", namespace)
+	}
 
 	kmakeschedulerunList := &v1.KmakeScheduleRunList{}
 
@@ -232,6 +249,10 @@ func (r *KubernetesController) Kmakescheduleruns(namespace string, kmake *string
 func (r *KubernetesController) Kmakenowschedulers(namespace string, name *string, monitor *string) ([]*v1.KmakeNowScheduler, error) {
 	ret := make([]*v1.KmakeNowScheduler, 0)
 
+	if r.namespace != "all" && r.namespace != namespace {
+		return nil, fmt.Errorf("namespace %s not supported", namespace)
+	}
+
 	kmakeNowSchedulerList := &v1.KmakeNowSchedulerList{}
 	o := &client.ListOptions{}
 	client.InNamespace(namespace).ApplyToList(o)
@@ -265,6 +286,10 @@ func (r *KubernetesController) CreateScheduleRun(namespace string, kmake *string
 	// make sure the scheduler exists...
 
 	// create a rset job for it
+
+	if r.namespace != "all" && r.namespace != namespace {
+		return nil, fmt.Errorf("namespace %s not supported", namespace)
+	}
 
 	op := v1.KmakeScheduleRunOperation{}
 
@@ -316,6 +341,10 @@ func (r *KubernetesController) CreateScheduleRun(namespace string, kmake *string
 }
 
 func (r *KubernetesController) AddChangeClient(ctx context.Context, namespace string) (<-chan gql.KmakeObject, error) {
+	if r.namespace != "all" && r.namespace != namespace {
+		return nil, fmt.Errorf("namespace %s not supported", namespace)
+	}
+
 	kmo := make(chan gql.KmakeObject, 1)
 	r.mutex.Lock()
 	r.index++
@@ -327,33 +356,33 @@ func (r *KubernetesController) AddChangeClient(ctx context.Context, namespace st
 	r.changes[namespace][r.index] = kmo
 	r.mutex.Unlock()
 
-	ret := []gql.KmakeObject{}
+	// ret := []gql.KmakeObject{}
 
-	// push the current state to the subriber
-	kms, _ := r.Kmakenowschedulers(namespace, nil, nil)
-	for _, v := range kms {
-		ret = append(ret, v)
-	}
+	// // push the current state to the subriber
+	// kms, _ := r.Kmakenowschedulers(namespace, nil, nil)
+	// for _, v := range kms {
+	// 	ret = append(ret, v)
+	// }
 
-	km, _ := r.Kmakes(&namespace, nil)
-	for _, v := range km {
-		ret = append(ret, v)
-	}
+	// km, _ := r.Kmakes(&namespace, nil)
+	// for _, v := range km {
+	// 	ret = append(ret, v)
+	// }
 
-	kmr, _ := r.Kmakeruns(&namespace, nil, nil, nil)
-	for _, v := range kmr {
-		ret = append(ret, v)
-	}
+	// kmr, _ := r.Kmakeruns(&namespace, nil, nil, nil)
+	// for _, v := range kmr {
+	// 	ret = append(ret, v)
+	// }
 
-	kmsr, _ := r.Kmakescheduleruns(namespace, nil, nil, nil, nil, nil)
+	// kmsr, _ := r.Kmakescheduleruns(namespace, nil, nil, nil, nil, nil)
 
-	for _, v := range kmsr {
-		ret = append(ret, v)
-	}
+	// for _, v := range kmsr {
+	// 	ret = append(ret, v)
+	// }
 
-	for _, v := range ret {
-		kmo <- v
-	}
+	// for _, v := range ret {
+	// 	kmo <- v
+	// }
 
 	// Delete channel when done
 	go func() {
@@ -368,6 +397,11 @@ func (r *KubernetesController) AddChangeClient(ctx context.Context, namespace st
 func (r *KubernetesController) KmakeChanges(namespace string) error {
 	// Create a new Controller that will call the provided Reconciler function in response
 	// to events.
+
+	if r.namespace != "all" && r.namespace != namespace {
+		return fmt.Errorf("namespace %q not supported", namespace)
+	}
+
 	err := r.prepareKmakeWatch()
 	if err != nil {
 		panic(err)

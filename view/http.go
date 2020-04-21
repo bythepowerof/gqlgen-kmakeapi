@@ -23,7 +23,7 @@ func RealHTTPServer(c client.Client, m manager.Manager, namespace string) {
 	cl := cors.Default()
 
 	kc := controller.NewKubernetesController(c, m, namespace)
-	kc.KmakeChanges("xxx")
+	kc.KmakeChanges(namespace)
 
 	srv := handler.New(NewExecutableSchema(Config{
 		Resolvers: &Resolver{
