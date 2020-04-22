@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"net/http"
 	"os"
 	"strings"
 
@@ -71,9 +69,9 @@ func main() {
 	if fakeHTTPServer {
 		gqlgen_kmakeapi.FakeHTTPServer(c)
 	} else {
-		gqlgen_kmakeapi.RealHTTPServer(c, m, namespace)
+		gqlgen_kmakeapi.RealHTTPServer(c, m, namespace, port)
 	}
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	// log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	// log.Fatal(http.ListenAndServe(":"+port, nil))
 }

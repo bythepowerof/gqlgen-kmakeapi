@@ -3,7 +3,7 @@ package controller
 import (
 	context "context"
 	"fmt"
-	"sync"
+	// "sync"
 
 	"github.com/bythepowerof/kmake-controller/api/v1"
 	"github.com/bythepowerof/kmake-controller/gql"
@@ -11,12 +11,13 @@ import (
 	// "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
+	// "sigs.k8s.io/controller-runtime/pkg/controller"
+	// "sigs.k8s.io/controller-runtime/pkg/handler"
+	// "sigs.k8s.io/controller-runtime/pkg/manager"
+	// "sigs.k8s.io/controller-runtime/pkg/manager/signals"
+	// "sigs.k8s.io/controller-runtime/pkg/reconcile"
+	// "sigs.k8s.io/controller-runtime/pkg/source"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
 type JobType string
@@ -59,28 +60,38 @@ type KmakeController interface {
 	Kmakescheduleruns(namespace string, kmake *string, kmakerun *string, kmakescheduler *string, name *string, runtype *RunType) ([]*v1.KmakeScheduleRun, error)
 	Kmakenowschedulers(namespace string, name *string, monitor *string) ([]*v1.KmakeNowScheduler, error)
 	CreateScheduleRun(namespace string, kmake *string, kmakerun *string, kmakescheduler *string, runtype *RunType, opts map[string]string) (*v1.KmakeScheduleRun, error)
-	AddChangeClient(ctx context.Context, namespace string) (<-chan gql.KmakeObject, error)
+	// AddChangeClient(ctx context.Context, namespace string) (<-chan gql.KmakeObject, error)
+	AddListener(m manager.Manager)
+	GetListener() *gql.KmakeListener
 }
 
 type KubernetesController struct {
-	client    client.Client
-	manager   manager.Manager
-	mutex     sync.Mutex
-	changes   map[string]map[int]chan gql.KmakeObject
-	index     int
+	client client.Client
+	// manager   manager.Manager
+	// mutex     sync.Mutex
+	// changes   map[string]map[int]chan gql.KmakeObject
+	// index     int
 	namespace string
+	Listener  *gql.KmakeListener
 }
 
-func NewKubernetesController(client client.Client, manager manager.Manager, namespace string) *KubernetesController {
+func NewKubernetesController(client client.Client, namespace string) *KubernetesController {
 
 	return &KubernetesController{
-		client:    client,
-		manager:   manager,
-		mutex:     sync.Mutex{},
-		changes:   map[string]map[int]chan gql.KmakeObject{},
+		client: client,
+		// manager:   manager,
+		// mutex:     sync.Mutex{},
+		// changes:   map[string]map[int]chan gql.KmakeObject{},
 		namespace: namespace,
 	}
+}
 
+func (r *KubernetesController) AddListener(m manager.Manager) {
+	r.Listener = gql.NewKmakeListener(r.client, m, r.namespace)
+}
+
+func (r *KubernetesController) GetListener() *gql.KmakeListener {
+	return r.Listener
 }
 
 func (r *KubernetesController) Namespaces(name *string) ([]*v11.Namespace, error) {
@@ -340,199 +351,199 @@ func (r *KubernetesController) CreateScheduleRun(namespace string, kmake *string
 	return kmakeschedulerun, nil
 }
 
-func (r *KubernetesController) AddChangeClient(ctx context.Context, namespace string) (<-chan gql.KmakeObject, error) {
-	if r.namespace != "all" && r.namespace != namespace {
-		return nil, fmt.Errorf("namespace %s not supported", namespace)
-	}
+// func (r *KubernetesController) AddChangeClient(ctx context.Context, namespace string) (<-chan gql.KmakeObject, error) {
+// 	if r.namespace != "all" && r.namespace != namespace {
+// 		return nil, fmt.Errorf("namespace %s not supported", namespace)
+// 	}
 
-	kmo := make(chan gql.KmakeObject, 1)
-	r.mutex.Lock()
-	r.index++
+// 	kmo := make(chan gql.KmakeObject, 1)
+// 	r.mutex.Lock()
+// 	r.index++
 
-	if _, ok := r.changes[namespace]; !ok {
-		r.changes[namespace] = make(map[int]chan gql.KmakeObject)
-	}
+// 	if _, ok := r.changes[namespace]; !ok {
+// 		r.changes[namespace] = make(map[int]chan gql.KmakeObject)
+// 	}
 
-	r.changes[namespace][r.index] = kmo
-	r.mutex.Unlock()
+// 	r.changes[namespace][r.index] = kmo
+// 	r.mutex.Unlock()
 
-	// ret := []gql.KmakeObject{}
+// 	// ret := []gql.KmakeObject{}
 
-	// // push the current state to the subriber
-	// kms, _ := r.Kmakenowschedulers(namespace, nil, nil)
-	// for _, v := range kms {
-	// 	ret = append(ret, v)
-	// }
+// 	// // push the current state to the subriber
+// 	// kms, _ := r.Kmakenowschedulers(namespace, nil, nil)
+// 	// for _, v := range kms {
+// 	// 	ret = append(ret, v)
+// 	// }
 
-	// km, _ := r.Kmakes(&namespace, nil)
-	// for _, v := range km {
-	// 	ret = append(ret, v)
-	// }
+// 	// km, _ := r.Kmakes(&namespace, nil)
+// 	// for _, v := range km {
+// 	// 	ret = append(ret, v)
+// 	// }
 
-	// kmr, _ := r.Kmakeruns(&namespace, nil, nil, nil)
-	// for _, v := range kmr {
-	// 	ret = append(ret, v)
-	// }
+// 	// kmr, _ := r.Kmakeruns(&namespace, nil, nil, nil)
+// 	// for _, v := range kmr {
+// 	// 	ret = append(ret, v)
+// 	// }
 
-	// kmsr, _ := r.Kmakescheduleruns(namespace, nil, nil, nil, nil, nil)
+// 	// kmsr, _ := r.Kmakescheduleruns(namespace, nil, nil, nil, nil, nil)
 
-	// for _, v := range kmsr {
-	// 	ret = append(ret, v)
-	// }
+// 	// for _, v := range kmsr {
+// 	// 	ret = append(ret, v)
+// 	// }
 
-	// for _, v := range ret {
-	// 	kmo <- v
-	// }
+// 	// for _, v := range ret {
+// 	// 	kmo <- v
+// 	// }
 
-	// Delete channel when done
-	go func() {
-		<-ctx.Done()
-		r.mutex.Lock()
-		delete(r.changes[r.namespace], r.index)
-		r.mutex.Unlock()
-	}()
-	return kmo, nil
-}
+// 	// Delete channel when done
+// 	go func() {
+// 		<-ctx.Done()
+// 		r.mutex.Lock()
+// 		delete(r.changes[r.namespace], r.index)
+// 		r.mutex.Unlock()
+// 	}()
+// 	return kmo, nil
+// }
 
-func (r *KubernetesController) KmakeChanges(namespace string) error {
-	// Create a new Controller that will call the provided Reconciler function in response
-	// to events.
+// func (r *KubernetesController) KmakeChanges(namespace string) error {
+// 	// Create a new Controller that will call the provided Reconciler function in response
+// 	// to events.
 
-	if r.namespace != "all" && r.namespace != namespace {
-		return fmt.Errorf("namespace %q not supported", namespace)
-	}
+// 	if r.namespace != "all" && r.namespace != namespace {
+// 		return fmt.Errorf("namespace %q not supported", namespace)
+// 	}
 
-	err := r.prepareKmakeWatch()
-	if err != nil {
-		panic(err)
-	}
+// 	err := r.prepareKmakeWatch()
+// 	if err != nil {
+// 		panic(err)
+// 	}
 
-	err = r.prepareKmakeRunWatch()
-	if err != nil {
-		panic(err)
-	}
+// 	err = r.prepareKmakeRunWatch()
+// 	if err != nil {
+// 		panic(err)
+// 	}
 
-	err = r.prepareKmakeScheduleRunWatch()
-	if err != nil {
-		panic(err)
-	}
+// 	err = r.prepareKmakeScheduleRunWatch()
+// 	if err != nil {
+// 		panic(err)
+// 	}
 
-	// err := r.prepareKmakeNowSchedulerWatch()
-	// if err != nil {
-	// 	panic(err)
-	// }
+// 	// err := r.prepareKmakeNowSchedulerWatch()
+// 	// if err != nil {
+// 	// 	panic(err)
+// 	// }
 
-	// Start the Controllers through the manager.
-	go func() {
-		if err := r.manager.Start(signals.SetupSignalHandler()); err != nil {
-			panic(err)
-		}
-	}()
+// 	// Start the Controllers through the manager.
+// 	go func() {
+// 		if err := r.manager.Start(signals.SetupSignalHandler()); err != nil {
+// 			panic(err)
+// 		}
+// 	}()
 
-	return nil
-}
+// 	return nil
+// }
 
-func (r *KubernetesController) prepareKmakeWatch() error {
-	c, err := controller.New("kmake-watch", r.manager, controller.Options{
-		Reconciler: reconcile.Func(r.watchKmake),
-	})
-	if err != nil {
-		return err
-	}
-	// Watch for kmake objects create / update / delete events and call Reconcile
-	return c.Watch(&source.Kind{Type: &v1.Kmake{}}, &handler.EnqueueRequestForObject{})
-}
+// func (r *KubernetesController) prepareKmakeWatch() error {
+// 	c, err := controller.New("kmake-watch", r.manager, controller.Options{
+// 		Reconciler: reconcile.Func(r.watchKmake),
+// 	})
+// 	if err != nil {
+// 		return err
+// 	}
+// 	// Watch for kmake objects create / update / delete events and call Reconcile
+// 	return c.Watch(&source.Kind{Type: &v1.Kmake{}}, &handler.EnqueueRequestForObject{})
+// }
 
-func (r *KubernetesController) watchKmake(o reconcile.Request) (reconcile.Result, error) {
-	// Your business logic to implement the API by creating, updating, deleting objects goes here.
-	ret := &v1.Kmake{}
+// func (r *KubernetesController) watchKmake(o reconcile.Request) (reconcile.Result, error) {
+// 	// Your business logic to implement the API by creating, updating, deleting objects goes here.
+// 	ret := &v1.Kmake{}
 
-	err := r.client.Get(context.Background(), o.NamespacedName, ret)
-	if err != nil {
-		// if errors.IsNotFound(err) {
-		// 	return reconcile.Result{}, nil
-		// }
-		return reconcile.Result{}, err
-	}
-	if ret.IsBeingDeleted() {
-		ret.Status.Status = "Deleting"
-	}
+// 	err := r.client.Get(context.Background(), o.NamespacedName, ret)
+// 	if err != nil {
+// 		// if errors.IsNotFound(err) {
+// 		// 	return reconcile.Result{}, nil
+// 		// }
+// 		return reconcile.Result{}, err
+// 	}
+// 	if ret.IsBeingDeleted() {
+// 		ret.Status.Status = "Deleting"
+// 	}
 
-	// Notify new message
-	r.mutex.Lock()
-	for _, ch := range r.changes[o.Namespace] {
-		ch <- ret
-	}
-	r.mutex.Unlock()
-	return reconcile.Result{}, nil
-}
+// 	// Notify new message
+// 	r.mutex.Lock()
+// 	for _, ch := range r.changes[o.Namespace] {
+// 		ch <- ret
+// 	}
+// 	r.mutex.Unlock()
+// 	return reconcile.Result{}, nil
+// }
 
-func (r *KubernetesController) prepareKmakeRunWatch() error {
-	c, err := controller.New("kmakerun-watch", r.manager, controller.Options{
-		Reconciler: reconcile.Func(r.watchKmakeRun),
-	})
-	if err != nil {
-		return err
-	}
-	// Watch for kmake objects create / update / delete events and call Reconcile
-	return c.Watch(&source.Kind{Type: &v1.KmakeRun{}}, &handler.EnqueueRequestForObject{})
-}
+// func (r *KubernetesController) prepareKmakeRunWatch() error {
+// 	c, err := controller.New("kmakerun-watch", r.manager, controller.Options{
+// 		Reconciler: reconcile.Func(r.watchKmakeRun),
+// 	})
+// 	if err != nil {
+// 		return err
+// 	}
+// 	// Watch for kmake objects create / update / delete events and call Reconcile
+// 	return c.Watch(&source.Kind{Type: &v1.KmakeRun{}}, &handler.EnqueueRequestForObject{})
+// }
 
-func (r *KubernetesController) watchKmakeRun(o reconcile.Request) (reconcile.Result, error) {
-	// Your business logic to implement the API by creating, updating, deleting objects goes here.
-	ret := &v1.KmakeRun{}
+// func (r *KubernetesController) watchKmakeRun(o reconcile.Request) (reconcile.Result, error) {
+// 	// Your business logic to implement the API by creating, updating, deleting objects goes here.
+// 	ret := &v1.KmakeRun{}
 
-	err := r.client.Get(context.Background(), o.NamespacedName, ret)
-	if err != nil {
-		// if errors.IsNotFound(err) {
-		// 	return reconcile.Result{}, nil
-		// }
-		return reconcile.Result{}, err
-	}
-	if ret.IsBeingDeleted() {
-		ret.Status.Status = "Deleting"
-	}
+// 	err := r.client.Get(context.Background(), o.NamespacedName, ret)
+// 	if err != nil {
+// 		// if errors.IsNotFound(err) {
+// 		// 	return reconcile.Result{}, nil
+// 		// }
+// 		return reconcile.Result{}, err
+// 	}
+// 	if ret.IsBeingDeleted() {
+// 		ret.Status.Status = "Deleting"
+// 	}
 
-	// Notify new message
-	r.mutex.Lock()
-	for _, ch := range r.changes[o.Namespace] {
-		ch <- ret
-	}
-	r.mutex.Unlock()
-	return reconcile.Result{}, nil
-}
+// 	// Notify new message
+// 	r.mutex.Lock()
+// 	for _, ch := range r.changes[o.Namespace] {
+// 		ch <- ret
+// 	}
+// 	r.mutex.Unlock()
+// 	return reconcile.Result{}, nil
+// }
 
-func (r *KubernetesController) prepareKmakeScheduleRunWatch() error {
-	c, err := controller.New("kmakeschedulerun-watch", r.manager, controller.Options{
-		Reconciler: reconcile.Func(r.watchKmakeScheduleRun),
-	})
-	if err != nil {
-		return err
-	}
-	// Watch for kmake objects create / update / delete events and call Reconcile
-	return c.Watch(&source.Kind{Type: &v1.KmakeScheduleRun{}}, &handler.EnqueueRequestForObject{})
-}
+// func (r *KubernetesController) prepareKmakeScheduleRunWatch() error {
+// 	c, err := controller.New("kmakeschedulerun-watch", r.manager, controller.Options{
+// 		Reconciler: reconcile.Func(r.watchKmakeScheduleRun),
+// 	})
+// 	if err != nil {
+// 		return err
+// 	}
+// 	// Watch for kmake objects create / update / delete events and call Reconcile
+// 	return c.Watch(&source.Kind{Type: &v1.KmakeScheduleRun{}}, &handler.EnqueueRequestForObject{})
+// }
 
-func (r *KubernetesController) watchKmakeScheduleRun(o reconcile.Request) (reconcile.Result, error) {
-	// Your business logic to implement the API by creating, updating, deleting objects goes here.
-	ret := &v1.KmakeScheduleRun{}
+// func (r *KubernetesController) watchKmakeScheduleRun(o reconcile.Request) (reconcile.Result, error) {
+// 	// Your business logic to implement the API by creating, updating, deleting objects goes here.
+// 	ret := &v1.KmakeScheduleRun{}
 
-	err := r.client.Get(context.Background(), o.NamespacedName, ret)
-	if err != nil {
-		// if errors.IsNotFound(err) {
-		// 	return reconcile.Result{}, nil
-		// }
-		return reconcile.Result{}, err
-	}
-	if ret.IsBeingDeleted() {
-		ret.Status.Status = "Deleting"
-	}
+// 	err := r.client.Get(context.Background(), o.NamespacedName, ret)
+// 	if err != nil {
+// 		// if errors.IsNotFound(err) {
+// 		// 	return reconcile.Result{}, nil
+// 		// }
+// 		return reconcile.Result{}, err
+// 	}
+// 	if ret.IsBeingDeleted() {
+// 		ret.Status.Status = "Deleting"
+// 	}
 
-	// Notify new message
-	r.mutex.Lock()
-	for _, ch := range r.changes[o.Namespace] {
-		ch <- ret
-	}
-	r.mutex.Unlock()
-	return reconcile.Result{}, nil
-}
+// 	// Notify new message
+// 	r.mutex.Lock()
+// 	for _, ch := range r.changes[o.Namespace] {
+// 		ch <- ret
+// 	}
+// 	r.mutex.Unlock()
+// 	return reconcile.Result{}, nil
+// }

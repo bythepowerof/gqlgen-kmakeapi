@@ -10,5 +10,6 @@ import (
 )
 
 func (r *subscriptionResolver) Changed(ctx context.Context, input *controller.SubNamespace) (<-chan gql.KmakeObject, error) {
-	return r.KmakeController.AddChangeClient(ctx, input.Namespace)
+	return r.KmakeController.GetListener().AddChangeClient(ctx, input.Namespace)
+	// return nil, nil
 }
