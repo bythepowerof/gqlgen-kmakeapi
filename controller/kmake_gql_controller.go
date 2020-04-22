@@ -3,21 +3,12 @@ package controller
 import (
 	context "context"
 	"fmt"
-	// "sync"
 
 	"github.com/bythepowerof/kmake-controller/api/v1"
 	"github.com/bythepowerof/kmake-controller/gql"
 	v11 "k8s.io/api/core/v1"
-	// "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	// "sigs.k8s.io/controller-runtime/pkg/controller"
-	// "sigs.k8s.io/controller-runtime/pkg/handler"
-	// "sigs.k8s.io/controller-runtime/pkg/manager"
-	// "sigs.k8s.io/controller-runtime/pkg/manager/signals"
-	// "sigs.k8s.io/controller-runtime/pkg/reconcile"
-	// "sigs.k8s.io/controller-runtime/pkg/source"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
 type JobType string
@@ -61,16 +52,12 @@ type KmakeController interface {
 	Kmakenowschedulers(namespace string, name *string, monitor *string) ([]*v1.KmakeNowScheduler, error)
 	CreateScheduleRun(namespace string, kmake *string, kmakerun *string, kmakescheduler *string, runtype *RunType, opts map[string]string) (*v1.KmakeScheduleRun, error)
 	// AddChangeClient(ctx context.Context, namespace string) (<-chan gql.KmakeObject, error)
-	AddListener(m manager.Manager)
+	AddListener()
 	GetListener() *gql.KmakeListener
 }
 
 type KubernetesController struct {
-	client client.Client
-	// manager   manager.Manager
-	// mutex     sync.Mutex
-	// changes   map[string]map[int]chan gql.KmakeObject
-	// index     int
+	client    client.Client
 	namespace string
 	Listener  *gql.KmakeListener
 }
@@ -78,16 +65,13 @@ type KubernetesController struct {
 func NewKubernetesController(client client.Client, namespace string) *KubernetesController {
 
 	return &KubernetesController{
-		client: client,
-		// manager:   manager,
-		// mutex:     sync.Mutex{},
-		// changes:   map[string]map[int]chan gql.KmakeObject{},
+		client:    client,
 		namespace: namespace,
 	}
 }
 
-func (r *KubernetesController) AddListener(m manager.Manager) {
-	r.Listener = gql.NewKmakeListener(r.client, m, r.namespace)
+func (r *KubernetesController) AddListener() {
+	r.Listener = gql.NewKmakeListener(r.namespace)
 }
 
 func (r *KubernetesController) GetListener() *gql.KmakeListener {

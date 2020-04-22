@@ -18,15 +18,14 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gorilla/websocket"
 	"github.com/rs/cors"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
-func RealHTTPServer(c client.Client, m manager.Manager, namespace string, port string) {
+func RealHTTPServer(c client.Client, namespace string, port string) {
 	cl := cors.Default()
 
 	kc := controller.NewKubernetesController(c, namespace)
 
-	kc.AddListener(m)
+	kc.AddListener()
 	kc.GetListener().KmakeChanges(namespace)
 
 	srv := handler.New(NewExecutableSchema(Config{

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/bythepowerof/gqlgen-kmakeapi/k8s"
 	"github.com/bythepowerof/gqlgen-kmakeapi/view"
@@ -13,7 +12,6 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
 const defaultPort = "8080"
@@ -54,24 +52,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	mo := manager.Options{Scheme: scheme, MetricsBindAddress: "0"}
-
-	if strings.ToLower(namespace) != "all" {
-		mo.Namespace = namespace
-	}
-
-	m, err := k8s.RealK8sManager(config.GetConfigOrDie(), mo)
-	if err != nil {
-		fmt.Println("failed to create manager")
-		os.Exit(1)
-	}
-
 	if fakeHTTPServer {
 		gqlgen_kmakeapi.FakeHTTPServer(c)
 	} else {
-		gqlgen_kmakeapi.RealHTTPServer(c, m, namespace, port)
+		gqlgen_kmakeapi.RealHTTPServer(c, namespace, port)
 	}
-
-	// log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	// log.Fatal(http.ListenAndServe(":"+port, nil))
 }
