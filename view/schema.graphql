@@ -23,10 +23,18 @@ input RunLevelIn {
   kmakescheduler: String!
 }
 
+input SubNamespace {
+  namespace: String!
+}
+
 type Mutation {
   reset(input: NewReset!): KmakeScheduleRun!
   stop(input: RunLevelIn!): KmakeScheduleRun!
   restart(input: RunLevelIn!): KmakeScheduleRun!
+}
+
+type Subscription {
+  changed(input: SubNamespace): KmakeObject!
 }
 
 type Namespace {

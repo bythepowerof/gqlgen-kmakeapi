@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"net/http"
 	"os"
 
 	"github.com/bythepowerof/gqlgen-kmakeapi/k8s"
@@ -18,11 +16,12 @@ import (
 
 const defaultPort = "8080"
 
-func processArgs(fakeK8sClient *bool, fakeHTTPServer *bool, port *string) {
+func processArgs(fakeK8sClient *bool, fakeHTTPServer *bool, port *string, namespace *string) {
 	flag.BoolVar(fakeK8sClient, "fake-k8s", false, "Use fake k8s client")
 	flag.BoolVar(fakeHTTPServer, "fake-http", false, "Use fake k8s server")
 	flag.StringVar(port, "port", defaultPort, "Port to listen to")
-
+	flag.StringVar(namespace, "namespace", "all",
+		"Namespace to watch - use 'all' for all namespaces")
 	flag.Parse()
 }
 
@@ -30,8 +29,9 @@ func main() {
 	var fakeK8sClient bool
 	var fakeHTTPServer bool
 	var port string
+	var namespace string
 
-	processArgs(&fakeK8sClient, &fakeHTTPServer, &port)
+	processArgs(&fakeK8sClient, &fakeHTTPServer, &port, &namespace)
 
 	scheme := runtime.NewScheme()
 	_ = clientgoscheme.AddToScheme(scheme)
@@ -55,9 +55,6 @@ func main() {
 	if fakeHTTPServer {
 		gqlgen_kmakeapi.FakeHTTPServer(c)
 	} else {
-		gqlgen_kmakeapi.RealHTTPServer(c)
+		gqlgen_kmakeapi.RealHTTPServer(c, namespace, port)
 	}
-
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

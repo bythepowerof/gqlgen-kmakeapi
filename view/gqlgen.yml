@@ -55,6 +55,8 @@ models:
     model: controller.NewReset
   NewStop:
     model: controller.RunLevelIn
+  SubNamespace:
+    model: controller.SubNamespace
   KV:
     model: v1.KV
   KmakeScheduleRun:

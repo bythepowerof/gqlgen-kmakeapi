@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -16,8 +17,8 @@ import (
 	"github.com/bythepowerof/gqlgen-kmakeapi/controller"
 	"github.com/bythepowerof/kmake-controller/api/v1"
 	"github.com/bythepowerof/kmake-controller/gql"
-	"github.com/vektah/gqlparser"
-	"github.com/vektah/gqlparser/ast"
+	gqlparser "github.com/vektah/gqlparser/v2"
+	"github.com/vektah/gqlparser/v2/ast"
 	v11 "k8s.io/api/core/v1"
 )
 
@@ -47,6 +48,7 @@ type ResolverRoot interface {
 	Mutation() MutationResolver
 	Namespace() NamespaceResolver
 	Query() QueryResolver
+	Subscription() SubscriptionResolver
 }
 
 type DirectiveRoot struct {
@@ -173,6 +175,10 @@ type ComplexityRoot struct {
 		TargetPattern func(childComplexity int) int
 		Targets       func(childComplexity int) int
 	}
+
+	Subscription struct {
+		Changed func(childComplexity int, input *controller.SubNamespace) int
+	}
 }
 
 type KmakeResolver interface {
@@ -214,6 +220,9 @@ type QueryResolver interface {
 	Kmakes(ctx context.Context, namespace string, kmake *string) ([]*v1.Kmake, error)
 	Kmakeruns(ctx context.Context, namespace string, kmake *string, jobtype *controller.JobType, kmakerun *string) ([]*v1.KmakeRun, error)
 	Kmakescheduleruns(ctx context.Context, namespace string, kmake *string, kmakerun *string, kmakescheduler *string, name *string, runtype *controller.RunType) ([]*v1.KmakeScheduleRun, error)
+}
+type SubscriptionResolver interface {
+	Changed(ctx context.Context, input *controller.SubNamespace) (<-chan gql.KmakeObject, error)
 }
 
 type executableSchema struct {
@@ -744,6 +753,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Rule.Targets(childComplexity), true
 
+	case "Subscription.changed":
+		if e.complexity.Subscription.Changed == nil {
+			break
+		}
+
+		args, err := ec.field_Subscription_changed_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.Changed(childComplexity, args["input"].(*controller.SubNamespace)), true
+
 	}
 	return 0, false
 }
@@ -782,6 +803,23 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				Data: buf.Bytes(),
 			}
 		}
+	case ast.Subscription:
+		next := ec._Subscription(ctx, rc.Operation.SelectionSet)
+
+		var buf bytes.Buffer
+		return func(ctx context.Context) *graphql.Response {
+			buf.Reset()
+			data := next()
+
+			if data == nil {
+				return nil
+			}
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
+		}
 
 	default:
 		return graphql.OneShot(graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
@@ -807,7 +845,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
 }
 
-var parsedSchema = gqlparser.MustLoadSchema(
+var sources = []*ast.Source{
 	&ast.Source{Name: "schema.graphql", Input: `
 type Query {
   namespaces(name: String): [Namespace]!
@@ -833,10 +871,18 @@ input RunLevelIn {
   kmakescheduler: String!
 }
 
+input SubNamespace {
+  namespace: String!
+}
+
 type Mutation {
   reset(input: NewReset!): KmakeScheduleRun!
   stop(input: RunLevelIn!): KmakeScheduleRun!
   restart(input: RunLevelIn!): KmakeScheduleRun!
+}
+
+type Subscription {
+  changed(input: SubNamespace): KmakeObject!
 }
 
 type Namespace {
@@ -983,8 +1029,9 @@ interface KmakeRunOp {
 interface KmakeScheduleRunOp {
   dummy: String
 }
-`},
-)
+`, BuiltIn: false},
+}
+var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // endregion ************************** generated!.gotpl **************************
 
@@ -1327,6 +1374,20 @@ func (ec *executionContext) field_Query_namespaces_args(ctx context.Context, raw
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Subscription_changed_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *controller.SubNamespace
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalOSubNamespace2ᚖgithubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋcontrollerᚐSubNamespace(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -3660,6 +3721,57 @@ func (ec *executionContext) _Rule_targetpattern(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Subscription_changed(ctx context.Context, field graphql.CollectedField) (ret func() graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = nil
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Subscription",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Subscription_changed_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Subscription().Changed(rctx, args["input"].(*controller.SubNamespace))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-resTmp.(<-chan gql.KmakeObject)
+		if !ok {
+			return nil
+		}
+		return graphql.WriterFunc(func(w io.Writer) {
+			w.Write([]byte{'{'})
+			graphql.MarshalString(field.Alias).MarshalGQL(w)
+			w.Write([]byte{':'})
+			ec.marshalNKmakeObject2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋgqlᚐKmakeObject(ctx, field.Selections, res).MarshalGQL(w)
+			w.Write([]byte{'}'})
+		})
+	}
+}
+
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -4775,6 +4887,24 @@ func (ec *executionContext) unmarshalInputRunLevelIn(ctx context.Context, obj in
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputSubNamespace(ctx context.Context, obj interface{}) (controller.SubNamespace, error) {
+	var it controller.SubNamespace
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "namespace":
+			var err error
+			it.Namespace, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -5791,6 +5921,26 @@ func (ec *executionContext) _Rule(ctx context.Context, sel ast.SelectionSet, obj
 	return out
 }
 
+var subscriptionImplementors = []string{"Subscription"}
+
+func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func() graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, subscriptionImplementors)
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Subscription",
+	})
+	if len(fields) != 1 {
+		ec.Errorf(ctx, "must subscribe to exactly one stream")
+		return nil
+	}
+
+	switch fields[0].Name {
+	case "changed":
+		return ec._Subscription_changed(ctx, fields[0])
+	default:
+		panic("unknown field " + strconv.Quote(fields[0].Name))
+	}
+}
+
 var __DirectiveImplementors = []string{"__Directive"}
 
 func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionSet, obj *introspection.Directive) graphql.Marshaler {
@@ -6122,6 +6272,16 @@ func (ec *executionContext) marshalNKmake2ᚕᚖgithubᚗcomᚋbythepowerofᚋkm
 	}
 	wg.Wait()
 	return ret
+}
+
+func (ec *executionContext) marshalNKmakeObject2githubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋgqlᚐKmakeObject(ctx context.Context, sel ast.SelectionSet, v gql.KmakeObject) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._KmakeObject(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNKmakeObject2ᚕgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋgqlᚐKmakeObject(ctx context.Context, sel ast.SelectionSet, v []gql.KmakeObject) graphql.Marshaler {
@@ -7002,6 +7162,18 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return ec.marshalOString2string(ctx, sel, *v)
+}
+
+func (ec *executionContext) unmarshalOSubNamespace2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋcontrollerᚐSubNamespace(ctx context.Context, v interface{}) (controller.SubNamespace, error) {
+	return ec.unmarshalInputSubNamespace(ctx, v)
+}
+
+func (ec *executionContext) unmarshalOSubNamespace2ᚖgithubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋcontrollerᚐSubNamespace(ctx context.Context, v interface{}) (*controller.SubNamespace, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalOSubNamespace2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋcontrollerᚐSubNamespace(ctx, v)
+	return &res, err
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

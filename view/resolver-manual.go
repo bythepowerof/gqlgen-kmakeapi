@@ -3,6 +3,7 @@ package gqlgen_kmakeapi
 //go:generate go run github.com/99designs/gqlgen
 import (
 	"context"
+	// "sync"
 
 	"github.com/bythepowerof/gqlgen-kmakeapi/controller"
 	"github.com/bythepowerof/kmake-controller/api/v1"
@@ -12,6 +13,9 @@ import (
 
 type Resolver struct {
 	KmakeController controller.KmakeController
+	// mutex           sync.Mutex
+	// changes         map[int]chan []gql.KmakeObject
+	// index           int
 }
 
 func (r *queryResolver) Namespaces(ctx context.Context, name *string) ([]*v11.Namespace, error) {
