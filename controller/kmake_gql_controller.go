@@ -71,7 +71,7 @@ func NewKubernetesController(client client.Client, namespace string) *Kubernetes
 }
 
 func (r *KubernetesController) AddListener() {
-	r.Listener = gql.NewKmakeListener(r.namespace)
+	r.Listener = gql.NewKmakeListener(r.namespace, nil)
 }
 
 func (r *KubernetesController) GetListener() *gql.KmakeListener {
