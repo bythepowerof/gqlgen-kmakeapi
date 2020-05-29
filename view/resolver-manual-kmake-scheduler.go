@@ -11,3 +11,8 @@ func (r *kmakeNowSchedulerResolver) Scheduleruns(ctx context.Context, obj *v1.Km
 	schedulename := obj.GetName()
 	return r.KmakeController.Kmakescheduleruns(obj.GetNamespace(), kmake, kmakerun, &schedulename, name, runtype)
 }
+
+func (r *kmakeNowSchedulerResolver) UID(ctx context.Context, obj *v1.KmakeNowScheduler) (*string, error) {
+	ret := string(obj.GetUID())
+	return &ret, nil
+}

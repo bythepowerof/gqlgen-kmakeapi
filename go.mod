@@ -5,6 +5,8 @@ go 1.13
 require (
 	github.com/99designs/gqlgen v0.11.3
 	github.com/bythepowerof/kmake-controller v0.1.12
+	github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6 // indirect
+	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/websocket v1.4.2
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/mitchellh/mapstructure v1.2.2 // indirect
@@ -12,6 +14,7 @@ require (
 	github.com/onsi/ginkgo v1.12.0
 	github.com/onsi/gomega v1.9.0
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/prometheus/client_golang v1.1.0 // indirect
 	github.com/rs/cors v1.7.0
 	github.com/vektah/gqlparser/v2 v2.0.1
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect

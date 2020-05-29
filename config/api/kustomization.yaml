@@ -5,7 +5,7 @@ kind: Kustomization
 images:
 - name: api
   newName: bythepowerof/gqlgen-kmakeapi
-  newTag: v0.1.10
+  newTag: latest
 - name: controller
   newName: bythepowerof/kmake-controller
   newTag: latest

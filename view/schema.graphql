@@ -65,6 +65,7 @@ type Kmake implements KmakeObject{
   variables: [KV]!
   rules: [Rule]!
   runs(jobtype: JobType, name: String): [KmakeRun]!
+  uid: String
 }
 
 type KV {
@@ -87,6 +88,7 @@ type KmakeRun implements KmakeObject {
   kmakename: String
   operation: KmakeRunOp
   schedulerun(kmakescheduler: String, name: String, runtype: RunType): [KmakeScheduleRun]
+  uid: String
 }
 
 type KmakeRunJob implements KmakeRunOp{
@@ -114,6 +116,7 @@ type KmakeScheduleRun implements KmakeObject{
   kmakerunname: String
   kmakeschedulename: String
   operation: KmakeScheduleRunOp!
+  uid: String
 }
 
 type KmakeScheduleRunStart implements KmakeScheduleRunOp {
@@ -158,6 +161,7 @@ type KmakeNowScheduler implements KmakeScheduler & KmakeObject{
 	variables: [KV]
 	monitor: [String]
   scheduleruns( kmake: String, kmakerun: String, name: String, runtype: RunType): [KmakeScheduleRun]!
+  uid: String
 }
 
 interface KmakeScheduler {
@@ -166,12 +170,14 @@ interface KmakeScheduler {
   status: String
 	variables: [KV]
 	monitor: [String]
+  uid:  String
 }
 
 interface KmakeObject {
 	name: String
 	namespace: String
   status: String
+  uid: String
 }
 
 interface KmakeRunOp {

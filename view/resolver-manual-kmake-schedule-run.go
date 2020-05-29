@@ -49,3 +49,8 @@ func (r *kmakeScheduleRunResolver) Operation(ctx context.Context, obj *v1.KmakeS
 	}
 	return nil, nil
 }
+
+func (r *kmakeScheduleRunResolver) UID(ctx context.Context, obj *v1.KmakeScheduleRun) (*string, error) {
+	ret := string(obj.GetUID())
+	return &ret, nil
+}

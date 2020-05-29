@@ -33,3 +33,8 @@ func (r *kmakeResolver) Runs(ctx context.Context, obj *v1.Kmake, jobtype *contro
 
 	return r.KmakeController.Kmakeruns(&namespace, &kmakename, jobtype, name)
 }
+
+func (r *kmakeResolver) UID(ctx context.Context, obj *v1.Kmake) (*string, error) {
+	ret := string(obj.GetUID())
+	return &ret, nil
+}

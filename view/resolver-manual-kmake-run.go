@@ -32,3 +32,8 @@ func (r *kmakeRunResolver) Operation(ctx context.Context, obj *v1.KmakeRun) (gql
 	}
 	return nil, nil
 }
+
+func (r *kmakeRunResolver) UID(ctx context.Context, obj *v1.KmakeRun) (*string, error) {
+	ret := string(obj.GetUID())
+	return &ret, nil
+}
