@@ -56,7 +56,10 @@ var _ = Describe("Fake client", func() {
 				Expect(operation).NotTo(BeNil())
 			})
 
-			//+ Methods Here
-		})
+			It("Uid", func() {
+				uid, err := r.UID(context.Background(), fo.FakeKmakeScheduleRun())
+				Expect(err).To(BeNil())
+				Expect(*uid).To(Equal(""))
+			})		})
 	})
 })
