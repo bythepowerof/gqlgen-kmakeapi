@@ -9,7 +9,7 @@ api: bin fmt vet
 	go build -o bin/api 
 
 server: build
-	go run main.go -namespace ${NAMESPACE}
+	go run main.go -namespace ${NAMESPACE} ${SERVEROPTS}
 
 view/resolver.go: view/schema.graphql view/gqlgen.yml
 	-mv view/resolver.go view/resolver.go.sav

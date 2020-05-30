@@ -60,6 +60,7 @@ var _ = Describe("Fake client", func() {
 				uid, err := r.UID(context.Background(), fo.FakeKmakeScheduleRun())
 				Expect(err).To(BeNil())
 				Expect(*uid).To(Equal(""))
-			})		})
+			})
+		})
 	})
 })

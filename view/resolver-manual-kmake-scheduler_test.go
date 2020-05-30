@@ -45,6 +45,6 @@ var _ = Describe("Fake client", func() {
 				Expect(err).To(BeNil())
 				Expect(*uid).To(Equal(""))
 			})
-				})
+		})
 	})
 })

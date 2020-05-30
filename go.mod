@@ -4,7 +4,9 @@ go 1.13
 
 require (
 	github.com/99designs/gqlgen v0.11.3
+	github.com/auth0/go-jwt-middleware v0.0.0-20200507191422-d30d7b9ece63
 	github.com/bythepowerof/kmake-controller v0.1.12
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6 // indirect
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/websocket v1.4.2
