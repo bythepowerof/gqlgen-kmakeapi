@@ -1,24 +1,33 @@
 
+enum RBAC {
+    QUERY
+
+    RESET
+    RESTART_STOP
+}
+
+directive @HasRbacDomain(rbac: RBAC!) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
 type Query {
   namespaces(name: String): [Namespace]!
 
-  kmakeObjects(namespace: String!, name: String): [KmakeObject]!
-  kmakeschedulers(namespace: String!, name: String, monitor: String): [KmakeScheduler]!
+  kmakeObjects(namespace: String! @HasRbacDomain(rbac: QUERY), name: String): [KmakeObject]!
+  kmakeschedulers(namespace: String! @HasRbacDomain(rbac: QUERY), name: String, monitor: String): [KmakeScheduler]!
 
-  kmakes(namespace: String!, kmake: String): [Kmake]!
-  kmakeruns(namespace: String!, kmake: String, jobtype: JobType, kmakerun: String): [KmakeRun]!
-  kmakescheduleruns(namespace: String!, kmake: String, kmakerun: String, kmakescheduler: String, name: String, runtype: RunType): [KmakeScheduleRun]!
+  kmakes(namespace: String! @HasRbacDomain(rbac: QUERY), kmake: String): [Kmake]!
+  kmakeruns(namespace: String! @HasRbacDomain(rbac: QUERY), kmake: String, jobtype: JobType, kmakerun: String): [KmakeRun]!
+  kmakescheduleruns(namespace: String! @HasRbacDomain(rbac: QUERY), kmake: String, kmakerun: String, kmakescheduler: String, name: String, runtype: RunType): [KmakeScheduleRun]!
 
 }
 
 input NewReset {
-  namespace: String!
+  namespace: String! @HasRbacDomain(rbac: RESET)
   kmakescheduler: String!
   full: Boolean!
 }
 
 input RunLevelIn {
-  namespace: String!
+  namespace: String! @HasRbacDomain(rbac: RESTART_STOP)
   kmakerun: String!
   kmakescheduler: String!
 }
@@ -27,10 +36,19 @@ input SubNamespace {
   namespace: String!
 }
 
+# JWT
+input NewJwt {
+  user: String!
+  roles: [String!]!
+}
+
 type Mutation {
   reset(input: NewReset!): KmakeScheduleRun!
   stop(input: RunLevelIn!): KmakeScheduleRun!
   restart(input: RunLevelIn!): KmakeScheduleRun!
+
+  # JWT mutations
+  createJwt(input: NewJwt!): String!
 }
 
 type Subscription {

@@ -13,6 +13,7 @@ import (
 
 type Resolver struct {
 	KmakeController controller.KmakeController
+	JwtSecret       string
 }
 
 func (r *queryResolver) Namespaces(ctx context.Context, name *string) ([]*v11.Namespace, error) {

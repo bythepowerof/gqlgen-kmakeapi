@@ -2,6 +2,8 @@ package gqlgen_kmakeapi
 
 // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
+import ()
+
 // Kmake returns KmakeResolver implementation.
 func (r *Resolver) Kmake() KmakeResolver { return &kmakeResolver{r} }
 

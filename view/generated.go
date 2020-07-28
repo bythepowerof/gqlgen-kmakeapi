@@ -52,6 +52,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	HasRbacDomain func(ctx context.Context, obj interface{}, next graphql.Resolver, rbac Rbac) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -153,9 +154,10 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		Reset   func(childComplexity int, input controller.NewReset) int
-		Restart func(childComplexity int, input controller.RunLevelIn) int
-		Stop    func(childComplexity int, input controller.RunLevelIn) int
+		CreateJwt func(childComplexity int, input NewJwt) int
+		Reset     func(childComplexity int, input controller.NewReset) int
+		Restart   func(childComplexity int, input controller.RunLevelIn) int
+		Stop      func(childComplexity int, input controller.RunLevelIn) int
 	}
 
 	Namespace struct {
@@ -217,6 +219,7 @@ type MutationResolver interface {
 	Reset(ctx context.Context, input controller.NewReset) (*v1.KmakeScheduleRun, error)
 	Stop(ctx context.Context, input controller.RunLevelIn) (*v1.KmakeScheduleRun, error)
 	Restart(ctx context.Context, input controller.RunLevelIn) (*v1.KmakeScheduleRun, error)
+	CreateJwt(ctx context.Context, input NewJwt) (string, error)
 }
 type NamespaceResolver interface {
 	Kmakes(ctx context.Context, obj *v11.Namespace, name *string) ([]*v1.Kmake, error)
@@ -627,6 +630,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.KmakeScheduleRunStop.Run(childComplexity), true
 
+	case "Mutation.createJwt":
+		if e.complexity.Mutation.CreateJwt == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createJwt_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateJwt(childComplexity, args["input"].(NewJwt)), true
+
 	case "Mutation.reset":
 		if e.complexity.Mutation.Reset == nil {
 			break
@@ -883,26 +898,35 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var sources = []*ast.Source{
 	&ast.Source{Name: "schema.graphql", Input: `
+enum RBAC {
+    QUERY
+
+    RESET
+    RESTART_STOP
+}
+
+directive @HasRbacDomain(rbac: RBAC!) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
 type Query {
   namespaces(name: String): [Namespace]!
 
-  kmakeObjects(namespace: String!, name: String): [KmakeObject]!
-  kmakeschedulers(namespace: String!, name: String, monitor: String): [KmakeScheduler]!
+  kmakeObjects(namespace: String! @HasRbacDomain(rbac: QUERY), name: String): [KmakeObject]!
+  kmakeschedulers(namespace: String! @HasRbacDomain(rbac: QUERY), name: String, monitor: String): [KmakeScheduler]!
 
-  kmakes(namespace: String!, kmake: String): [Kmake]!
-  kmakeruns(namespace: String!, kmake: String, jobtype: JobType, kmakerun: String): [KmakeRun]!
-  kmakescheduleruns(namespace: String!, kmake: String, kmakerun: String, kmakescheduler: String, name: String, runtype: RunType): [KmakeScheduleRun]!
+  kmakes(namespace: String! @HasRbacDomain(rbac: QUERY), kmake: String): [Kmake]!
+  kmakeruns(namespace: String! @HasRbacDomain(rbac: QUERY), kmake: String, jobtype: JobType, kmakerun: String): [KmakeRun]!
+  kmakescheduleruns(namespace: String! @HasRbacDomain(rbac: QUERY), kmake: String, kmakerun: String, kmakescheduler: String, name: String, runtype: RunType): [KmakeScheduleRun]!
 
 }
 
 input NewReset {
-  namespace: String!
+  namespace: String! @HasRbacDomain(rbac: RESET)
   kmakescheduler: String!
   full: Boolean!
 }
 
 input RunLevelIn {
-  namespace: String!
+  namespace: String! @HasRbacDomain(rbac: RESTART_STOP)
   kmakerun: String!
   kmakescheduler: String!
 }
@@ -911,10 +935,19 @@ input SubNamespace {
   namespace: String!
 }
 
+# JWT
+input NewJwt {
+  user: String!
+  roles: [String!]!
+}
+
 type Mutation {
   reset(input: NewReset!): KmakeScheduleRun!
   stop(input: RunLevelIn!): KmakeScheduleRun!
   restart(input: RunLevelIn!): KmakeScheduleRun!
+
+  # JWT mutations
+  createJwt(input: NewJwt!): String!
 }
 
 type Subscription {
@@ -1079,6 +1112,20 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) dir_HasRbacDomain_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 Rbac
+	if tmp, ok := rawArgs["rbac"]; ok {
+		arg0, err = ec.unmarshalNRBAC2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋviewᚐRbac(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["rbac"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_KmakeNowScheduler_scheduleruns_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1169,6 +1216,20 @@ func (ec *executionContext) field_Kmake_runs_args(ctx context.Context, rawArgs m
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_createJwt_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 NewJwt
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalNNewJwt2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋviewᚐNewJwt(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_reset_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1244,9 +1305,26 @@ func (ec *executionContext) field_Query_kmakeObjects_args(ctx context.Context, r
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["namespace"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, tmp) }
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			rbac, err := ec.unmarshalNRBAC2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋviewᚐRbac(ctx, "QUERY")
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasRbacDomain == nil {
+				return nil, errors.New("directive HasRbacDomain is not implemented")
+			}
+			return ec.directives.HasRbacDomain(ctx, rawArgs, directive0, rbac)
+		}
+
+		tmp, err = directive1(ctx)
 		if err != nil {
 			return nil, err
+		}
+		if data, ok := tmp.(string); ok {
+			arg0 = data
+		} else {
+			return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 		}
 	}
 	args["namespace"] = arg0
@@ -1266,9 +1344,26 @@ func (ec *executionContext) field_Query_kmakeruns_args(ctx context.Context, rawA
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["namespace"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, tmp) }
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			rbac, err := ec.unmarshalNRBAC2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋviewᚐRbac(ctx, "QUERY")
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasRbacDomain == nil {
+				return nil, errors.New("directive HasRbacDomain is not implemented")
+			}
+			return ec.directives.HasRbacDomain(ctx, rawArgs, directive0, rbac)
+		}
+
+		tmp, err = directive1(ctx)
 		if err != nil {
 			return nil, err
+		}
+		if data, ok := tmp.(string); ok {
+			arg0 = data
+		} else {
+			return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 		}
 	}
 	args["namespace"] = arg0
@@ -1304,9 +1399,26 @@ func (ec *executionContext) field_Query_kmakes_args(ctx context.Context, rawArgs
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["namespace"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, tmp) }
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			rbac, err := ec.unmarshalNRBAC2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋviewᚐRbac(ctx, "QUERY")
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasRbacDomain == nil {
+				return nil, errors.New("directive HasRbacDomain is not implemented")
+			}
+			return ec.directives.HasRbacDomain(ctx, rawArgs, directive0, rbac)
+		}
+
+		tmp, err = directive1(ctx)
 		if err != nil {
 			return nil, err
+		}
+		if data, ok := tmp.(string); ok {
+			arg0 = data
+		} else {
+			return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 		}
 	}
 	args["namespace"] = arg0
@@ -1326,9 +1438,26 @@ func (ec *executionContext) field_Query_kmakeschedulers_args(ctx context.Context
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["namespace"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, tmp) }
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			rbac, err := ec.unmarshalNRBAC2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋviewᚐRbac(ctx, "QUERY")
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasRbacDomain == nil {
+				return nil, errors.New("directive HasRbacDomain is not implemented")
+			}
+			return ec.directives.HasRbacDomain(ctx, rawArgs, directive0, rbac)
+		}
+
+		tmp, err = directive1(ctx)
 		if err != nil {
 			return nil, err
+		}
+		if data, ok := tmp.(string); ok {
+			arg0 = data
+		} else {
+			return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 		}
 	}
 	args["namespace"] = arg0
@@ -1356,9 +1485,26 @@ func (ec *executionContext) field_Query_kmakescheduleruns_args(ctx context.Conte
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["namespace"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, tmp) }
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			rbac, err := ec.unmarshalNRBAC2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋviewᚐRbac(ctx, "QUERY")
+			if err != nil {
+				return nil, err
+			}
+			if ec.directives.HasRbacDomain == nil {
+				return nil, errors.New("directive HasRbacDomain is not implemented")
+			}
+			return ec.directives.HasRbacDomain(ctx, rawArgs, directive0, rbac)
+		}
+
+		tmp, err = directive1(ctx)
 		if err != nil {
 			return nil, err
+		}
+		if data, ok := tmp.(string); ok {
+			arg0 = data
+		} else {
+			return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 		}
 	}
 	args["namespace"] = arg0
@@ -3327,6 +3473,47 @@ func (ec *executionContext) _Mutation_restart(ctx context.Context, field graphql
 	return ec.marshalNKmakeScheduleRun2ᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeScheduleRun(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_createJwt(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createJwt_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateJwt(rctx, args["input"].(NewJwt))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Namespace_name(ctx context.Context, field graphql.CollectedField, obj *v11.Namespace) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -4993,6 +5180,30 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputNewJwt(ctx context.Context, obj interface{}) (NewJwt, error) {
+	var it NewJwt
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "user":
+			var err error
+			it.User, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "roles":
+			var err error
+			it.Roles, err = ec.unmarshalNString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputNewReset(ctx context.Context, obj interface{}) (controller.NewReset, error) {
 	var it controller.NewReset
 	var asMap = obj.(map[string]interface{})
@@ -5001,9 +5212,26 @@ func (ec *executionContext) unmarshalInputNewReset(ctx context.Context, obj inte
 		switch k {
 		case "namespace":
 			var err error
-			it.Namespace, err = ec.unmarshalNString2string(ctx, v)
+			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
+			directive1 := func(ctx context.Context) (interface{}, error) {
+				rbac, err := ec.unmarshalNRBAC2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋviewᚐRbac(ctx, "RESET")
+				if err != nil {
+					return nil, err
+				}
+				if ec.directives.HasRbacDomain == nil {
+					return nil, errors.New("directive HasRbacDomain is not implemented")
+				}
+				return ec.directives.HasRbacDomain(ctx, obj, directive0, rbac)
+			}
+
+			tmp, err := directive1(ctx)
 			if err != nil {
 				return it, err
+			}
+			if data, ok := tmp.(string); ok {
+				it.Namespace = data
+			} else {
+				return it, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 			}
 		case "kmakescheduler":
 			var err error
@@ -5031,9 +5259,26 @@ func (ec *executionContext) unmarshalInputRunLevelIn(ctx context.Context, obj in
 		switch k {
 		case "namespace":
 			var err error
-			it.Namespace, err = ec.unmarshalNString2string(ctx, v)
+			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
+			directive1 := func(ctx context.Context) (interface{}, error) {
+				rbac, err := ec.unmarshalNRBAC2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋviewᚐRbac(ctx, "RESTART_STOP")
+				if err != nil {
+					return nil, err
+				}
+				if ec.directives.HasRbacDomain == nil {
+					return nil, errors.New("directive HasRbacDomain is not implemented")
+				}
+				return ec.directives.HasRbacDomain(ctx, obj, directive0, rbac)
+			}
+
+			tmp, err := directive1(ctx)
 			if err != nil {
 				return it, err
+			}
+			if data, ok := tmp.(string); ok {
+				it.Namespace = data
+			} else {
+				return it, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 			}
 		case "kmakerun":
 			var err error
@@ -5918,6 +6163,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "createJwt":
+			out.Values[i] = ec._Mutation_createJwt(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6703,8 +6953,21 @@ func (ec *executionContext) marshalNNamespace2ᚕᚖk8sᚗioᚋapiᚋcoreᚋv1�
 	return ret
 }
 
+func (ec *executionContext) unmarshalNNewJwt2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋviewᚐNewJwt(ctx context.Context, v interface{}) (NewJwt, error) {
+	return ec.unmarshalInputNewJwt(ctx, v)
+}
+
 func (ec *executionContext) unmarshalNNewReset2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋcontrollerᚐNewReset(ctx context.Context, v interface{}) (controller.NewReset, error) {
 	return ec.unmarshalInputNewReset(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNRBAC2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋviewᚐRbac(ctx context.Context, v interface{}) (Rbac, error) {
+	var res Rbac
+	return res, res.UnmarshalGQL(v)
+}
+
+func (ec *executionContext) marshalNRBAC2githubᚗcomᚋbythepowerofᚋgqlgenᚑkmakeapiᚋviewᚐRbac(ctx context.Context, sel ast.SelectionSet, v Rbac) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) marshalNRule2ᚕᚖgithubᚗcomᚋbythepowerofᚋkmakeᚑcontrollerᚋapiᚋv1ᚐKmakeRule(ctx context.Context, sel ast.SelectionSet, v []*v1.KmakeRule) graphql.Marshaler {
@@ -6786,6 +7049,35 @@ func (ec *executionContext) marshalNString2ᚕstring(ctx context.Context, sel as
 	ret := make(graphql.Array, len(v))
 	for i := range v {
 		ret[i] = ec.marshalOString2string(ctx, sel, v[i])
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalNString2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
+	var vSlice []interface{}
+	if v != nil {
+		if tmp1, ok := v.([]interface{}); ok {
+			vSlice = tmp1
+		} else {
+			vSlice = []interface{}{v}
+		}
+	}
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
 	}
 
 	return ret

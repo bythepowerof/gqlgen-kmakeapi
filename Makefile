@@ -17,7 +17,7 @@ view/resolver.go: view/schema.graphql view/gqlgen.yml
 
 
 fix: view/resolver.go
-	cd view; ./fix.pl
+	-cd view; ./fix.pl
 
 diff: fix
 	-diff -q --from-file view/resolver.go viw/resolver.go.sav 

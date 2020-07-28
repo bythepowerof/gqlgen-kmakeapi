@@ -2,6 +2,7 @@ package gqlgen_kmakeapi
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 	jwt "github.com/dgrijalva/jwt-go"
@@ -22,13 +23,12 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/JeremyMarshall/gqlgen-jwt/rbac/dummy"
+	"github.com/JeremyMarshall/gqlgen-jwt/rbac/types"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/websocket"
 	"github.com/rs/cors"
-)
-
-const (
-	APP_KEY = "My Secret"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 type ServerOpts struct {
@@ -38,18 +38,69 @@ type ServerOpts struct {
 	Jwt       bool
 }
 
-func AuthMiddleware(next http.Handler) http.Handler {
-	if len(APP_KEY) == 0 {
+func AuthMiddleware(next http.Handler, secret string) http.Handler {
+	if len(secret) == 0 {
 		log.Fatal("HTTP server unable to start, expected an APP_KEY for JWT auth")
 	}
 	jwtMiddleware := jwtmiddleware.New(jwtmiddleware.Options{
 		ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
-			return []byte(APP_KEY), nil
+			return []byte(secret), nil
 		},
 		SigningMethod: jwt.SigningMethodHS256,
 		Debug:         true,
+		// Set this to false if you always want a bearer token present
+		CredentialsOptional: true,
+		UserProperty:        JwtTokenField,
+		ErrorHandler: func(w http.ResponseWriter, r *http.Request, err string) {
+			data := gqlerror.Error{
+				Message: fmt.Sprintf("JWT Auth %s", err),
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(data)
+		},
 	})
 	return jwtMiddleware.Handler(next)
+}
+
+type User struct {
+	User  string
+	Roles []string
+}
+
+func GetCurrentUser(ctx context.Context) *User {
+	if rawToken := ctx.Value(JwtTokenField); rawToken != nil {
+		token := rawToken.(*jwt.Token)
+
+		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+			u := &User{
+				User:  claims["user"].(string),
+				Roles: make([]string, 0),
+			}
+			for _, r := range claims["roles"].([]interface{}) {
+				u.Roles = append(u.Roles, fmt.Sprint(r))
+			}
+			return u
+		}
+	}
+	return &User{}
+}
+
+type RbacDomainMiddlewareFunc func(ctx context.Context, obj interface{}, next graphql.Resolver, rbac Rbac) (res interface{}, err error)
+
+func RbacDomainMiddleware(rbacChecker types.Rbac) RbacDomainMiddlewareFunc {
+	return func(ctx context.Context, obj interface{}, next graphql.Resolver, rbac Rbac) (res interface{}, err error) {
+
+		if args, ok := obj.(map[string]interface{}); ok {
+			if domain, ok := args["namespace"].(string); ok {
+				user := GetCurrentUser(ctx)
+				if rbacChecker.CheckDomain(user.Roles, &domain, rbac.String()) {
+					return next(ctx)
+				}
+			}
+		}
+		return nil, fmt.Errorf("Access denied")
+	}
 }
 
 func RealHTTPServer(c client.Client, opts ServerOpts) {
@@ -61,9 +112,15 @@ func RealHTTPServer(c client.Client, opts ServerOpts) {
 	kc.AddListener()
 	kc.GetListener().KmakeChanges(opts.Namespace)
 
+	rbac := &dummy.Dummy{}
+
 	srv := handler.New(NewExecutableSchema(Config{
 		Resolvers: &Resolver{
 			KmakeController: kc,
+			JwtSecret:       JwtSecret,
+		},
+		Directives: DirectiveRoot{
+			HasRbacDomain: RbacDomainMiddleware(rbac),
 		},
 	}))
 
@@ -91,7 +148,7 @@ func RealHTTPServer(c client.Client, opts ServerOpts) {
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	if opts.Jwt {
-		http.Handle("/query", AuthMiddleware(handlers.LoggingHandler(os.Stdout, cl.Handler(srv))))
+		http.Handle("/query", AuthMiddleware(handlers.LoggingHandler(os.Stdout, cl.Handler(srv)), JwtSecret))
 	} else {
 		http.Handle("/query", handlers.LoggingHandler(os.Stdout, cl.Handler(srv)))
 	}
@@ -104,7 +161,8 @@ func FakeHTTPServer(c k8sclient.Client) *gclient.Client {
 	return gclient.New(handler.NewDefaultServer(NewExecutableSchema(
 		Config{
 			Resolvers: &Resolver{
-				controller.NewKubernetesController(c, "all"),
+				KmakeController: controller.NewKubernetesController(c, "all"),
+				JwtSecret:       JwtSecret,
 			},
 		},
 	)))
