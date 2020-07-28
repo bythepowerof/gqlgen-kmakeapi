@@ -1,24 +1,33 @@
 
+enum RBAC {
+    QUERY
+
+    RESET
+    RESTART_STOP
+}
+
+directive @HasRbacDomain(rbac: RBAC!) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
 type Query {
   namespaces(name: String): [Namespace]!
 
-  kmakeObjects(namespace: String!, name: String): [KmakeObject]!
-  kmakeschedulers(namespace: String!, name: String, monitor: String): [KmakeScheduler]!
+  kmakeObjects(namespace: String! @HasRbacDomain(rbac: QUERY), name: String): [KmakeObject]!
+  kmakeschedulers(namespace: String! @HasRbacDomain(rbac: QUERY), name: String, monitor: String): [KmakeScheduler]!
 
-  kmakes(namespace: String!, kmake: String): [Kmake]!
-  kmakeruns(namespace: String!, kmake: String, jobtype: JobType, kmakerun: String): [KmakeRun]!
-  kmakescheduleruns(namespace: String!, kmake: String, kmakerun: String, kmakescheduler: String, name: String, runtype: RunType): [KmakeScheduleRun]!
+  kmakes(namespace: String! @HasRbacDomain(rbac: QUERY), kmake: String): [Kmake]!
+  kmakeruns(namespace: String! @HasRbacDomain(rbac: QUERY), kmake: String, jobtype: JobType, kmakerun: String): [KmakeRun]!
+  kmakescheduleruns(namespace: String! @HasRbacDomain(rbac: QUERY), kmake: String, kmakerun: String, kmakescheduler: String, name: String, runtype: RunType): [KmakeScheduleRun]!
 
 }
 
 input NewReset {
-  namespace: String!
+  namespace: String! @HasRbacDomain(rbac: RESET)
   kmakescheduler: String!
   full: Boolean!
 }
 
 input RunLevelIn {
-  namespace: String!
+  namespace: String! @HasRbacDomain(rbac: RESTART_STOP)
   kmakerun: String!
   kmakescheduler: String!
 }
@@ -27,10 +36,19 @@ input SubNamespace {
   namespace: String!
 }
 
+# JWT
+input NewJwt {
+  user: String!
+  roles: [String!]!
+}
+
 type Mutation {
   reset(input: NewReset!): KmakeScheduleRun!
   stop(input: RunLevelIn!): KmakeScheduleRun!
   restart(input: RunLevelIn!): KmakeScheduleRun!
+
+  # JWT mutations
+  createJwt(input: NewJwt!): String!
 }
 
 type Subscription {
@@ -65,6 +83,7 @@ type Kmake implements KmakeObject{
   variables: [KV]!
   rules: [Rule]!
   runs(jobtype: JobType, name: String): [KmakeRun]!
+  uid: String
 }
 
 type KV {
@@ -87,6 +106,7 @@ type KmakeRun implements KmakeObject {
   kmakename: String
   operation: KmakeRunOp
   schedulerun(kmakescheduler: String, name: String, runtype: RunType): [KmakeScheduleRun]
+  uid: String
 }
 
 type KmakeRunJob implements KmakeRunOp{
@@ -114,6 +134,7 @@ type KmakeScheduleRun implements KmakeObject{
   kmakerunname: String
   kmakeschedulename: String
   operation: KmakeScheduleRunOp!
+  uid: String
 }
 
 type KmakeScheduleRunStart implements KmakeScheduleRunOp {
@@ -158,6 +179,7 @@ type KmakeNowScheduler implements KmakeScheduler & KmakeObject{
 	variables: [KV]
 	monitor: [String]
   scheduleruns( kmake: String, kmakerun: String, name: String, runtype: RunType): [KmakeScheduleRun]!
+  uid: String
 }
 
 interface KmakeScheduler {
@@ -166,12 +188,14 @@ interface KmakeScheduler {
   status: String
 	variables: [KV]
 	monitor: [String]
+  uid:  String
 }
 
 interface KmakeObject {
 	name: String
 	namespace: String
   status: String
+  uid: String
 }
 
 interface KmakeRunOp {

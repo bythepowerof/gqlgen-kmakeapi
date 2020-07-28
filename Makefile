@@ -1,5 +1,5 @@
 # Image URL to use all building/pushing image targets
-IMG ?= bythepowerof/gqlgen-kmakeapi:v0.1.10
+IMG ?= bythepowerof/gqlgen-kmakeapi:latest
 NAMESPACE ?= all
 
 # PKGS := github.com/bythepowerof/gqlgen-kmakeapi,github.com/bythepowerof/gqlgen-kmakeapi/controller,github.com/bythepowerof/gqlgen-kmakeapi/k8s,github.com/bythepowerof/gqlgen-kmakeapi/view
@@ -9,7 +9,7 @@ api: bin fmt vet
 	go build -o bin/api 
 
 server: build
-	go run main.go -namespace ${NAMESPACE}
+	go run main.go -namespace ${NAMESPACE} ${SERVEROPTS}
 
 view/resolver.go: view/schema.graphql view/gqlgen.yml
 	-mv view/resolver.go view/resolver.go.sav
@@ -17,7 +17,7 @@ view/resolver.go: view/schema.graphql view/gqlgen.yml
 
 
 fix: view/resolver.go
-	cd view; ./fix.pl
+	-cd view; ./fix.pl
 
 diff: fix
 	-diff -q --from-file view/resolver.go viw/resolver.go.sav 

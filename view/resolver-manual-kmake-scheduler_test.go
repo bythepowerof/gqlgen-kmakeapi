@@ -40,7 +40,11 @@ var _ = Describe("Fake client", func() {
 				Expect(len(scheduleruns)).To(Equal(1))
 			})
 
-			//+ Methods Here
+			It("Uid", func() {
+				uid, err := r.UID(context.Background(), fo.FakeKmakeNowScheduler())
+				Expect(err).To(BeNil())
+				Expect(*uid).To(Equal(""))
+			})
 		})
 	})
 })

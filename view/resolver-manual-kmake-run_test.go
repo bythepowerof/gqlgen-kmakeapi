@@ -55,7 +55,11 @@ var _ = Describe("Fake client", func() {
 				Expect(schedulerun[0].GetName()).To(Equal("test-kmakeschedulerun"))
 			})
 
-			//+ Methods Here
+			It("Uid", func() {
+				uid, err := r.UID(context.Background(), fo.FakeKmakeRun())
+				Expect(err).To(BeNil())
+				Expect(*uid).To(Equal(""))
+			})
 		})
 	})
 })

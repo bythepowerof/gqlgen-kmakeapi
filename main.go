@@ -16,9 +16,12 @@ import (
 
 const defaultPort = "8080"
 
-func processArgs(fakeK8sClient *bool, fakeHTTPServer *bool, port *string, namespace *string) {
+func processArgs(fakeK8sClient *bool, fakeHTTPServer *bool, port *string, namespace *string, trace *bool, jwt *bool) {
 	flag.BoolVar(fakeK8sClient, "fake-k8s", false, "Use fake k8s client")
 	flag.BoolVar(fakeHTTPServer, "fake-http", false, "Use fake k8s server")
+	flag.BoolVar(trace, "trace", false, "Trace GQL stuff")
+	flag.BoolVar(jwt, "jwt", false, "Use JWT token on requests")
+
 	flag.StringVar(port, "port", defaultPort, "Port to listen to")
 	flag.StringVar(namespace, "namespace", "all",
 		"Namespace to watch - use 'all' for all namespaces")
@@ -30,8 +33,10 @@ func main() {
 	var fakeHTTPServer bool
 	var port string
 	var namespace string
+	var trace bool
+	var jwt bool
 
-	processArgs(&fakeK8sClient, &fakeHTTPServer, &port, &namespace)
+	processArgs(&fakeK8sClient, &fakeHTTPServer, &port, &namespace, &trace, &jwt)
 
 	scheme := runtime.NewScheme()
 	_ = clientgoscheme.AddToScheme(scheme)
@@ -55,6 +60,6 @@ func main() {
 	if fakeHTTPServer {
 		gqlgen_kmakeapi.FakeHTTPServer(c)
 	} else {
-		gqlgen_kmakeapi.RealHTTPServer(c, namespace, port)
+		gqlgen_kmakeapi.RealHTTPServer(c, gqlgen_kmakeapi.ServerOpts{Namespace: namespace, Port: port, Trace: trace, Jwt: jwt})
 	}
 }
